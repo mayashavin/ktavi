@@ -6,7 +6,6 @@ import { loadConfig } from '../../core/config.js';
 import { parseMarkdownTool } from '../../tools/parse-markdown/index.js';
 import { reviewSeoTool } from '../../tools/review-seo/index.js';
 import { updateFrontmatterTool } from '../../tools/update-frontmatter/index.js';
-import type { WritingMode } from '../../core/types.js';
 
 export function registerFixCommand(program: Command) {
   program
@@ -23,7 +22,6 @@ export function registerFixCommand(program: Command) {
           ? createOpenAITextProvider(apiKey, config.ai.textModel)
           : undefined;
 
-        const _mode = (opts.mode as WritingMode) ?? config.writing.defaultMode;
         const draft = await parseMarkdownTool({ filePath: file });
         const { suggestions } = await reviewSeoTool({ draft }, aiProvider);
 

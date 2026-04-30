@@ -1,6 +1,6 @@
 {
   "name": "polira",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "A CLI-first, workflow-driven AI assistant for preparing Markdown blog drafts for publishing.",
   "type": "module",
   "bin": {
@@ -25,6 +25,10 @@
     "cli",
     "ai",
     "cover-image"
+  ],
+  "files": [
+    "dist",
+    "README.md"
   ],
   "license": "MIT",
   "engines": {
