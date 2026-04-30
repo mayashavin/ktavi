@@ -1,0 +1,128 @@
+import { Command } from 'commander';
+import { prepareDraftWorkflow } from '../../workflows/prepareDraftWorkflow.js';
+import { logger } from '../../core/logger.js';
+import { PoliraError } from '../../core/errors.js';
+import { createOpenAITextProvider } from '../../providers/ai/openaiTextProvider.js';
+import { createOpenAIImageProvider } from '../../providers/image/openaiImageProvider.js';
+import { createLocalStorageProvider } from '../../providers/storage/localStorageProvider.js';
+import { createCloudinaryStorageProvider } from '../../providers/storage/cloudinaryStorageProvider.js';
+import { loadConfig } from '../../core/config.js';
+import type { ImageSize, StorageTarget, WritingMode } from '../../core/types.js';
+
+export function registerPrepareCommand(program: Command) {
+  program
+    .command('prepare')
+    .description('Run the full publish-preparation workflow.')
+    .argument('<file>', 'Path to the Markdown file')
+    .option('--generate-cover', 'Generate a cover image')
+    .option('--upload <target>', 'Upload target: cloudinary or none', 'none')
+    .option('--save <target>', 'Save target: local or none', 'none')
+    .option('--apply', 'Apply safe changes')
+    .option('--mode <mode>', 'Writing review mode: light, medium, or strong', 'medium')
+    .option('--json', 'Output results as JSON')
+    .action(
+      async (
+        file: string,
+        opts: {
+          generateCover?: boolean;
+          upload: string;
+          save: string;
+          apply?: boolean;
+          mode: string;
+          json?: boolean;
+        },
+      ) => {
+        try {
+          const config = await loadConfig();
+          const apiKey = process.env.OPENAI_API_KEY;
+          const aiProvider = apiKey
+            ? createOpenAITextProvider(apiKey, config.ai.textModel)
+            : undefined;
+
+          const storageTarget = (opts.upload !== 'none' ? opts.upload : opts.save !== 'none' ? opts.save : config.storage.provider) as StorageTarget;
+          const storageProvider =
+            storageTarget === 'cloudinary'
+              ? createCloudinaryStorageProvider({
+                  cloudName: process.env.CLOUDINARY_CLOUD_NAME ?? '',
+                  apiKey: process.env.CLOUDINARY_API_KEY ?? '',
+                  apiSecret: process.env.CLOUDINARY_API_SECRET ?? '',
+                  folder: config.storage.cloudinary?.folder ?? 'blog-covers',
+                })
+              : createLocalStorageProvider(
+                  config.storage.local?.outputDir ?? './public/images/blog',
+                  config.storage.local?.publicPathPrefix ?? '/images/blog',
+                );
+
+          const imageProvider =
+            opts.generateCover && apiKey
+              ? createOpenAIImageProvider(apiKey, config.ai.imageModel)
+              : undefined;
+
+          const result = await prepareDraftWorkflow(file, {
+            mode: (opts.mode as WritingMode) ?? config.writing.defaultMode,
+            apply: opts.apply ?? false,
+            generateCover: opts.generateCover ?? false,
+            size: config.image.size as ImageSize,
+            style: config.image.style,
+            coverField: config.markdown.coverField,
+            aiProvider,
+            imageProvider,
+            storageProvider,
+          });
+
+          if (opts.json) {
+            console.log(JSON.stringify(result, null, 2));
+            return;
+          }
+
+          logger.heading('Draft Preparation Report');
+
+          logger.heading('Metadata');
+          logger.label('Title', result.draft.frontmatter.title ?? '(none)');
+          logger.label('Word count', String(result.draft.metadata.wordCount));
+          logger.label('Reading time', `~${result.draft.metadata.estimatedReadingTimeMinutes} min`);
+
+          if (result.seoSuggestions.length > 0) {
+            logger.heading('SEO Suggestions');
+            for (const s of result.seoSuggestions) {
+              const icon = s.severity === 'critical' ? '!' : s.severity === 'warning' ? '?' : 'i';
+              console.log(`  [${icon}] ${s.field}: ${s.reason}`);
+            }
+          }
+
+          if (result.writingSuggestions.length > 0) {
+            logger.heading('Writing Suggestions');
+            for (const s of result.writingSuggestions) {
+              console.log(`  [${s.category}] ${s.reason}`);
+              logger.dim(`    - ${s.original}`);
+              logger.dim(`    + ${s.suggestion}`);
+              logger.blank();
+            }
+          }
+
+          if (result.coverPrompt) {
+            logger.heading('Cover Image Concept');
+            logger.label('Concept', result.coverPrompt.visualConcept);
+            logger.label('Alt text', result.coverPrompt.altText);
+          }
+
+          if (result.patch?.diff) {
+            logger.heading('Changes');
+            console.log(result.patch.diff);
+          }
+
+          if (!opts.apply) {
+            logger.info('Run with --apply to write changes.');
+          }
+
+          logger.blank();
+        } catch (err) {
+          if (err instanceof PoliraError) {
+            logger.error(err.message);
+            process.exit(1);
+          }
+          throw err;
+        }
+      },
+    );
+}
