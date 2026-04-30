@@ -39,11 +39,21 @@ Use `--apply` to write changes.
 
 ```bash
 npm run dev -- analyze ./posts/my-post.md   # Run locally via tsx
-npm run build                                # Compile TypeScript
+npm run build                                # Build with Vite
 npm test                                     # Run tests
 npm run typecheck                            # Type check
 npm run lint                                 # Lint
 npm run format                               # Format
+```
+
+## Releasing
+
+This project uses [Changesets](https://github.com/changesets/changesets) for versioning and changelogs.
+
+```bash
+npx changeset           # Add a changeset after making notable changes
+npm run version          # Bump version and update CHANGELOG.md
+npm run release          # Build and publish to npm
 ```
 
 ## Privacy

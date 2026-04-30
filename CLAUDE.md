@@ -12,7 +12,7 @@ The full project spec is in `project-plan.md`.
 
 ```bash
 npm run dev           # Run CLI locally via tsx (tsx src/cli/index.ts)
-npm run build         # Compile TypeScript (tsc)
+npm run build         # Build with Vite (vite build)
 npm test              # Run tests (vitest run)
 npm run test:watch    # Watch mode tests (vitest)
 npm run lint          # Lint (eslint .)
@@ -21,6 +21,22 @@ npm run typecheck     # Type check without emitting (tsc --noEmit)
 ```
 
 The CLI binary is `polira`. During development, use `npm run dev -- <command> <args>` to invoke it.
+
+## Build
+
+Vite builds the project in library mode with `preserveModules` — each source file produces a corresponding output file in `dist/`. TypeScript declarations are generated via `vite-plugin-dts`. `tsconfig.json` is type-checking only (`noEmit: true`); Vite handles all compilation.
+
+## Releases & Changelog
+
+Uses [Changesets](https://github.com/changesets/changesets) for versioning and changelog generation.
+
+```bash
+npx changeset              # Add a changeset (run after notable changes)
+npm run version            # Bump version + update CHANGELOG.md
+npm run release            # Build + publish to npm
+```
+
+Each PR with user-facing changes should include a changeset file (created by `npx changeset`).
 
 ## Architecture
 
