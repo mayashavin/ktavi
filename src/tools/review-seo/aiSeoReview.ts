@@ -7,7 +7,7 @@ export async function runAiSeoReview(
   aiProvider: TextAIProvider,
 ): Promise<SeoSuggestion[]> {
   const result = await aiProvider.generateStructuredOutput<{ suggestions: SeoSuggestion[] }>({
-    systemPrompt: `You are an SEO expert reviewing a blog post draft. Analyze the metadata and content and suggest improvements.
+    systemPrompt: `You are an SEO expert reviewing a blog post draft. Analyze the metadata and content and suggest improvements. Your response should be in JSON format.
 
 Rules:
 - Review the draft as a blog post
@@ -15,7 +15,10 @@ Rules:
 - Explain why each suggestion improves discoverability or clarity
 - Avoid clickbait suggestions
 - Keep title and description aligned with actual content
-- Return structured suggestions`,
+- Return an array of structured suggestions for each metadata field, with field, severity, current, suggested, reason, and source.
+- Field should be one of: title, description, slug, tags, headings, cover, content, images
+- Source should be either "deterministic" or "ai".
+- Severity should be one of: info, warning, critical.`,
     userPrompt: `Review this blog draft for SEO:
 
 Title: ${draft.frontmatter.title ?? '(none)'}

@@ -39,7 +39,13 @@ export function registerPrepareCommand(program: Command) {
             ? createOpenAITextProvider(apiKey, config.ai.textModel)
             : undefined;
 
-          const storageTarget = (opts.upload !== 'none' ? opts.upload : opts.save !== 'none' ? opts.save : config.storage.provider) as StorageTarget;
+          const storageTarget = (
+            opts.upload !== 'none'
+              ? opts.upload
+              : opts.save !== 'none'
+                ? opts.save
+                : config.storage.provider
+          ) as StorageTarget;
           const storageProvider =
             storageTarget === 'cloudinary'
               ? createCloudinaryStorageProvider({
@@ -95,7 +101,7 @@ export function registerPrepareCommand(program: Command) {
             for (const s of result.writingSuggestions) {
               console.log(`  [${s.category}] ${s.reason}`);
               logger.dim(`    - ${s.original}`);
-              logger.dim(`    + ${s.suggestion}`);
+              logger.dim(`    + ${s.suggested}`);
               logger.blank();
             }
           }
