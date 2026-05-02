@@ -17,7 +17,7 @@ Rules:
 - Keep title and description aligned with actual content
 - Return an array of structured suggestions for each metadata field, with field, severity, current, suggested, reason, and source.
 - Field should be one of: title, description, slug, tags, headings, cover, content, images
-- Source should be either "deterministic" or "ai".
+- Source should be exactly "ai" for every suggestion.
 - Severity should be one of: info, warning, critical.`,
     userPrompt: `Review this blog draft for SEO:
 
