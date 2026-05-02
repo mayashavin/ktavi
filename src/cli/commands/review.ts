@@ -39,9 +39,11 @@ export function registerReviewCommand(program: Command) {
         }
 
         for (const s of result.suggestions) {
-          console.log(`  [${s.category}] ${s.reason} (confidence: ${(s.confidence * 100).toFixed(0)}%)`);
+          console.log(
+            `  [${s.category}] ${s.reason} (confidence: ${(s.confidence * 100).toFixed(0)}%)`,
+          );
           logger.dim(`    - ${s.original}`);
-          logger.dim(`    + ${s.suggestion}`);
+          logger.dim(`    + ${s.suggested}`);
           logger.blank();
         }
       } catch (err) {

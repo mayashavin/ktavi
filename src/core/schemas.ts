@@ -11,7 +11,7 @@ export const seoSuggestionSchema = z.object({
 
 export const writingSuggestionSchema = z.object({
   original: z.string(),
-  suggestion: z.string(),
+  suggested: z.string(),
   reason: z.string(),
   category: z.enum(['grammar', 'clarity', 'tone', 'structure', 'diction']),
   confidence: z.number().min(0).max(1),

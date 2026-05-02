@@ -62,7 +62,7 @@ export type SeoSuggestion = {
 
 export type WritingSuggestion = {
   original: string;
-  suggestion: string;
+  suggested: string;
   reason: string;
   category: 'grammar' | 'clarity' | 'tone' | 'structure' | 'diction';
   confidence: number;
