@@ -4,6 +4,7 @@ const config: PoliraConfig = {
   ai: {
     provider: 'openai',
     textModel: 'gpt-4o',
+    imageModel: 'dall-e-3',
   },
   markdown: {
     coverField: 'cover',
@@ -19,7 +20,7 @@ const config: PoliraConfig = {
   storage: {
     provider: 'local',
     local: {
-      outputDir: './public/images/blog',
+      outputDir: './temp/images/blog',
       publicPathPrefix: '/images/blog',
     },
     cloudinary: {
