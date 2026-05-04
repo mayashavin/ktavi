@@ -1,3 +1,5 @@
+import path from 'node:path';
+import os from 'node:os';
 import { z } from 'zod';
 import type { CoverFieldName, ImageSize, StorageTarget, WritingMode } from './types.js';
 
@@ -85,18 +87,91 @@ const DEFAULT_CONFIG: PoliraConfig = {
   },
 };
 
-export async function loadConfig(configPath?: string): Promise<PoliraConfig> {
-  if (!configPath) {
-    return DEFAULT_CONFIG;
+export function getGlobalConfigPath(): string {
+  return path.join(os.homedir(), '.config', 'polira', 'config.js');
+}
+
+export function getProjectConfigPath(): string {
+  return path.resolve('polira.config.ts');
+}
+
+async function loadConfigFile(filePath: string): Promise<Partial<PoliraConfig> | null> {
+  try {
+    const module = await import(filePath);
+    return (module.default ?? module) as Partial<PoliraConfig>;
+  } catch (err) {
+    const code = (err as NodeJS.ErrnoException).code;
+    const message = (err as Error).message ?? '';
+    const isFileMissing =
+      (code === 'ERR_MODULE_NOT_FOUND' && message.includes(filePath)) || code === 'ENOENT';
+
+    // Under plain Node (production, no tsx), .ts files cannot be imported directly
+    // (ERR_UNKNOWN_FILE_EXTENSION). Also fall back when the .ts file is simply absent,
+    // so users can write polira.config.js instead of polira.config.ts.
+    if (filePath.endsWith('.ts') && (isFileMissing || code === 'ERR_UNKNOWN_FILE_EXTENSION')) {
+      return loadConfigFile(filePath.replace(/\.ts$/, '.js'));
+    }
+
+    if (isFileMissing) {
+      return null;
+    }
+    throw err;
+  }
+}
+
+function deepMerge(base: PoliraConfig, override: Partial<PoliraConfig>): PoliraConfig {
+  const result = { ...base };
+
+  if (override.ai) {
+    result.ai = { ...result.ai, ...override.ai };
+  }
+  if (override.markdown) {
+    result.markdown = { ...result.markdown, ...override.markdown };
+  }
+  if (override.writing) {
+    result.writing = { ...result.writing, ...override.writing };
+  }
+  if (override.image) {
+    result.image = { ...result.image, ...override.image };
+  }
+  if (override.storage) {
+    result.storage = { ...result.storage, ...override.storage };
+    if (override.storage.local) {
+      result.storage.local = {
+        ...(result.storage.local ?? DEFAULT_CONFIG.storage.local!),
+        ...override.storage.local,
+      };
+    }
+    if (override.storage.cloudinary) {
+      result.storage.cloudinary = {
+        ...(result.storage.cloudinary ?? {}),
+        ...override.storage.cloudinary,
+      };
+    }
   }
 
-  try {
-    const module = await import(configPath);
-    const raw = module.default ?? module;
-    return poliraConfigSchema.parse(raw) as PoliraConfig;
-  } catch {
-    return DEFAULT_CONFIG;
+  return poliraConfigSchema.parse(result) as PoliraConfig;
+}
+
+export async function loadConfig(
+  configPath?: string,
+  globalConfigPath?: string,
+): Promise<PoliraConfig> {
+  let config = { ...DEFAULT_CONFIG };
+
+  const resolvedGlobalPath = globalConfigPath ?? getGlobalConfigPath();
+  const globalRaw = await loadConfigFile(resolvedGlobalPath);
+  if (globalRaw) {
+    config = deepMerge(config, globalRaw);
   }
+
+  const projectPath = configPath ?? getProjectConfigPath();
+  const projectRaw = await loadConfigFile(projectPath);
+  if (projectRaw) {
+    config = deepMerge(config, projectRaw);
+  }
+
+  return config;
 }
 
 export { DEFAULT_CONFIG };
