@@ -99,8 +99,15 @@ async function loadConfigFile(filePath: string): Promise<Partial<PoliraConfig> |
   try {
     const module = await import(filePath);
     return (module.default ?? module) as Partial<PoliraConfig>;
-  } catch {
-    return null;
+  } catch (err) {
+    const code = (err as NodeJS.ErrnoException).code;
+    const message = (err as Error).message ?? '';
+    const isFileMissing =
+      (code === 'ERR_MODULE_NOT_FOUND' && message.includes(filePath)) || code === 'ENOENT';
+    if (isFileMissing) {
+      return null;
+    }
+    throw err;
   }
 }
 
@@ -138,10 +145,14 @@ function deepMerge(base: PoliraConfig, override: Partial<PoliraConfig>): PoliraC
   return poliraConfigSchema.parse(result) as PoliraConfig;
 }
 
-export async function loadConfig(configPath?: string): Promise<PoliraConfig> {
+export async function loadConfig(
+  configPath?: string,
+  globalConfigPath?: string,
+): Promise<PoliraConfig> {
   let config = { ...DEFAULT_CONFIG };
 
-  const globalRaw = await loadConfigFile(getGlobalConfigPath());
+  const resolvedGlobalPath = globalConfigPath ?? getGlobalConfigPath();
+  const globalRaw = await loadConfigFile(resolvedGlobalPath);
   if (globalRaw) {
     config = deepMerge(config, globalRaw);
   }
