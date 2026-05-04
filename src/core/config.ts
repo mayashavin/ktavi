@@ -63,7 +63,7 @@ const poliraConfigSchema = z.object({
       provider: z.enum(['local', 'cloudinary']).default('local'),
       local: z
         .object({
-          outputDir: z.string().default('./public/images/blog'),
+          outputDir: z.string().default('./temp/images/blog'),
           publicPathPrefix: z.string().default('/images/blog'),
         })
         .optional()
@@ -276,3 +276,14 @@ export async function resolveConfigWithSources(
 }
 
 export { DEFAULT_CONFIG };
+
+/**
+ * Loads a single config file without merging any other scope.
+ * Used by `config init` to prefill prompts from the file being edited only.
+ */
+export async function loadSingleConfigFile(
+  filePath: string,
+): Promise<Partial<PoliraConfig> | null> {
+  const result = await loadConfigFile(filePath);
+  return result?.config ?? null;
+}

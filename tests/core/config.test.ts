@@ -90,7 +90,7 @@ describe('loadConfig', () => {
   });
 
   it('deep-merges storage.local without touching cloudinary', async () => {
-    const { loadConfig, DEFAULT_CONFIG } = await import('../../src/core/config.js');
+    const { loadConfig } = await import('../../src/core/config.js');
     const fixturePath = path.resolve('tests/fixtures/test-config-local-storage.ts');
     const config = await loadConfig(fixturePath, NONEXISTENT_PATH);
     expect(config.storage.provider).toBe('local');

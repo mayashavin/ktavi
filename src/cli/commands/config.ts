@@ -2,6 +2,8 @@ import { Command } from 'commander';
 import { resolveConfigWithSources } from '../../core/config.js';
 import type { ConfigSource } from '../../core/config.js';
 import { logger } from '../../core/logger.js';
+import { runConfigInit } from './configInit.js';
+import type { ConfigInitOptions } from './configInit.js';
 
 const SOURCE_LABELS: Record<ConfigSource, string> = {
   default: 'default',
@@ -50,5 +52,15 @@ export function registerConfigCommand(program: Command) {
       }
 
       logger.blank();
+    });
+
+  configCmd
+    .command('init')
+    .description('Interactively create a polira config file')
+    .option('--global', 'Create global config at ~/.config/polira/config.js')
+    .option('--force', 'Overwrite existing config without confirmation')
+    .option('--defaults', 'Skip prompts and write default config')
+    .action(async (opts: ConfigInitOptions) => {
+      await runConfigInit(opts);
     });
 }

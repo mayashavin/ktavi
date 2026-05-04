@@ -14,6 +14,7 @@ export default defineConfig({
     rollupOptions: {
       external: [
         /^node:/,
+        /^@inquirer\//,
         'commander',
         'gray-matter',
         'unified',
@@ -25,13 +26,13 @@ export default defineConfig({
         'dotenv',
         'dotenv/config',
         'openai',
+        'jiti',
       ],
       output: {
         preserveModules: true,
         preserveModulesRoot: 'src',
         entryFileNames: '[name].js',
-        banner: (chunk) =>
-          chunk.fileName === 'cli/index.js' ? '#!/usr/bin/env node\n' : '',
+        banner: (chunk) => (chunk.fileName === 'cli/index.js' ? '#!/usr/bin/env node\n' : ''),
       },
     },
     minify: false,
