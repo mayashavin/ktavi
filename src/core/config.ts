@@ -63,7 +63,7 @@ const poliraConfigSchema = z.object({
       provider: z.enum(['local', 'cloudinary']).default('local'),
       local: z
         .object({
-          outputDir: z.string().default('./public/images/blog'),
+          outputDir: z.string().default('./temp/images/blog'),
           publicPathPrefix: z.string().default('/images/blog'),
         })
         .optional()

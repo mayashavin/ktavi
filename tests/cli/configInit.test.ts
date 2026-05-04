@@ -126,7 +126,7 @@ describe('polira config init', () => {
     vi.restoreAllMocks();
   });
 
-  it('prompts and writes only overridden fields', async () => {
+  it('writes all prompted fields including defaults and overrides', async () => {
     const configPath = path.join(tmpDir, 'polira.config.ts');
 
     const originalResolve = path.resolve;
@@ -149,9 +149,13 @@ describe('polira config init', () => {
     const content = await fs.readFile(configPath, 'utf-8');
     expect(content).toContain('defaultMode: "strong"');
     expect(content).toContain('style: "watercolor illustration"');
-    expect(content).not.toContain('ai:');
-    expect(content).not.toContain('markdown:');
-    expect(content).not.toContain('storage:');
+    expect(content).toContain('ai:');
+    expect(content).toContain('provider: "openai"');
+    expect(content).toContain('textModel: "gpt-4o"');
+    expect(content).toContain('markdown:');
+    expect(content).toContain('coverField: "cover"');
+    expect(content).toContain('storage:');
+    expect(content).toContain('provider: "local"');
 
     vi.restoreAllMocks();
   });

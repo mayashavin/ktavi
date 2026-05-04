@@ -117,28 +117,15 @@ async function promptForConfig(
 
   const config: Partial<PoliraConfig> = {};
 
-  const imageModelChanged = imageModel && imageModel !== (SCHEMA_DEFAULTS.ai.imageModel ?? '');
-  if (
-    provider !== SCHEMA_DEFAULTS.ai.provider ||
-    textModel !== SCHEMA_DEFAULTS.ai.textModel ||
-    imageModelChanged
-  ) {
-    config.ai = { provider, textModel };
-    if (imageModel) config.ai.imageModel = imageModel;
-  }
+  config.ai = { provider, textModel };
+  if (imageModel) config.ai.imageModel = imageModel;
 
-  if (defaultMode !== SCHEMA_DEFAULTS.writing.defaultMode) {
-    config.writing = { defaultMode };
-  }
+  config.writing = { defaultMode };
 
-  if (imageSize !== SCHEMA_DEFAULTS.image.size || imageStyle) {
-    config.image = { size: imageSize };
-    if (imageStyle) config.image.style = imageStyle;
-  }
+  config.image = { size: imageSize };
+  if (imageStyle) config.image.style = imageStyle;
 
-  if (coverField !== SCHEMA_DEFAULTS.markdown.coverField) {
-    config.markdown = { coverField };
-  }
+  config.markdown = { coverField };
 
   if (storageProvider === 'local') {
     const outputDir = await input({
@@ -157,15 +144,7 @@ async function promptForConfig(
         SCHEMA_DEFAULTS.storage.local!.publicPathPrefix,
       ),
     });
-
-    const localDefaults = SCHEMA_DEFAULTS.storage.local!;
-    if (
-      storageProvider !== SCHEMA_DEFAULTS.storage.provider ||
-      outputDir !== localDefaults.outputDir ||
-      publicPathPrefix !== localDefaults.publicPathPrefix
-    ) {
-      config.storage = { provider: storageProvider, local: { outputDir, publicPathPrefix } };
-    }
+    config.storage = { provider: storageProvider, local: { outputDir, publicPathPrefix } };
   } else {
     const folder = await input({
       message: 'Cloudinary folder',
