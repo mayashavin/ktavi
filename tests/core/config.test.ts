@@ -13,9 +13,9 @@ describe('getGlobalConfigPath', () => {
 });
 
 describe('getProjectConfigPath', () => {
-  it('returns polira.config.js resolved from cwd', () => {
+  it('returns polira.config.ts resolved from cwd', () => {
     const result = getProjectConfigPath();
-    expect(result).toBe(path.resolve('polira.config.js'));
+    expect(result).toBe(path.resolve('polira.config.ts'));
   });
 });
 
