@@ -75,13 +75,13 @@ const poliraConfigSchema = z.object({
 });
 
 const DEFAULT_CONFIG: PoliraConfig = {
-  ai: { provider: 'openai', textModel: 'gpt-4o' },
+  ai: { provider: 'openai', textModel: 'gpt-4o', imageModel: 'gpt-image-2' },
   markdown: { coverField: 'cover', preserveFrontmatterOrder: true },
   writing: { defaultMode: 'medium' },
   image: { size: '1792x1024' },
   storage: {
     provider: 'local',
-    local: { outputDir: './public/images/blog', publicPathPrefix: '/images/blog' },
+    local: { outputDir: './temp/images/blog', publicPathPrefix: '/images/blog' },
   },
 };
 
