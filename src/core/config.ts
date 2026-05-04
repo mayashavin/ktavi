@@ -88,11 +88,11 @@ const DEFAULT_CONFIG: PoliraConfig = {
 };
 
 export function getGlobalConfigPath(): string {
-  return path.join(os.homedir(), '.config', 'polira', 'config.ts');
+  return path.join(os.homedir(), '.config', 'polira', 'config.js');
 }
 
 export function getProjectConfigPath(): string {
-  return path.resolve('polira.config.ts');
+  return path.resolve('polira.config.js');
 }
 
 async function loadConfigFile(filePath: string): Promise<Partial<PoliraConfig> | null> {

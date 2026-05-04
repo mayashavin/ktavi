@@ -8,14 +8,14 @@ const NONEXISTENT_PATH = '/nonexistent/path/config.ts';
 describe('getGlobalConfigPath', () => {
   it('returns path under ~/.config/polira/', () => {
     const result = getGlobalConfigPath();
-    expect(result).toBe(path.join(os.homedir(), '.config', 'polira', 'config.ts'));
+    expect(result).toBe(path.join(os.homedir(), '.config', 'polira', 'config.js'));
   });
 });
 
 describe('getProjectConfigPath', () => {
-  it('returns polira.config.ts resolved from cwd', () => {
+  it('returns polira.config.js resolved from cwd', () => {
     const result = getProjectConfigPath();
-    expect(result).toBe(path.resolve('polira.config.ts'));
+    expect(result).toBe(path.resolve('polira.config.js'));
   });
 });
 
