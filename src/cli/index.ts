@@ -6,6 +6,7 @@ import { registerReviewCommand } from './commands/review.js';
 import { registerFixCommand } from './commands/fix.js';
 import { registerCoverCommand } from './commands/cover.js';
 import { registerPrepareCommand } from './commands/prepare.js';
+import { registerConfigCommand } from './commands/config.js';
 
 const program = new Command();
 
@@ -20,5 +21,6 @@ registerReviewCommand(program);
 registerFixCommand(program);
 registerCoverCommand(program);
 registerPrepareCommand(program);
+registerConfigCommand(program);
 
 program.parse();

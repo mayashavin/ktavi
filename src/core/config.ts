@@ -174,4 +174,79 @@ export async function loadConfig(
   return config;
 }
 
+export type ConfigSource = 'default' | 'global' | 'project';
+
+export type ConfigValueWithSource = {
+  value: unknown;
+  source: ConfigSource;
+};
+
+export type ResolvedConfigWithSources = {
+  config: PoliraConfig;
+  sources: Record<string, ConfigValueWithSource>;
+  paths: {
+    global: { path: string; loaded: boolean };
+    project: { path: string; loaded: boolean };
+  };
+};
+
+function flattenConfig(obj: Record<string, unknown>, prefix = ''): Record<string, unknown> {
+  const result: Record<string, unknown> = {};
+  for (const [key, value] of Object.entries(obj)) {
+    const fullKey = prefix ? `${prefix}.${key}` : key;
+    if (value !== null && typeof value === 'object' && !Array.isArray(value)) {
+      Object.assign(result, flattenConfig(value as Record<string, unknown>, fullKey));
+    } else {
+      result[fullKey] = value;
+    }
+  }
+  return result;
+}
+
+function getSource(
+  key: string,
+  globalFlat: Record<string, unknown> | null,
+  projectFlat: Record<string, unknown> | null,
+): ConfigSource {
+  if (projectFlat && key in projectFlat) return 'project';
+  if (globalFlat && key in globalFlat) return 'global';
+  return 'default';
+}
+
+export async function resolveConfigWithSources(
+  configPath?: string,
+  globalConfigPath?: string,
+): Promise<ResolvedConfigWithSources> {
+  const resolvedGlobalPath = globalConfigPath ?? getGlobalConfigPath();
+  const projectPath = configPath ?? getProjectConfigPath();
+
+  const globalRaw = await loadConfigFile(resolvedGlobalPath);
+  const projectRaw = await loadConfigFile(projectPath);
+
+  let config = { ...DEFAULT_CONFIG };
+  if (globalRaw) config = deepMerge(config, globalRaw);
+  if (projectRaw) config = deepMerge(config, projectRaw);
+
+  const globalFlat = globalRaw ? flattenConfig(globalRaw as Record<string, unknown>) : null;
+  const projectFlat = projectRaw ? flattenConfig(projectRaw as Record<string, unknown>) : null;
+  const resolvedFlat = flattenConfig(config as unknown as Record<string, unknown>);
+
+  const sources: Record<string, ConfigValueWithSource> = {};
+  for (const key of Object.keys(resolvedFlat)) {
+    sources[key] = {
+      value: resolvedFlat[key],
+      source: getSource(key, globalFlat, projectFlat),
+    };
+  }
+
+  return {
+    config,
+    sources,
+    paths: {
+      global: { path: resolvedGlobalPath, loaded: globalRaw !== null },
+      project: { path: projectPath, loaded: projectRaw !== null },
+    },
+  };
+}
+
 export { DEFAULT_CONFIG };

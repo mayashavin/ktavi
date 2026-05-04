@@ -144,3 +144,61 @@ describe('loadConfig', () => {
     await expect(loadConfig(brokenPath, NONEXISTENT_PATH)).rejects.toThrow('config file is broken');
   });
 });
+
+describe('resolveConfigWithSources', () => {
+  beforeEach(() => {
+    vi.resetModules();
+  });
+
+  it('marks all values as default when no config files exist', async () => {
+    const { resolveConfigWithSources } = await import('../../src/core/config.js');
+    const resolved = await resolveConfigWithSources(NONEXISTENT_PATH, NONEXISTENT_PATH);
+    expect(resolved.sources['ai.provider'].source).toBe('default');
+    expect(resolved.sources['ai.textModel'].source).toBe('default');
+    expect(resolved.sources['writing.defaultMode'].source).toBe('default');
+    expect(resolved.paths.global.loaded).toBe(false);
+    expect(resolved.paths.project.loaded).toBe(false);
+  });
+
+  it('marks overridden values as project source', async () => {
+    const { resolveConfigWithSources } = await import('../../src/core/config.js');
+    const projectFixture = path.resolve('tests/fixtures/test-config.ts');
+    const resolved = await resolveConfigWithSources(projectFixture, NONEXISTENT_PATH);
+    expect(resolved.sources['ai.textModel'].source).toBe('project');
+    expect(resolved.sources['ai.textModel'].value).toBe('gpt-4o-mini');
+    expect(resolved.sources['writing.defaultMode'].source).toBe('project');
+    expect(resolved.sources['ai.provider'].source).toBe('default');
+    expect(resolved.paths.project.loaded).toBe(true);
+  });
+
+  it('marks overridden values as global source', async () => {
+    const { resolveConfigWithSources } = await import('../../src/core/config.js');
+    const globalFixture = path.resolve('tests/fixtures/test-config-global.ts');
+    const resolved = await resolveConfigWithSources(NONEXISTENT_PATH, globalFixture);
+    expect(resolved.sources['ai.textModel'].source).toBe('global');
+    expect(resolved.sources['ai.textModel'].value).toBe('gpt-3.5-turbo');
+    expect(resolved.sources['writing.defaultMode'].source).toBe('global');
+    expect(resolved.sources['image.size'].source).toBe('default');
+  });
+
+  it('project source wins over global for the same key', async () => {
+    const { resolveConfigWithSources } = await import('../../src/core/config.js');
+    const globalFixture = path.resolve('tests/fixtures/test-config-global.ts');
+    const projectFixture = path.resolve('tests/fixtures/test-config.ts');
+    const resolved = await resolveConfigWithSources(projectFixture, globalFixture);
+    expect(resolved.sources['ai.textModel'].source).toBe('project');
+    expect(resolved.sources['ai.textModel'].value).toBe('gpt-4o-mini');
+  });
+
+  it('includes all resolved flat keys', async () => {
+    const { resolveConfigWithSources } = await import('../../src/core/config.js');
+    const resolved = await resolveConfigWithSources(NONEXISTENT_PATH, NONEXISTENT_PATH);
+    expect(resolved.sources).toHaveProperty('ai.provider');
+    expect(resolved.sources).toHaveProperty('ai.textModel');
+    expect(resolved.sources).toHaveProperty('markdown.coverField');
+    expect(resolved.sources).toHaveProperty('writing.defaultMode');
+    expect(resolved.sources).toHaveProperty('image.size');
+    expect(resolved.sources).toHaveProperty('storage.provider');
+    expect(resolved.sources).toHaveProperty('storage.local.outputDir');
+  });
+});
