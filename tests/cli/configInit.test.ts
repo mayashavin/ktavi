@@ -58,7 +58,7 @@ function setupPromptMocks(
       overrides.textModel ?? 'gpt-4o',
       overrides.imageModel ?? 'gpt-image-2',
       overrides.imageStyle ?? '',
-      overrides.outputDir ?? './public/images/blog',
+      overrides.outputDir ?? './temp/images/blog',
       overrides.publicPathPrefix ?? '/images/blog',
     ],
   };
@@ -222,6 +222,60 @@ describe('polira config init', () => {
     });
 
     await runConfigInit({ defaults: true, force: true });
+
+    const content = await fs.readFile(configPath, 'utf-8');
+    expect(content).toContain('export default {');
+    expect(content).not.toBe('old content');
+
+    vi.restoreAllMocks();
+  });
+
+  it('prompts for overwrite when --defaults is used without --force on existing file', async () => {
+    const configPath = path.join(tmpDir, 'polira.config.ts');
+    await fs.writeFile(configPath, 'old content');
+    await fs.writeFile(path.join(tmpDir, 'tsconfig.json'), '{}');
+
+    const originalResolve = path.resolve;
+    vi.spyOn(path, 'resolve').mockImplementation((...args: string[]) => {
+      if (args.length === 1 && args[0] === 'polira.config.ts') return configPath;
+      if (args.length === 1 && args[0].startsWith('polira.config.'))
+        return path.join(tmpDir, args[0]);
+      if (args.length === 1 && args[0] === 'tsconfig.json')
+        return originalResolve(tmpDir, 'tsconfig.json');
+      return originalResolve(...args);
+    });
+
+    mockedConfirm.mockResolvedValue(false);
+
+    await runConfigInit({ defaults: true });
+
+    expect(mockedConfirm).toHaveBeenCalledWith(
+      expect.objectContaining({ message: expect.stringContaining('already exists') }),
+    );
+    const content = await fs.readFile(configPath, 'utf-8');
+    expect(content).toBe('old content');
+
+    vi.restoreAllMocks();
+  });
+
+  it('overwrites existing file when --defaults confirms overwrite', async () => {
+    const configPath = path.join(tmpDir, 'polira.config.ts');
+    await fs.writeFile(configPath, 'old content');
+    await fs.writeFile(path.join(tmpDir, 'tsconfig.json'), '{}');
+
+    const originalResolve = path.resolve;
+    vi.spyOn(path, 'resolve').mockImplementation((...args: string[]) => {
+      if (args.length === 1 && args[0] === 'polira.config.ts') return configPath;
+      if (args.length === 1 && args[0].startsWith('polira.config.'))
+        return path.join(tmpDir, args[0]);
+      if (args.length === 1 && args[0] === 'tsconfig.json')
+        return originalResolve(tmpDir, 'tsconfig.json');
+      return originalResolve(...args);
+    });
+
+    mockedConfirm.mockResolvedValue(true);
+
+    await runConfigInit({ defaults: true });
 
     const content = await fs.readFile(configPath, 'utf-8');
     expect(content).toContain('export default {');

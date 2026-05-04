@@ -254,7 +254,7 @@ export async function runConfigInit(opts: ConfigInitOptions): Promise<void> {
   const filePath = isGlobal ? getGlobalConfigPath() : path.resolve(`polira.config${ext}`);
 
   const exists = await fileExists(filePath);
-  if (exists && !opts.force && !opts.defaults) {
+  if (exists && !opts.force) {
     const overwrite = await confirm({
       message: `${filePath} already exists. Overwrite?`,
       default: false,
