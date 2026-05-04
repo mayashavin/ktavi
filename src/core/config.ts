@@ -1,3 +1,5 @@
+import path from 'node:path';
+import os from 'node:os';
 import { z } from 'zod';
 import type { CoverFieldName, ImageSize, StorageTarget, WritingMode } from './types.js';
 
@@ -85,18 +87,72 @@ const DEFAULT_CONFIG: PoliraConfig = {
   },
 };
 
-export async function loadConfig(configPath?: string): Promise<PoliraConfig> {
-  if (!configPath) {
-    return DEFAULT_CONFIG;
+export function getGlobalConfigPath(): string {
+  return path.join(os.homedir(), '.config', 'polira', 'config.ts');
+}
+
+export function getProjectConfigPath(): string {
+  return path.resolve('polira.config.ts');
+}
+
+async function loadConfigFile(filePath: string): Promise<Partial<PoliraConfig> | null> {
+  try {
+    const module = await import(filePath);
+    return (module.default ?? module) as Partial<PoliraConfig>;
+  } catch {
+    return null;
+  }
+}
+
+function deepMerge(base: PoliraConfig, override: Partial<PoliraConfig>): PoliraConfig {
+  const result = { ...base };
+
+  if (override.ai) {
+    result.ai = { ...result.ai, ...override.ai };
+  }
+  if (override.markdown) {
+    result.markdown = { ...result.markdown, ...override.markdown };
+  }
+  if (override.writing) {
+    result.writing = { ...result.writing, ...override.writing };
+  }
+  if (override.image) {
+    result.image = { ...result.image, ...override.image };
+  }
+  if (override.storage) {
+    result.storage = { ...result.storage, ...override.storage };
+    if (override.storage.local) {
+      result.storage.local = {
+        ...(result.storage.local ?? DEFAULT_CONFIG.storage.local!),
+        ...override.storage.local,
+      };
+    }
+    if (override.storage.cloudinary) {
+      result.storage.cloudinary = {
+        ...(result.storage.cloudinary ?? {}),
+        ...override.storage.cloudinary,
+      };
+    }
   }
 
-  try {
-    const module = await import(configPath);
-    const raw = module.default ?? module;
-    return poliraConfigSchema.parse(raw) as PoliraConfig;
-  } catch {
-    return DEFAULT_CONFIG;
+  return poliraConfigSchema.parse(result) as PoliraConfig;
+}
+
+export async function loadConfig(configPath?: string): Promise<PoliraConfig> {
+  let config = { ...DEFAULT_CONFIG };
+
+  const globalRaw = await loadConfigFile(getGlobalConfigPath());
+  if (globalRaw) {
+    config = deepMerge(config, globalRaw);
   }
+
+  const projectPath = configPath ?? getProjectConfigPath();
+  const projectRaw = await loadConfigFile(projectPath);
+  if (projectRaw) {
+    config = deepMerge(config, projectRaw);
+  }
+
+  return config;
 }
 
 export { DEFAULT_CONFIG };
