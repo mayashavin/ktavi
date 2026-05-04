@@ -36,6 +36,7 @@
     "node": ">=18"
   },
   "dependencies": {
+    "@inquirer/prompts": "^7.10.1",
     "cloudinary": "^2.5.1",
     "commander": "^13.1.0",
     "diff": "^7.0.0",
