@@ -16,10 +16,11 @@ export function createLocalStorageProvider(
         throw new PoliraError('Image has no buffer or base64 data to save.', 'WRITE_FAILED');
       }
 
-      const filePath = path.join(outputDir, `${image.fileName}.png`);
+      const normalizedFileName = path.parse(image.fileName).name;
+      const filePath = path.join(outputDir, `${normalizedFileName}.png`);
       await writeBuffer(filePath, buffer);
 
-      const publicUrl = `${publicPathPrefix}/${image.fileName}`;
+      const publicUrl = `${publicPathPrefix}/${normalizedFileName}.png`;
 
       return {
         provider: 'local',
