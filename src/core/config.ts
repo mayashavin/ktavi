@@ -92,7 +92,7 @@ export function getGlobalConfigPath(): string {
 }
 
 export function getProjectConfigPath(): string {
-  return path.resolve('polira.config.ts');
+  return path.resolve('polira.config.js');
 }
 
 async function loadConfigFile(filePath: string): Promise<Partial<PoliraConfig> | null> {
