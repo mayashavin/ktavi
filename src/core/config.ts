@@ -1,5 +1,6 @@
 import path from 'node:path';
 import os from 'node:os';
+import { createJiti } from 'jiti';
 import { z } from 'zod';
 import type { CoverFieldName, ImageSize, StorageTarget, WritingMode } from './types.js';
 
@@ -105,10 +106,14 @@ async function loadConfigFile(filePath: string): Promise<Partial<PoliraConfig> |
     const isFileMissing =
       (code === 'ERR_MODULE_NOT_FOUND' && message.includes(filePath)) || code === 'ENOENT';
 
-    // Under plain Node (production, no tsx), .ts files cannot be imported directly
-    // (ERR_UNKNOWN_FILE_EXTENSION). Also fall back when the .ts file is simply absent,
-    // so users can write polira.config.js instead of polira.config.ts.
-    if (filePath.endsWith('.ts') && (isFileMissing || code === 'ERR_UNKNOWN_FILE_EXTENSION')) {
+    // Plain Node cannot import .ts files (ERR_UNKNOWN_FILE_EXTENSION).
+    // Use jiti to load them at runtime without requiring tsx.
+    if (filePath.endsWith('.ts') && code === 'ERR_UNKNOWN_FILE_EXTENSION') {
+      return loadConfigFileWithJiti(filePath);
+    }
+
+    // .ts file absent — fall back to .js sibling so JS projects work too.
+    if (filePath.endsWith('.ts') && isFileMissing) {
       return loadConfigFile(filePath.replace(/\.ts$/, '.js'));
     }
 
@@ -116,6 +121,19 @@ async function loadConfigFile(filePath: string): Promise<Partial<PoliraConfig> |
       return null;
     }
     throw err;
+  }
+}
+
+async function loadConfigFileWithJiti(filePath: string): Promise<Partial<PoliraConfig> | null> {
+  try {
+    const jiti = createJiti(import.meta.url, { interopDefault: true });
+    const module = await jiti.import(filePath);
+    return (
+      (module as { default?: Partial<PoliraConfig> }).default ?? (module as Partial<PoliraConfig>)
+    );
+  } catch {
+    // .ts file exists but can't be loaded — fall back to .js sibling
+    return loadConfigFile(filePath.replace(/\.ts$/, '.js'));
   }
 }
 
