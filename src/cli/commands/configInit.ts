@@ -1,6 +1,10 @@
 import path from 'node:path';
 import { input, select, confirm } from '@inquirer/prompts';
-import { getGlobalConfigPath, getProjectConfigPath, loadConfig } from '../../core/config.js';
+import {
+  getGlobalConfigPath,
+  getProjectConfigPath,
+  loadSingleConfigFile,
+} from '../../core/config.js';
 import type { PoliraConfig } from '../../core/config.js';
 import { logger } from '../../core/logger.js';
 import { fileExists } from '../../utils/fileSystem.js';
@@ -30,15 +34,7 @@ async function detectTypeScript(): Promise<boolean> {
 async function loadExistingConfig(isGlobal: boolean): Promise<Partial<PoliraConfig> | null> {
   try {
     const configPath = isGlobal ? getGlobalConfigPath() : getProjectConfigPath();
-    if (!(await fileExists(configPath))) {
-      if (!configPath.endsWith('.ts')) return null;
-      const jsPath = configPath.replace(/\.ts$/, '.js');
-      if (!(await fileExists(jsPath))) return null;
-    }
-    const config = isGlobal
-      ? await loadConfig(undefined, configPath)
-      : await loadConfig(configPath, undefined);
-    return config;
+    return await loadSingleConfigFile(configPath);
   } catch {
     return null;
   }
@@ -195,7 +191,7 @@ function serializeConfig(config: Partial<PoliraConfig>): string {
         renderObject(value as Record<string, unknown>, indent + 1);
         lines.push(`${pad}}${comma}`);
       } else if (typeof value === 'string') {
-        lines.push(`${pad}${key}: '${value}'${comma}`);
+        lines.push(`${pad}${key}: ${JSON.stringify(value)}${comma}`);
       } else {
         lines.push(`${pad}${key}: ${String(value)}${comma}`);
       }

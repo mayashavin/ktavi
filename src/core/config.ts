@@ -276,3 +276,14 @@ export async function resolveConfigWithSources(
 }
 
 export { DEFAULT_CONFIG };
+
+/**
+ * Loads a single config file without merging any other scope.
+ * Used by `config init` to prefill prompts from the file being edited only.
+ */
+export async function loadSingleConfigFile(
+  filePath: string,
+): Promise<Partial<PoliraConfig> | null> {
+  const result = await loadConfigFile(filePath);
+  return result?.config ?? null;
+}

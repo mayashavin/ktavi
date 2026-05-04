@@ -114,11 +114,11 @@ describe('polira config init', () => {
 
     const content = await fs.readFile(configPath, 'utf-8');
     expect(content).toContain('export default {');
-    expect(content).toContain("provider: 'openai'");
-    expect(content).toContain("textModel: 'gpt-4o'");
-    expect(content).toContain("defaultMode: 'medium'");
-    expect(content).toContain("size: '1792x1024'");
-    expect(content).toContain("provider: 'local'");
+    expect(content).toContain('provider: "openai"');
+    expect(content).toContain('textModel: "gpt-4o"');
+    expect(content).toContain('defaultMode: "medium"');
+    expect(content).toContain('size: "1792x1024"');
+    expect(content).toContain('provider: "local"');
 
     expect(mockedSelect).not.toHaveBeenCalled();
     expect(mockedInput).not.toHaveBeenCalled();
@@ -147,8 +147,8 @@ describe('polira config init', () => {
     await runConfigInit({});
 
     const content = await fs.readFile(configPath, 'utf-8');
-    expect(content).toContain("defaultMode: 'strong'");
-    expect(content).toContain("style: 'watercolor illustration'");
+    expect(content).toContain('defaultMode: "strong"');
+    expect(content).toContain('style: "watercolor illustration"');
     expect(content).not.toContain('ai:');
     expect(content).not.toContain('markdown:');
     expect(content).not.toContain('storage:');
@@ -174,8 +174,8 @@ describe('polira config init', () => {
     await runConfigInit({});
 
     const content = await fs.readFile(configPath, 'utf-8');
-    expect(content).toContain("provider: 'cloudinary'");
-    expect(content).toContain("folder: 'my-covers'");
+    expect(content).toContain('provider: "cloudinary"');
+    expect(content).toContain('folder: "my-covers"');
 
     vi.restoreAllMocks();
   });
@@ -331,6 +331,30 @@ describe('polira config init', () => {
       .then(() => true)
       .catch(() => false);
     expect(exists).toBe(false);
+
+    vi.restoreAllMocks();
+  });
+
+  it('escapes special characters in string values', async () => {
+    const configPath = path.join(tmpDir, 'polira.config.ts');
+
+    const originalResolve = path.resolve;
+    vi.spyOn(path, 'resolve').mockImplementation((...args: string[]) => {
+      if (args.length === 1 && args[0] === 'polira.config.ts') return configPath;
+      if (args.length === 1 && args[0].startsWith('polira.config.'))
+        return path.join(tmpDir, args[0]);
+      if (args.length === 1 && args[0] === 'tsconfig.json')
+        return originalResolve(tmpDir, 'tsconfig.json');
+      return originalResolve(...args);
+    });
+
+    setupPromptMocks({ imageStyle: 'it\'s a "test" style\nwith newline' });
+
+    await runConfigInit({});
+
+    const content = await fs.readFile(configPath, 'utf-8');
+    // JSON.stringify produces a safely escaped double-quoted string literal
+    expect(content).toContain('style: "it\'s a \\"test\\" style\\nwith newline"');
 
     vi.restoreAllMocks();
   });
