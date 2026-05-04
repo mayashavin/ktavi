@@ -14,6 +14,8 @@ It reviews your draft for grammar, clarity, and SEO metadata, generates a matchi
 - Save images locally or upload to Cloudinary
 - Update Markdown frontmatter
 - Show diffs before applying changes
+- Interactive config scaffolding with `polira config init`
+- View resolved config with source attribution via `polira config show`
 
 ## Setup
 
@@ -22,6 +24,16 @@ npm install
 cp .env.example .env
 # Add your API keys to .env
 ```
+
+### Quick config setup
+
+```bash
+polira config init                  # Interactive config wizard
+polira config init --defaults       # Write default config without prompts
+polira config init --global         # Create global config at ~/.config/polira/config.js
+```
+
+This creates a `polira.config.ts` (or `.js`) with your preferred AI provider, models, writing mode, image settings, and storage configuration.
 
 ## Usage
 
@@ -34,6 +46,18 @@ polira prepare ./posts/my-post.md
 ```
 
 Use `--apply` to write changes.
+
+### Configuration
+
+```bash
+polira config show                  # Display resolved config with sources
+polira config show --json           # Output as JSON
+```
+
+Config is loaded with the following precedence: **project config** > **global config** > **defaults**.
+
+- **Project config**: `polira.config.ts` or `polira.config.js` in the current directory
+- **Global config**: `~/.config/polira/config.js`
 
 ## Development
 
