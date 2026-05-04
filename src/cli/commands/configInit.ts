@@ -164,7 +164,7 @@ function serializeConfig(config: Partial<PoliraConfig>): string {
     const entries = Object.entries(obj);
     for (let i = 0; i < entries.length; i++) {
       const [key, value] = entries[i];
-      const comma = i < entries.length - 1 ? ',' : ',';
+      const comma = ',';
       if (value !== null && typeof value === 'object' && !Array.isArray(value)) {
         lines.push(`${pad}${key}: {`);
         renderObject(value as Record<string, unknown>, indent + 1);
