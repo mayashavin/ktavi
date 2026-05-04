@@ -201,4 +201,20 @@ describe('resolveConfigWithSources', () => {
     expect(resolved.sources).toHaveProperty('storage.provider');
     expect(resolved.sources).toHaveProperty('storage.local.outputDir');
   });
+
+  it('reports the .js path when only .js config exists (no .ts sibling)', async () => {
+    const { resolveConfigWithSources } = await import('../../src/core/config.js');
+    const jsOnlyFixtureTsPath = path.resolve('tests/fixtures/test-config-js-only.ts');
+    const resolved = await resolveConfigWithSources(jsOnlyFixtureTsPath, NONEXISTENT_PATH);
+    expect(resolved.paths.project.loaded).toBe(true);
+    expect(resolved.paths.project.path).toBe(jsOnlyFixtureTsPath.replace(/\.ts$/, '.js'));
+  });
+
+  it('reports the .ts path when .ts config exists', async () => {
+    const { resolveConfigWithSources } = await import('../../src/core/config.js');
+    const projectFixture = path.resolve('tests/fixtures/test-config.ts');
+    const resolved = await resolveConfigWithSources(projectFixture, NONEXISTENT_PATH);
+    expect(resolved.paths.project.loaded).toBe(true);
+    expect(resolved.paths.project.path).toBe(projectFixture);
+  });
 });

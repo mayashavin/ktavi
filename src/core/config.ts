@@ -96,10 +96,12 @@ export function getProjectConfigPath(): string {
   return path.resolve('polira.config.ts');
 }
 
-async function loadConfigFile(filePath: string): Promise<Partial<PoliraConfig> | null> {
+type LoadedConfig = { config: Partial<PoliraConfig>; resolvedPath: string } | null;
+
+async function loadConfigFile(filePath: string): Promise<LoadedConfig> {
   try {
     const module = await import(filePath);
-    return (module.default ?? module) as Partial<PoliraConfig>;
+    return { config: (module.default ?? module) as Partial<PoliraConfig>, resolvedPath: filePath };
   } catch (err) {
     const code = (err as NodeJS.ErrnoException).code;
     const message = (err as Error).message ?? '';
@@ -124,15 +126,14 @@ async function loadConfigFile(filePath: string): Promise<Partial<PoliraConfig> |
   }
 }
 
-async function loadConfigFileWithJiti(filePath: string): Promise<Partial<PoliraConfig> | null> {
+async function loadConfigFileWithJiti(filePath: string): Promise<LoadedConfig> {
   try {
     const jiti = createJiti(import.meta.url, { interopDefault: true });
     const module = await jiti.import(filePath);
-    return (
-      (module as { default?: Partial<PoliraConfig> }).default ?? (module as Partial<PoliraConfig>)
-    );
+    const config =
+      (module as { default?: Partial<PoliraConfig> }).default ?? (module as Partial<PoliraConfig>);
+    return { config, resolvedPath: filePath };
   } catch {
-    // .ts file exists but can't be loaded — fall back to .js sibling
     return loadConfigFile(filePath.replace(/\.ts$/, '.js'));
   }
 }
@@ -178,15 +179,15 @@ export async function loadConfig(
   let config = { ...DEFAULT_CONFIG };
 
   const resolvedGlobalPath = globalConfigPath ?? getGlobalConfigPath();
-  const globalRaw = await loadConfigFile(resolvedGlobalPath);
-  if (globalRaw) {
-    config = deepMerge(config, globalRaw);
+  const globalResult = await loadConfigFile(resolvedGlobalPath);
+  if (globalResult) {
+    config = deepMerge(config, globalResult.config);
   }
 
   const projectPath = configPath ?? getProjectConfigPath();
-  const projectRaw = await loadConfigFile(projectPath);
-  if (projectRaw) {
-    config = deepMerge(config, projectRaw);
+  const projectResult = await loadConfigFile(projectPath);
+  if (projectResult) {
+    config = deepMerge(config, projectResult.config);
   }
 
   return config;
@@ -238,15 +239,19 @@ export async function resolveConfigWithSources(
   const resolvedGlobalPath = globalConfigPath ?? getGlobalConfigPath();
   const projectPath = configPath ?? getProjectConfigPath();
 
-  const globalRaw = await loadConfigFile(resolvedGlobalPath);
-  const projectRaw = await loadConfigFile(projectPath);
+  const globalResult = await loadConfigFile(resolvedGlobalPath);
+  const projectResult = await loadConfigFile(projectPath);
 
   let config = { ...DEFAULT_CONFIG };
-  if (globalRaw) config = deepMerge(config, globalRaw);
-  if (projectRaw) config = deepMerge(config, projectRaw);
+  if (globalResult) config = deepMerge(config, globalResult.config);
+  if (projectResult) config = deepMerge(config, projectResult.config);
 
-  const globalFlat = globalRaw ? flattenConfig(globalRaw as Record<string, unknown>) : null;
-  const projectFlat = projectRaw ? flattenConfig(projectRaw as Record<string, unknown>) : null;
+  const globalFlat = globalResult
+    ? flattenConfig(globalResult.config as Record<string, unknown>)
+    : null;
+  const projectFlat = projectResult
+    ? flattenConfig(projectResult.config as Record<string, unknown>)
+    : null;
   const resolvedFlat = flattenConfig(config as unknown as Record<string, unknown>);
 
   const sources: Record<string, ConfigValueWithSource> = {};
@@ -261,8 +266,11 @@ export async function resolveConfigWithSources(
     config,
     sources,
     paths: {
-      global: { path: resolvedGlobalPath, loaded: globalRaw !== null },
-      project: { path: projectPath, loaded: projectRaw !== null },
+      global: {
+        path: globalResult?.resolvedPath ?? resolvedGlobalPath,
+        loaded: globalResult !== null,
+      },
+      project: { path: projectResult?.resolvedPath ?? projectPath, loaded: projectResult !== null },
     },
   };
 }
