@@ -31,6 +31,7 @@ export async function updateFrontmatterTool(input: {
   const { diff } = generateDiffTool({
     original: draft.rawContent,
     updated: updatedContent,
+    filename: draft.filePath,
   });
 
   if (apply && changes.length > 0) {

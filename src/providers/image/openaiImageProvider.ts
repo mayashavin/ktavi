@@ -16,10 +16,9 @@ export function createOpenAIImageProvider(apiKey: string, model?: string): Image
       const client = new OpenAI({ apiKey });
 
       const response = await client.images.generate({
-        model: model ?? 'dall-e-3',
+        model: model ?? 'gpt-image-2',
         prompt: input.prompt,
         size: input.size ?? '1792x1024',
-        response_format: 'b64_json',
         n: 1,
       });
 
@@ -28,11 +27,12 @@ export function createOpenAIImageProvider(apiKey: string, model?: string): Image
         throw new PoliraError('No image data returned from provider.', 'IMAGE_GENERATION_FAILED');
       }
 
+      const buffer = Buffer.from(imageData, 'base64');
       return {
         fileName: input.fileName,
         mimeType: 'image/png',
         base64: imageData,
-        buffer: Buffer.from(imageData, 'base64'),
+        buffer,
       };
     },
   };

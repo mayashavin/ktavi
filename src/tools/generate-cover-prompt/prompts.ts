@@ -1,5 +1,5 @@
 export function buildCoverPromptSystemPrompt(style?: string): string {
-  return `You are a creative director generating blog cover image concepts.
+  return `You are a creative director generating blog cover image concepts. Your response should be in JSON format.
 
 Rules:
 - Create a visual concept based on the article's actual topic

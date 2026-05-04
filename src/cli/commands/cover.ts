@@ -1,7 +1,5 @@
 import { Command } from 'commander';
-import {
-  generateAndAttachCoverWorkflow,
-} from '../../workflows/generateAndAttachCoverWorkflow.js';
+import { generateAndAttachCoverWorkflow } from '../../workflows/generateAndAttachCoverWorkflow.js';
 import { logger } from '../../core/logger.js';
 import { PoliraError } from '../../core/errors.js';
 import { createOpenAITextProvider } from '../../providers/ai/openaiTextProvider.js';
@@ -38,13 +36,17 @@ export function registerCoverCommand(program: Command) {
           const config = await loadConfig();
           const apiKey = process.env.OPENAI_API_KEY;
           if (!apiKey) {
-            logger.error('OPENAI_API_KEY is required for cover generation. Add it to your .env file.');
+            logger.error(
+              'OPENAI_API_KEY is required for cover generation. Add it to your .env file.',
+            );
             process.exit(1);
           }
 
           const aiProvider = createOpenAITextProvider(apiKey, config.ai.textModel);
 
-          const storageTarget = (opts.upload ?? opts.save ?? config.storage.provider) as StorageTarget;
+          const storageTarget = (opts.upload ??
+            opts.save ??
+            config.storage.provider) as StorageTarget;
           const storageProvider =
             storageTarget === 'cloudinary'
               ? createCloudinaryStorageProvider({
@@ -54,7 +56,7 @@ export function registerCoverCommand(program: Command) {
                   folder: config.storage.cloudinary?.folder ?? 'blog-covers',
                 })
               : createLocalStorageProvider(
-                  config.storage.local?.outputDir ?? './public/images/blog',
+                  config.storage.local?.outputDir ?? './temp/images/blog',
                   config.storage.local?.publicPathPrefix ?? '/images/blog',
                 );
 
