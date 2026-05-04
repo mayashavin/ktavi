@@ -13,9 +13,9 @@ describe('getGlobalConfigPath', () => {
 });
 
 describe('getProjectConfigPath', () => {
-  it('returns polira.config.js resolved from cwd', () => {
+  it('returns polira.config.ts resolved from cwd', () => {
     const result = getProjectConfigPath();
-    expect(result).toBe(path.resolve('polira.config.js'));
+    expect(result).toBe(path.resolve('polira.config.ts'));
   });
 });
 
@@ -87,5 +87,60 @@ describe('loadConfig', () => {
     const config = await loadConfig(jsOnlyFixtureTsPath, NONEXISTENT_PATH);
     expect(config.ai.textModel).toBe('gpt-4o-mini');
     expect(config.writing.defaultMode).toBe('light');
+  });
+
+  it('deep-merges storage.local without touching cloudinary', async () => {
+    const { loadConfig, DEFAULT_CONFIG } = await import('../../src/core/config.js');
+    const fixturePath = path.resolve('tests/fixtures/test-config-local-storage.ts');
+    const config = await loadConfig(fixturePath, NONEXISTENT_PATH);
+    expect(config.storage.provider).toBe('local');
+    expect(config.storage.local?.outputDir).toBe('./custom/output');
+    expect(config.storage.local?.publicPathPrefix).toBe('/custom');
+    expect(config.storage.cloudinary).toBeUndefined();
+  });
+
+  it('deep-merges storage.cloudinary without touching local', async () => {
+    const { loadConfig, DEFAULT_CONFIG } = await import('../../src/core/config.js');
+    const fixturePath = path.resolve('tests/fixtures/test-config-storage.ts');
+    const config = await loadConfig(fixturePath, NONEXISTENT_PATH);
+    expect(config.storage.cloudinary?.folder).toBe('my-covers');
+    expect(config.storage.local?.outputDir).toBe(DEFAULT_CONFIG.storage.local?.outputDir);
+    expect(config.storage.local?.publicPathPrefix).toBe(
+      DEFAULT_CONFIG.storage.local?.publicPathPrefix,
+    );
+  });
+
+  it('deep-merges markdown and image config', async () => {
+    const { loadConfig, DEFAULT_CONFIG } = await import('../../src/core/config.js');
+    const fixturePath = path.resolve('tests/fixtures/test-config-image-markdown.ts');
+    const config = await loadConfig(fixturePath, NONEXISTENT_PATH);
+    expect(config.markdown.coverField).toBe('heroImage');
+    expect(config.markdown.preserveFrontmatterOrder).toBe(
+      DEFAULT_CONFIG.markdown.preserveFrontmatterOrder,
+    );
+    expect(config.image.size).toBe('1024x1024');
+    expect(config.image.style).toBe('watercolor illustration');
+  });
+
+  it('loads .ts project config directly when it exists', async () => {
+    const { loadConfig } = await import('../../src/core/config.js');
+    const tsFixture = path.resolve('tests/fixtures/test-config.ts');
+    const config = await loadConfig(tsFixture, NONEXISTENT_PATH);
+    expect(config.ai.textModel).toBe('gpt-4o-mini');
+  });
+
+  it('loads global .js config directly', async () => {
+    const { loadConfig, DEFAULT_CONFIG } = await import('../../src/core/config.js');
+    const globalJsPath = path.resolve('tests/fixtures/test-config-js-only.js');
+    const config = await loadConfig(NONEXISTENT_PATH, globalJsPath);
+    expect(config.ai.textModel).toBe('gpt-4o-mini');
+    expect(config.writing.defaultMode).toBe('light');
+    expect(config.image.size).toBe(DEFAULT_CONFIG.image.size);
+  });
+
+  it('re-throws non-file-not-found errors from config loading', async () => {
+    const { loadConfig } = await import('../../src/core/config.js');
+    const brokenPath = path.resolve('tests/fixtures/test-config-broken.js');
+    await expect(loadConfig(brokenPath, NONEXISTENT_PATH)).rejects.toThrow('config file is broken');
   });
 });
