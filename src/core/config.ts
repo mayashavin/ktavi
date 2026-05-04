@@ -104,6 +104,14 @@ async function loadConfigFile(filePath: string): Promise<Partial<PoliraConfig> |
     const message = (err as Error).message ?? '';
     const isFileMissing =
       (code === 'ERR_MODULE_NOT_FOUND' && message.includes(filePath)) || code === 'ENOENT';
+
+    // Under plain Node (production, no tsx), .ts files cannot be imported directly
+    // (ERR_UNKNOWN_FILE_EXTENSION). Also fall back when the .ts file is simply absent,
+    // so users can write polira.config.js instead of polira.config.ts.
+    if (filePath.endsWith('.ts') && (isFileMissing || code === 'ERR_UNKNOWN_FILE_EXTENSION')) {
+      return loadConfigFile(filePath.replace(/\.ts$/, '.js'));
+    }
+
     if (isFileMissing) {
       return null;
     }

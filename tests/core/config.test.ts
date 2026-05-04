@@ -79,4 +79,13 @@ describe('loadConfig', () => {
     // project config sets defaultMode to 'strong', overriding global 'light'
     expect(config.writing.defaultMode).toBe('strong');
   });
+
+  it('falls back to .js config when .ts path does not exist (production support)', async () => {
+    const { loadConfig } = await import('../../src/core/config.js');
+    // Pass the .ts path — only the .js sibling exists on disk
+    const jsOnlyFixtureTsPath = path.resolve('tests/fixtures/test-config-js-only.ts');
+    const config = await loadConfig(jsOnlyFixtureTsPath, NONEXISTENT_PATH);
+    expect(config.ai.textModel).toBe('gpt-4o-mini');
+    expect(config.writing.defaultMode).toBe('light');
+  });
 });
