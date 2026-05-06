@@ -1,14 +1,17 @@
 export type BlogFrontmatter = {
   title?: string;
   description?: string;
+  id?: string;
   slug?: string;
-  tags?: string[];
+  tags?: string[] | string;
   date?: string;
   cover?: string;
   image?: string;
   heroImage?: string;
   ogImage?: string;
   thumbnail?: string;
+  img?: string;
+  cover_image?: string;
   canonical?: string;
   draft?: boolean;
   [key: string]: unknown;
@@ -119,4 +122,11 @@ export type ImageSize = '1024x1024' | '1536x1024' | '1792x1024';
 
 export type StorageTarget = 'local' | 'cloudinary';
 
-export type CoverFieldName = 'cover' | 'image' | 'heroImage' | 'ogImage' | 'thumbnail';
+export type CoverFieldName =
+  | 'cover'
+  | 'image'
+  | 'heroImage'
+  | 'ogImage'
+  | 'thumbnail'
+  | 'img'
+  | 'cover_image';

@@ -72,6 +72,36 @@ describe('parseMarkdownTool', () => {
     expect(draft.metadata.headings.length).toBe(0);
   });
 
+  it('resolves cover image from cover_image field', async () => {
+    const draft = await parseMarkdownTool({ filePath: fixture('post-with-cover-image-field.md') });
+
+    expect(draft.metadata.coverImage).toBe('/images/blog/cover-image-field.png');
+  });
+
+  it('resolves cover image from img field', async () => {
+    const draft = await parseMarkdownTool({ filePath: fixture('post-with-img-field.md') });
+
+    expect(draft.metadata.coverImage).toBe('/images/blog/img-field.png');
+  });
+
+  it('parses comma-separated tags as array', async () => {
+    const draft = await parseMarkdownTool({ filePath: fixture('post-with-string-tags.md') });
+
+    expect(draft.metadata.tags).toEqual(['vue', 'react', 'typescript']);
+  });
+
+  it('uses id field as slug fallback', async () => {
+    const draft = await parseMarkdownTool({ filePath: fixture('post-with-id-field.md') });
+
+    expect(draft.metadata.slug).toBe('my-post-id');
+  });
+
+  it('falls back to filename as slug when no slug or id', async () => {
+    const draft = await parseMarkdownTool({ filePath: fixture('missing-meta.md') });
+
+    expect(draft.metadata.slug).toBe('missing-meta');
+  });
+
   it('throws on non-existent file', async () => {
     await expect(parseMarkdownTool({ filePath: '/nonexistent/file.md' })).rejects.toThrow(
       'Could not read file',
