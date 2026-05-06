@@ -1,6 +1,6 @@
 import { unified } from 'unified';
 import remarkParse from 'remark-parse';
-import type { Root, Heading, Link, Image, Text, PhrasingContent } from 'mdast';
+import type { Root, Heading, Link, Image, Text, PhrasingContent, Html } from 'mdast';
 import type { MarkdownHeading, MarkdownImage, MarkdownLink } from '../core/types.js';
 
 function extractText(children: PhrasingContent[]): string {
@@ -48,10 +48,41 @@ export function extractLinks(tree: Root): MarkdownLink[] {
   }));
 }
 
+function extractHtmlAttr(attrs: string, attrName: string): string | undefined {
+  const match = new RegExp(`(?:^|\\s)${attrName}\\s*=\\s*(?:"([^"]*)"|'([^']*)'|([^\\s>]+))`, 'i').exec(attrs);
+  return match ? (match[1] ?? match[2] ?? match[3]) : undefined;
+}
+
+function extractHtmlImages(html: string): MarkdownImage[] {
+  const results: MarkdownImage[] = [];
+  // remark-parse emits `html` nodes as single-line blocks, so [^>]*? is safe here.
+  // Note: attribute values containing literal `>` (e.g. alt="a > b") are not supported.
+  const imgTagRegex = /<img([^>]*?)(?:\/>|>(?:<\/img>)?)/gi;
+  let match: RegExpExecArray | null;
+  while ((match = imgTagRegex.exec(html)) !== null) {
+    const attrs = match[1];
+    const url = extractHtmlAttr(attrs, 'src');
+    if (url) {
+      results.push({
+        url,
+        alt: extractHtmlAttr(attrs, 'alt'),
+        title: extractHtmlAttr(attrs, 'title'),
+      });
+    }
+  }
+  return results;
+}
+
 export function extractImages(tree: Root): MarkdownImage[] {
-  return collectNodes<Image>(tree, 'image').map((node) => ({
+  const markdownImages = collectNodes<Image>(tree, 'image').map((node) => ({
     alt: node.alt ?? undefined,
     url: node.url,
     title: node.title ?? undefined,
   }));
+
+  const htmlImages = collectNodes<Html>(tree, 'html').flatMap((node) =>
+    extractHtmlImages(node.value),
+  );
+
+  return [...markdownImages, ...htmlImages];
 }
