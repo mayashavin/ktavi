@@ -12,11 +12,13 @@ export function registerAnalyzeCommand(program: Command) {
     .argument('<file>', 'Path to the Markdown file')
     .action(async (file: string) => {
       try {
-        const config = await loadConfig();
         const apiKey = process.env.OPENAI_API_KEY;
-        const aiProvider = apiKey
-          ? createOpenAITextProvider(apiKey, config.ai.textModel)
-          : undefined;
+        let aiProvider;
+
+        if (apiKey) {
+          const config = await loadConfig();
+          aiProvider = createOpenAITextProvider(apiKey, config.ai.textModel);
+        }
 
         const { draft, contentSummary } = await analyzeDraftWorkflow(file, { aiProvider });
         const { metadata, frontmatter } = draft;
