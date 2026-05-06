@@ -43,7 +43,9 @@ const poliraConfigSchema = z.object({
     .default({}),
   markdown: z
     .object({
-      coverField: z.enum(['cover', 'image', 'heroImage', 'ogImage', 'thumbnail']).default('cover'),
+      coverField: z
+        .enum(['cover', 'image', 'heroImage', 'ogImage', 'thumbnail', 'img', 'cover_image'])
+        .default('cover'),
       preserveFrontmatterOrder: z.boolean().optional().default(true),
     })
     .default({}),
