@@ -58,7 +58,7 @@ function extractHtmlImages(html: string): MarkdownImage[] {
   // remark-parse emits `html` nodes as single-line blocks, so [^>]*? is safe here.
   // Note: attribute values containing literal `>` (e.g. alt="a > b") are not supported.
   const imgTagRegex = /<img([^>]*?)(?:\/>|>(?:<\/img>)?)/gi;
-  let match;
+  let match: RegExpExecArray | null;
   while ((match = imgTagRegex.exec(html)) !== null) {
     const attrs = match[1];
     const url = extractHtmlAttr(attrs, 'src');
