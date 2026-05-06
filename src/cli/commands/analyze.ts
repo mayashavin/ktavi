@@ -1,17 +1,23 @@
 import { Command } from 'commander';
 import { analyzeDraftWorkflow } from '../../workflows/analyzeDraftWorkflow.js';
 import { logger } from '../../core/logger.js';
-import { PoliraError } from '../../core/errors.js';
+import { PoliraError, friendlyErrorMessage } from '../../core/errors.js';
 
 export function registerAnalyzeCommand(program: Command) {
   program
     .command('analyze')
     .description('Parse a Markdown file and print a metadata summary.')
     .argument('<file>', 'Path to the Markdown file')
-    .action(async (file: string) => {
+    .option('--json', 'Output results as JSON')
+    .action(async (file: string, opts: { json?: boolean }) => {
       try {
         const { draft } = await analyzeDraftWorkflow(file);
         const { metadata, frontmatter } = draft;
+
+        if (opts.json) {
+          console.log(JSON.stringify({ draft }, null, 2));
+          return;
+        }
 
         logger.heading('Draft Analysis');
 
@@ -21,7 +27,10 @@ export function registerAnalyzeCommand(program: Command) {
         logger.label('Slug', frontmatter.slug ?? '(none)');
         logger.label('Tags', metadata.tags.length > 0 ? metadata.tags.join(', ') : '(none)');
         logger.label('Cover', metadata.coverImage ?? '(none)');
-        logger.label('Draft', frontmatter.draft !== undefined ? String(frontmatter.draft) : '(not set)');
+        logger.label(
+          'Draft',
+          frontmatter.draft !== undefined ? String(frontmatter.draft) : '(not set)',
+        );
 
         logger.heading('Content');
         logger.label('Word count', String(metadata.wordCount));
@@ -44,10 +53,21 @@ export function registerAnalyzeCommand(program: Command) {
           }
         }
 
+        const missingFields = [
+          !frontmatter.title && 'title',
+          !frontmatter.description && 'description',
+          !metadata.coverImage && 'cover',
+          metadata.tags.length === 0 && 'tags',
+        ].filter(Boolean) as string[];
+
+        logger.summary({
+          critical: missingFields.length,
+        });
+
         logger.blank();
       } catch (err) {
         if (err instanceof PoliraError) {
-          logger.error(err.message);
+          logger.error(friendlyErrorMessage(err.code));
           process.exit(1);
         }
         throw err;

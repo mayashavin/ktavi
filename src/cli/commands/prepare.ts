@@ -1,7 +1,7 @@
 import { Command } from 'commander';
 import { prepareDraftWorkflow } from '../../workflows/prepareDraftWorkflow.js';
 import { logger } from '../../core/logger.js';
-import { PoliraError } from '../../core/errors.js';
+import { PoliraError, friendlyErrorMessage } from '../../core/errors.js';
 import { createOpenAITextProvider } from '../../providers/ai/openaiTextProvider.js';
 import { createOpenAIImageProvider } from '../../providers/image/openaiImageProvider.js';
 import { createLocalStorageProvider } from '../../providers/storage/localStorageProvider.js';
@@ -91,15 +91,14 @@ export function registerPrepareCommand(program: Command) {
           if (result.seoSuggestions.length > 0) {
             logger.heading('SEO Suggestions');
             for (const s of result.seoSuggestions) {
-              const icon = s.severity === 'critical' ? '!' : s.severity === 'warning' ? '?' : 'i';
-              console.log(`  [${icon}] ${s.field}: ${s.reason}`);
+              logger.severity(s.severity, s.field, s.reason);
             }
           }
 
           if (result.writingSuggestions.length > 0) {
             logger.heading('Writing Suggestions');
             for (const s of result.writingSuggestions) {
-              console.log(`  [${s.category}] ${s.reason}`);
+              logger.severity('info', s.category, s.reason);
               logger.dim(`    - ${s.original}`);
               logger.dim(`    + ${s.suggested}`);
               logger.blank();
@@ -114,17 +113,31 @@ export function registerPrepareCommand(program: Command) {
 
           if (result.patch?.diff) {
             logger.heading('Changes');
-            console.log(result.patch.diff);
+            logger.diff(result.patch.diff);
           }
 
           if (!opts.apply) {
             logger.info('Run with --apply to write changes.');
           }
 
+          const seoCounts = result.seoSuggestions.reduce(
+            (acc, s) => {
+              acc[s.severity] = (acc[s.severity] ?? 0) + 1;
+              return acc;
+            },
+            {} as Record<string, number>,
+          );
+          const totalInfo = (seoCounts['info'] ?? 0) + result.writingSuggestions.length;
+          logger.summary({
+            critical: seoCounts['critical'],
+            warning: seoCounts['warning'],
+            info: totalInfo || undefined,
+          });
+
           logger.blank();
         } catch (err) {
           if (err instanceof PoliraError) {
-            logger.error(err.message);
+            logger.error(friendlyErrorMessage(err.code));
             process.exit(1);
           }
           throw err;

@@ -1,7 +1,7 @@
 import { Command } from 'commander';
 import { optimizeSeoWorkflow } from '../../workflows/optimizeSeoWorkflow.js';
 import { logger } from '../../core/logger.js';
-import { PoliraError } from '../../core/errors.js';
+import { PoliraError, friendlyErrorMessage } from '../../core/errors.js';
 import { createOpenAITextProvider } from '../../providers/ai/openaiTextProvider.js';
 import { loadConfig } from '../../core/config.js';
 
@@ -38,26 +38,41 @@ export function registerSeoCommand(program: Command) {
         }
 
         for (const s of result.suggestions) {
-          const icon = s.severity === 'critical' ? '!' : s.severity === 'warning' ? '?' : 'i';
-          const color = s.severity === 'critical' ? '\x1b[31m' : s.severity === 'warning' ? '\x1b[33m' : '\x1b[36m';
-          console.log(`  ${color}[${icon}]\x1b[0m ${s.field}: ${s.reason}`);
+          logger.severity(s.severity, s.field, s.reason);
           if (s.current) {
-            logger.dim(`      current: ${Array.isArray(s.current) ? s.current.join(', ') : s.current}`);
+            logger.dim(
+              `      current: ${Array.isArray(s.current) ? s.current.join(', ') : s.current}`,
+            );
           }
           if (s.suggested) {
-            logger.dim(`      suggested: ${Array.isArray(s.suggested) ? s.suggested.join(', ') : s.suggested}`);
+            logger.dim(
+              `      suggested: ${Array.isArray(s.suggested) ? s.suggested.join(', ') : s.suggested}`,
+            );
           }
         }
 
         if (result.patch?.diff) {
           logger.heading('Changes');
-          console.log(result.patch.diff);
+          logger.diff(result.patch.diff);
         }
+
+        const counts = result.suggestions.reduce(
+          (acc, s) => {
+            acc[s.severity] = (acc[s.severity] ?? 0) + 1;
+            return acc;
+          },
+          {} as Record<string, number>,
+        );
+        logger.summary({
+          critical: counts['critical'],
+          warning: counts['warning'],
+          info: counts['info'],
+        });
 
         logger.blank();
       } catch (err) {
         if (err instanceof PoliraError) {
-          logger.error(err.message);
+          logger.error(friendlyErrorMessage(err.code));
           process.exit(1);
         }
         throw err;

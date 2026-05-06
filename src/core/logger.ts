@@ -10,6 +10,18 @@ const COLORS = {
   gray: '\x1b[90m',
 };
 
+const SEVERITY_ICONS = {
+  critical: '✖',
+  warning: '⚠',
+  info: 'ℹ',
+} as const;
+
+const SEVERITY_COLORS = {
+  critical: COLORS.red,
+  warning: COLORS.yellow,
+  info: COLORS.cyan,
+} as const;
+
 export const logger = {
   info(message: string) {
     console.log(`${COLORS.blue}info${COLORS.reset}  ${message}`);
@@ -41,5 +53,46 @@ export const logger = {
 
   blank() {
     console.log();
+  },
+
+  severity(severity: 'info' | 'warning' | 'critical', label: string, message: string) {
+    const icon = SEVERITY_ICONS[severity];
+    const color = SEVERITY_COLORS[severity];
+    console.log(
+      `  ${color}${icon}${COLORS.reset} ${COLORS.bold}${label}:${COLORS.reset} ${message}`,
+    );
+  },
+
+  diff(diffText: string) {
+    for (const line of diffText.split('\n')) {
+      if (line.startsWith('+') && !line.startsWith('+++')) {
+        console.log(`${COLORS.green}${line}${COLORS.reset}`);
+      } else if (line.startsWith('-') && !line.startsWith('---')) {
+        console.log(`${COLORS.red}${line}${COLORS.reset}`);
+      } else if (line.startsWith('@@')) {
+        console.log(`${COLORS.cyan}${line}${COLORS.reset}`);
+      } else {
+        console.log(line);
+      }
+    }
+  },
+
+  summary(counts: { info?: number; warning?: number; critical?: number }) {
+    const parts: string[] = [];
+    if (counts.critical) {
+      parts.push(`${COLORS.red}${counts.critical} critical${COLORS.reset}`);
+    }
+    if (counts.warning) {
+      const label = counts.warning === 1 ? 'warning' : 'warnings';
+      parts.push(`${COLORS.yellow}${counts.warning} ${label}${COLORS.reset}`);
+    }
+    if (counts.info) {
+      parts.push(`${COLORS.cyan}${counts.info} info${COLORS.reset}`);
+    }
+    if (parts.length === 0) {
+      console.log(`\n${COLORS.green}✔ No issues found.${COLORS.reset}`);
+    } else {
+      console.log(`\n${COLORS.dim}Summary:${COLORS.reset} ${parts.join(', ')}`);
+    }
   },
 };
