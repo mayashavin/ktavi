@@ -26,9 +26,9 @@ export const coverPromptResultSchema = z.object({
 
 export const contentSummarySchema = z.object({
   shortSummary: z.string(),
-  keyTopics: z.array(z.string()),
+  keyTopics: z.array(z.string()).min(3).max(5),
   targetAudience: z.string(),
-  suggestedDescription: z.string(),
+  suggestedDescription: z.string().trim().max(159),
 });
 
 export const aiSeoResponseSchema = z.object({
