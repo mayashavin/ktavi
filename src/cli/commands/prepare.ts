@@ -88,6 +88,14 @@ export function registerPrepareCommand(program: Command) {
           logger.label('Word count', String(result.draft.metadata.wordCount));
           logger.label('Reading time', `~${result.draft.metadata.estimatedReadingTimeMinutes} min`);
 
+          if (result.contentSummary) {
+            logger.heading('Content Summary');
+            logger.label('Summary', result.contentSummary.shortSummary);
+            logger.label('Key topics', result.contentSummary.keyTopics.join(', '));
+            logger.label('Target audience', result.contentSummary.targetAudience);
+            logger.label('Suggested description', result.contentSummary.suggestedDescription);
+          }
+
           if (result.seoSuggestions.length > 0) {
             logger.heading('SEO Suggestions');
             for (const s of result.seoSuggestions) {
