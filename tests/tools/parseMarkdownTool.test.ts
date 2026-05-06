@@ -61,9 +61,30 @@ describe('parseMarkdownTool', () => {
   it('extracts images with and without alt text', async () => {
     const draft = await parseMarkdownTool({ filePath: fixture('post-with-images.md') });
 
-    expect(draft.metadata.images.length).toBe(4);
+    expect(draft.metadata.images.length).toBe(7);
     const noAlt = draft.metadata.images.filter((img) => !img.alt || img.alt.trim() === '');
-    expect(noAlt.length).toBe(1);
+    expect(noAlt.length).toBe(2);
+  });
+
+  it('extracts HTML img elements with correct attributes', async () => {
+    const draft = await parseMarkdownTool({ filePath: fixture('post-with-images.md') });
+
+    const htmlImg = draft.metadata.images.find((img) => img.url === './images/grid-html.png');
+    expect(htmlImg).toBeDefined();
+    expect(htmlImg?.alt).toBe('HTML grid example');
+    expect(htmlImg?.title).toBe('HTML title');
+
+    const htmlImgNoAlt = draft.metadata.images.find(
+      (img) => img.url === './images/grid-html-no-alt.png',
+    );
+    expect(htmlImgNoAlt).toBeDefined();
+    expect(htmlImgNoAlt?.alt).toBeUndefined();
+
+    const htmlImgSelfClosing = draft.metadata.images.find(
+      (img) => img.url === './images/grid-html-self-closing.png',
+    );
+    expect(htmlImgSelfClosing).toBeDefined();
+    expect(htmlImgSelfClosing?.alt).toBe('Self-closing HTML image');
   });
 
   it('handles posts with no headings in body', async () => {

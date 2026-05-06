@@ -1,6 +1,6 @@
 import { unified } from 'unified';
 import remarkParse from 'remark-parse';
-import type { Root, Heading, Link, Image, Text, PhrasingContent } from 'mdast';
+import type { Root, Heading, Link, Image, Text, PhrasingContent, Html } from 'mdast';
 import type { MarkdownHeading, MarkdownImage, MarkdownLink } from '../core/types.js';
 
 function extractText(children: PhrasingContent[]): string {
@@ -48,10 +48,38 @@ export function extractLinks(tree: Root): MarkdownLink[] {
   }));
 }
 
+function extractHtmlImages(html: string): MarkdownImage[] {
+  const results: MarkdownImage[] = [];
+  const imgTagRegex = /<img([^>]*?)(?:\/>|>(?:<\/img>)?)/gi;
+  let match;
+  while ((match = imgTagRegex.exec(html)) !== null) {
+    const attrs = match[1];
+    // Support double-quoted, single-quoted, and unquoted attribute values
+    const srcMatch = /\bsrc=(?:"([^"]*)"|'([^']*)'|([^\s>]+))/i.exec(attrs);
+    const altMatch = /\balt=(?:"([^"]*)"|'([^']*)'|([^\s>]+))/i.exec(attrs);
+    const titleMatch = /\btitle=(?:"([^"]*)"|'([^']*)'|([^\s>]+))/i.exec(attrs);
+    const url = srcMatch?.[1] ?? srcMatch?.[2] ?? srcMatch?.[3];
+    if (url) {
+      results.push({
+        url,
+        alt: altMatch ? (altMatch[1] ?? altMatch[2] ?? altMatch[3]) : undefined,
+        title: titleMatch ? (titleMatch[1] ?? titleMatch[2] ?? titleMatch[3]) : undefined,
+      });
+    }
+  }
+  return results;
+}
+
 export function extractImages(tree: Root): MarkdownImage[] {
-  return collectNodes<Image>(tree, 'image').map((node) => ({
+  const markdownImages = collectNodes<Image>(tree, 'image').map((node) => ({
     alt: node.alt ?? undefined,
     url: node.url,
     title: node.title ?? undefined,
   }));
+
+  const htmlImages = collectNodes<Html>(tree, 'html').flatMap((node) =>
+    extractHtmlImages(node.value),
+  );
+
+  return [...markdownImages, ...htmlImages];
 }
