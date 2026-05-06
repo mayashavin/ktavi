@@ -77,7 +77,7 @@ describe('summarizeContentTool', () => {
         capturedPrompt = input.userPrompt;
         return {
           shortSummary: 'summary',
-          keyTopics: ['topic'],
+          keyTopics: ['topic1', 'topic2', 'topic3'],
           targetAudience: 'audience',
           suggestedDescription: 'description',
         };
@@ -95,7 +95,7 @@ describe('summarizeContentTool', () => {
         capturedPrompt = input.userPrompt;
         return {
           shortSummary: 'summary',
-          keyTopics: ['topic'],
+          keyTopics: ['topic1', 'topic2', 'topic3'],
           targetAudience: 'audience',
           suggestedDescription: 'description',
         };

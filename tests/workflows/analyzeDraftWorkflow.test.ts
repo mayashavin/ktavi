@@ -10,7 +10,7 @@ function makeProvider(): TextAIProvider {
     async generateStructuredOutput() {
       return {
         shortSummary: 'A post about testing.',
-        keyTopics: ['testing', 'vitest'],
+        keyTopics: ['testing', 'vitest', 'TypeScript'],
         targetAudience: 'developers',
         suggestedDescription: 'Learn about testing with vitest.',
       };
@@ -36,7 +36,7 @@ describe('analyzeDraftWorkflow', () => {
     expect(result.draft).toBeDefined();
     expect(result.contentSummary).toBeDefined();
     expect(result.contentSummary!.shortSummary).toBe('A post about testing.');
-    expect(result.contentSummary!.keyTopics).toEqual(['testing', 'vitest']);
+    expect(result.contentSummary!.keyTopics).toEqual(['testing', 'vitest', 'TypeScript']);
     expect(result.contentSummary!.targetAudience).toBe('developers');
     expect(result.contentSummary!.suggestedDescription).toBe('Learn about testing with vitest.');
   });
