@@ -634,7 +634,6 @@ Recommended packages:
 - `gray-matter` for YAML frontmatter.
 - `unified` ecosystem for Markdown parsing.
 - `remark-parse` for Markdown AST.
-- `remark-stringify` if AST-based writing becomes necessary.
 
 ### YAML
 
@@ -1823,7 +1822,7 @@ Recommended package fields:
 Runtime dependencies:
 
 ```bash
-npm install commander gray-matter unified remark-parse remark-stringify zod diff cloudinary dotenv
+npm install commander gray-matter unified remark-parse zod diff cloudinary dotenv
 ```
 
 Development dependencies:
