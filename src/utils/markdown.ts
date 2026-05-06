@@ -48,22 +48,25 @@ export function extractLinks(tree: Root): MarkdownLink[] {
   }));
 }
 
+function extractHtmlAttr(attrs: string, attrName: string): string | undefined {
+  const match = new RegExp(`\\b${attrName}=(?:"([^"]*)"|'([^']*)'|([^\\s>]+))`, 'i').exec(attrs);
+  return match ? (match[1] ?? match[2] ?? match[3]) : undefined;
+}
+
 function extractHtmlImages(html: string): MarkdownImage[] {
   const results: MarkdownImage[] = [];
+  // remark-parse emits `html` nodes as single-line blocks, so [^>]*? is safe here.
+  // Note: attribute values containing literal `>` (e.g. alt="a > b") are not supported.
   const imgTagRegex = /<img([^>]*?)(?:\/>|>(?:<\/img>)?)/gi;
   let match;
   while ((match = imgTagRegex.exec(html)) !== null) {
     const attrs = match[1];
-    // Support double-quoted, single-quoted, and unquoted attribute values
-    const srcMatch = /\bsrc=(?:"([^"]*)"|'([^']*)'|([^\s>]+))/i.exec(attrs);
-    const altMatch = /\balt=(?:"([^"]*)"|'([^']*)'|([^\s>]+))/i.exec(attrs);
-    const titleMatch = /\btitle=(?:"([^"]*)"|'([^']*)'|([^\s>]+))/i.exec(attrs);
-    const url = srcMatch?.[1] ?? srcMatch?.[2] ?? srcMatch?.[3];
+    const url = extractHtmlAttr(attrs, 'src');
     if (url) {
       results.push({
         url,
-        alt: altMatch ? (altMatch[1] ?? altMatch[2] ?? altMatch[3]) : undefined,
-        title: titleMatch ? (titleMatch[1] ?? titleMatch[2] ?? titleMatch[3]) : undefined,
+        alt: extractHtmlAttr(attrs, 'alt'),
+        title: extractHtmlAttr(attrs, 'title'),
       });
     }
   }
