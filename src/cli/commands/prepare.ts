@@ -4,9 +4,8 @@ import { logger } from '../../core/logger.js';
 import { PoliraError } from '../../core/errors.js';
 import { createOpenAITextProvider } from '../../providers/ai/openaiTextProvider.js';
 import { createOpenAIImageProvider } from '../../providers/image/openaiImageProvider.js';
-import { createLocalStorageProvider } from '../../providers/storage/localStorageProvider.js';
-import { createCloudinaryStorageProvider } from '../../providers/storage/cloudinaryStorageProvider.js';
 import { loadConfig } from '../../core/config.js';
+import { createStorageProvider } from '../shared/providers.js';
 import type { ImageSize, StorageTarget, WritingMode } from '../../core/types.js';
 
 export function registerPrepareCommand(program: Command) {
@@ -46,18 +45,7 @@ export function registerPrepareCommand(program: Command) {
                 ? opts.save
                 : config.storage.provider
           ) as StorageTarget;
-          const storageProvider =
-            storageTarget === 'cloudinary'
-              ? createCloudinaryStorageProvider({
-                  cloudName: process.env.CLOUDINARY_CLOUD_NAME ?? '',
-                  apiKey: process.env.CLOUDINARY_API_KEY ?? '',
-                  apiSecret: process.env.CLOUDINARY_API_SECRET ?? '',
-                  folder: config.storage.cloudinary?.folder ?? 'blog-covers',
-                })
-              : createLocalStorageProvider(
-                  config.storage.local?.outputDir ?? './public/images/blog',
-                  config.storage.local?.publicPathPrefix ?? '/images/blog',
-                );
+          const storageProvider = createStorageProvider(storageTarget, config, process.env);
 
           const imageProvider =
             opts.generateCover && apiKey
