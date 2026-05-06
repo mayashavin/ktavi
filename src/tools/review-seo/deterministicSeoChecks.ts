@@ -25,8 +25,7 @@ export function runDeterministicSeoChecks(draft: BlogDraft): SeoSuggestion[] {
       field: 'title',
       severity: 'info',
       current: frontmatter.title,
-      reason:
-        'Title exceeds 70 characters and may be truncated in search results.',
+      reason: 'Title exceeds 70 characters and may be truncated in search results.',
       source: 'deterministic',
     });
   }
@@ -56,25 +55,24 @@ export function runDeterministicSeoChecks(draft: BlogDraft): SeoSuggestion[] {
     });
   }
 
-  if (!frontmatter.slug) {
+  if (!metadata.slug) {
     suggestions.push({
       field: 'slug',
       severity: 'warning',
       reason: 'Missing slug. A clean URL slug improves SEO and shareability.',
       source: 'deterministic',
     });
-  } else if (!isValidSlug(frontmatter.slug)) {
+  } else if (!isValidSlug(metadata.slug)) {
     suggestions.push({
       field: 'slug',
       severity: 'warning',
-      current: frontmatter.slug,
-      reason:
-        'Slug contains invalid characters. Use lowercase letters, numbers, and hyphens only.',
+      current: metadata.slug,
+      reason: 'Slug contains invalid characters. Use lowercase letters, numbers, and hyphens only.',
       source: 'deterministic',
     });
   }
 
-  if (!frontmatter.tags || frontmatter.tags.length === 0) {
+  if (metadata.tags.length === 0) {
     suggestions.push({
       field: 'tags',
       severity: 'warning',

@@ -14,13 +14,13 @@ describe('deterministicSeoChecks', () => {
     expect(critical.length).toBe(0);
   });
 
-  it('detects missing description, slug, tags, and cover', async () => {
+  it('detects missing description, tags, and cover (slug falls back to filename)', async () => {
     const draft = await parseMarkdownTool({ filePath: fixture('missing-meta.md') });
     const suggestions = runDeterministicSeoChecks(draft);
 
     const fields = suggestions.map((s) => s.field);
     expect(fields).toContain('description');
-    expect(fields).toContain('slug');
+    expect(fields).not.toContain('slug');
     expect(fields).toContain('tags');
     expect(fields).toContain('cover');
   });
@@ -57,5 +57,37 @@ describe('deterministicSeoChecks', () => {
 
     const coverSuggestions = suggestions.filter((s) => s.field === 'cover');
     expect(coverSuggestions.length).toBe(0);
+  });
+
+  it('does not flag cover when cover_image field is used', async () => {
+    const draft = await parseMarkdownTool({ filePath: fixture('post-with-cover-image-field.md') });
+    const suggestions = runDeterministicSeoChecks(draft);
+
+    const coverSuggestions = suggestions.filter((s) => s.field === 'cover');
+    expect(coverSuggestions.length).toBe(0);
+  });
+
+  it('does not flag cover when img field is used', async () => {
+    const draft = await parseMarkdownTool({ filePath: fixture('post-with-img-field.md') });
+    const suggestions = runDeterministicSeoChecks(draft);
+
+    const coverSuggestions = suggestions.filter((s) => s.field === 'cover');
+    expect(coverSuggestions.length).toBe(0);
+  });
+
+  it('does not flag tags when comma-separated string is used', async () => {
+    const draft = await parseMarkdownTool({ filePath: fixture('post-with-string-tags.md') });
+    const suggestions = runDeterministicSeoChecks(draft);
+
+    const tagSuggestions = suggestions.filter((s) => s.field === 'tags');
+    expect(tagSuggestions.length).toBe(0);
+  });
+
+  it('uses id field as slug and does not flag it as missing', async () => {
+    const draft = await parseMarkdownTool({ filePath: fixture('post-with-id-field.md') });
+    const suggestions = runDeterministicSeoChecks(draft);
+
+    const slugSuggestions = suggestions.filter((s) => s.field === 'slug');
+    expect(slugSuggestions.length).toBe(0);
   });
 });

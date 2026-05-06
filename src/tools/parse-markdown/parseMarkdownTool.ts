@@ -8,7 +8,7 @@ export async function parseMarkdownTool(input: { filePath: string }): Promise<Bl
   const rawContent = await readFile(input.filePath);
   const { frontmatter, body } = parseFrontmatter(rawContent);
   const tree = parseMarkdownAST(body);
-  const metadata = extractMetadata(frontmatter, body, tree);
+  const metadata = extractMetadata(frontmatter, body, tree, input.filePath);
 
   return {
     filePath: input.filePath,
