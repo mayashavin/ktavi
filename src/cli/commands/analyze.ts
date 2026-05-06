@@ -53,15 +53,19 @@ export function registerAnalyzeCommand(program: Command) {
           }
         }
 
-        const missingFields = [
-          !frontmatter.title && 'title',
-          !frontmatter.description && 'description',
-          !metadata.coverImage && 'cover',
-          metadata.tags.length === 0 && 'tags',
-        ].filter(Boolean) as string[];
+        const criticalFields = [
+          frontmatter.title == null ? 'title' : null,
+          frontmatter.description == null ? 'description' : null,
+        ].filter((f): f is string => f !== null);
+
+        const warningFields = [
+          metadata.coverImage == null ? 'cover' : null,
+          metadata.tags.length === 0 ? 'tags' : null,
+        ].filter((f): f is string => f !== null);
 
         logger.summary({
-          critical: missingFields.length,
+          critical: criticalFields.length || undefined,
+          warning: warningFields.length || undefined,
         });
 
         logger.blank();
