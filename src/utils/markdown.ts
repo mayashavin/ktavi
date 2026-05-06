@@ -49,7 +49,7 @@ export function extractLinks(tree: Root): MarkdownLink[] {
 }
 
 function extractHtmlAttr(attrs: string, attrName: string): string | undefined {
-  const match = new RegExp(`\\b${attrName}=(?:"([^"]*)"|'([^']*)'|([^\\s>]+))`, 'i').exec(attrs);
+  const match = new RegExp(`(?:^|\\s)${attrName}\\s*=\\s*(?:"([^"]*)"|'([^']*)'|([^\\s>]+))`, 'i').exec(attrs);
   return match ? (match[1] ?? match[2] ?? match[3]) : undefined;
 }
 
