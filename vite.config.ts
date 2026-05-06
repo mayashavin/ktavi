@@ -19,7 +19,6 @@ export default defineConfig({
         'gray-matter',
         'unified',
         'remark-parse',
-        'remark-stringify',
         'zod',
         'diff',
         'cloudinary',
