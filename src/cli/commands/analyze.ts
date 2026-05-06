@@ -27,10 +27,7 @@ export function registerAnalyzeCommand(program: Command) {
         logger.label('Slug', frontmatter.slug ?? '(none)');
         logger.label('Tags', metadata.tags.length > 0 ? metadata.tags.join(', ') : '(none)');
         logger.label('Cover', metadata.coverImage ?? '(none)');
-        logger.label(
-          'Draft',
-          frontmatter.draft !== undefined ? String(frontmatter.draft) : '(not set)',
-        );
+        logger.label('Draft', frontmatter.draft ? String(frontmatter.draft) : '(not set)');
 
         logger.heading('Content');
         logger.label('Word count', String(metadata.wordCount));
@@ -64,8 +61,8 @@ export function registerAnalyzeCommand(program: Command) {
         ].filter((f): f is string => f !== null);
 
         logger.summary({
-          critical: criticalFields.length || undefined,
-          warning: warningFields.length || undefined,
+          critical: criticalFields.length,
+          warning: warningFields.length,
         });
 
         logger.blank();
