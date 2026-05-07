@@ -24,6 +24,13 @@ export const coverPromptResultSchema = z.object({
   suggestedFilename: z.string(),
 });
 
+export const contentSummarySchema = z.object({
+  shortSummary: z.string(),
+  keyTopics: z.array(z.string()).min(3).max(5),
+  targetAudience: z.string(),
+  suggestedDescription: z.string().trim().max(159),
+});
+
 export const aiSeoResponseSchema = z.object({
   suggestions: z.array(seoSuggestionSchema),
 });

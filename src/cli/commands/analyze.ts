@@ -2,6 +2,8 @@ import { Command } from 'commander';
 import { analyzeDraftWorkflow } from '../../workflows/analyzeDraftWorkflow.js';
 import { logger } from '../../core/logger.js';
 import { PoliraError } from '../../core/errors.js';
+import { createOpenAITextProvider } from '../../providers/ai/openaiTextProvider.js';
+import { loadConfig } from '../../core/config.js';
 
 export function registerAnalyzeCommand(program: Command) {
   program
@@ -10,7 +12,15 @@ export function registerAnalyzeCommand(program: Command) {
     .argument('<file>', 'Path to the Markdown file')
     .action(async (file: string) => {
       try {
-        const { draft } = await analyzeDraftWorkflow(file);
+        const apiKey = process.env.OPENAI_API_KEY;
+        let aiProvider;
+
+        if (apiKey) {
+          const config = await loadConfig();
+          aiProvider = createOpenAITextProvider(apiKey, config.ai.textModel);
+        }
+
+        const { draft, contentSummary } = await analyzeDraftWorkflow(file, { aiProvider });
         const { metadata, frontmatter } = draft;
 
         logger.heading('Draft Analysis');
@@ -21,7 +31,10 @@ export function registerAnalyzeCommand(program: Command) {
         logger.label('Slug', frontmatter.slug ?? '(none)');
         logger.label('Tags', metadata.tags.length > 0 ? metadata.tags.join(', ') : '(none)');
         logger.label('Cover', metadata.coverImage ?? '(none)');
-        logger.label('Draft', frontmatter.draft !== undefined ? String(frontmatter.draft) : '(not set)');
+        logger.label(
+          'Draft',
+          frontmatter.draft !== undefined ? String(frontmatter.draft) : '(not set)',
+        );
 
         logger.heading('Content');
         logger.label('Word count', String(metadata.wordCount));
@@ -42,6 +55,14 @@ export function registerAnalyzeCommand(program: Command) {
           for (const img of metadata.images) {
             logger.dim(`  ${img.url}${img.alt ? ` (alt: ${img.alt})` : ' (no alt text)'}`);
           }
+        }
+
+        if (contentSummary) {
+          logger.heading('Summary');
+          logger.label('Summary', contentSummary.shortSummary);
+          logger.label('Key topics', contentSummary.keyTopics.join(', '));
+          logger.label('Target audience', contentSummary.targetAudience);
+          logger.label('Suggested description', contentSummary.suggestedDescription);
         }
 
         logger.blank();
