@@ -105,8 +105,6 @@ export async function generateAndAttachCoverWorkflow(
       }
 
       // choice === 'regenerate'
-      if (localPath) rejectedLocalPaths.push(localPath);
-
       if (attempt === maxRetries) {
         // Reached the retry limit — accept the last image automatically
         console.log(
@@ -114,6 +112,9 @@ export async function generateAndAttachCoverWorkflow(
         );
         break;
       }
+
+      // Mark the current image for cleanup before generating the next one
+      if (localPath) rejectedLocalPaths.push(localPath);
 
       feedbackContext = await input({
         message: 'Describe what you would like to change:',

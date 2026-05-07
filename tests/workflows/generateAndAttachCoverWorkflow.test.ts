@@ -7,7 +7,17 @@ vi.mock('@inquirer/prompts', () => ({
   input: vi.fn(),
 }));
 
+// Mock deleteFile to track cleanup calls without touching the filesystem
+vi.mock('../../src/utils/fileSystem.js', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('../../src/utils/fileSystem.js')>();
+  return {
+    ...actual,
+    deleteFile: vi.fn(),
+  };
+});
+
 import { select, input } from '@inquirer/prompts';
+import { deleteFile } from '../../src/utils/fileSystem.js';
 import { generateAndAttachCoverWorkflow } from '../../src/workflows/generateAndAttachCoverWorkflow.js';
 import type {
   TextAIProvider,
@@ -207,5 +217,51 @@ describe('generateAndAttachCoverWorkflow — interactive mode', () => {
     expect(callCount).toBe(maxRetries + 1);
     // Last select was regenerate but loop ended, so result still has generatedImage
     expect(result.generatedImage).toBeDefined();
+  });
+
+  it('does not delete the auto-accepted image when maxRetries is reached', async () => {
+    // Always select regenerate to exhaust retries
+    vi.mocked(select).mockResolvedValue('regenerate');
+    vi.mocked(input).mockResolvedValue('Some feedback');
+    vi.mocked(deleteFile).mockResolvedValue(undefined);
+
+    const maxRetries = 2;
+    let callCount = 0;
+    const imageProvider: ImageGenerationProvider = {
+      async generateImage() {
+        callCount++;
+        return {
+          fileName: 'mountain-landscape',
+          mimeType: 'image/png',
+          base64: 'abc123',
+          localPath: `/tmp/polira-test/mountain-landscape-${callCount}.png`,
+        };
+      },
+    };
+
+    const result = await generateAndAttachCoverWorkflow(VALID_POST, {
+      generate: true,
+      apply: false,
+      size: '1792x1024',
+      coverField: 'cover',
+      aiProvider: makeAiProvider(),
+      imageProvider,
+      interactive: true,
+      maxRetries,
+    });
+
+    expect(callCount).toBe(maxRetries + 1);
+    expect(result.generatedImage).toBeDefined();
+
+    // The accepted (last) image path must NOT be deleted
+    const acceptedPath = `/tmp/polira-test/mountain-landscape-${maxRetries + 1}.png`;
+    const deletedPaths = vi.mocked(deleteFile).mock.calls.map((c) => c[0]);
+    expect(deletedPaths).not.toContain(acceptedPath);
+
+    // Only the rejected intermediate images should be cleaned up
+    expect(deletedPaths).toHaveLength(maxRetries);
+    for (let i = 1; i <= maxRetries; i++) {
+      expect(deletedPaths).toContain(`/tmp/polira-test/mountain-landscape-${i}.png`);
+    }
   });
 });
