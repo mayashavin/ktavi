@@ -634,7 +634,6 @@ Recommended packages:
 - `gray-matter` for YAML frontmatter.
 - `unified` ecosystem for Markdown parsing.
 - `remark-parse` for Markdown AST.
-- `remark-stringify` if AST-based writing becomes necessary.
 
 ### YAML
 
@@ -931,15 +930,7 @@ export type MarkdownImage = {
 
 ```ts
 export type SeoSuggestion = {
-  field:
-    | 'title'
-    | 'description'
-    | 'slug'
-    | 'tags'
-    | 'headings'
-    | 'cover'
-    | 'content'
-    | 'images';
+  field: 'title' | 'description' | 'slug' | 'tags' | 'headings' | 'cover' | 'content' | 'images';
   severity: 'info' | 'warning' | 'critical';
   current?: string | string[];
   suggested?: string | string[];
@@ -1336,7 +1327,7 @@ Input:
 Output:
 
 ```ts
-BlogDraft
+BlogDraft;
 ```
 
 Responsibilities:
@@ -1420,7 +1411,7 @@ Input:
 Output:
 
 ```ts
-CoverPromptResult
+CoverPromptResult;
 ```
 
 Responsibilities:
@@ -1447,7 +1438,7 @@ Input:
 Output:
 
 ```ts
-GeneratedImage
+GeneratedImage;
 ```
 
 Responsibilities:
@@ -1473,7 +1464,7 @@ Input:
 Output:
 
 ```ts
-UploadedAsset
+UploadedAsset;
 ```
 
 Responsibilities:
@@ -1499,7 +1490,7 @@ Input:
 Output:
 
 ```ts
-DraftPatch
+DraftPatch;
 ```
 
 Responsibilities:
@@ -1823,7 +1814,7 @@ Recommended package fields:
 Runtime dependencies:
 
 ```bash
-npm install commander gray-matter unified remark-parse remark-stringify zod diff cloudinary dotenv
+npm install commander gray-matter unified remark-parse zod diff cloudinary dotenv
 ```
 
 Development dependencies:
@@ -2046,7 +2037,7 @@ When generating the boilerplate:
 
 ## 29. Suggested README Summary
 
-```markdown
+````markdown
 # Polira
 
 A CLI-first, workflow-driven AI assistant for preparing Markdown blog drafts for publishing.
@@ -2073,9 +2064,11 @@ polira review ./posts/my-post.md
 polira cover ./posts/my-post.md --prompt-only
 polira prepare ./posts/my-post.md
 ```
+````
 
 Use `--apply` to write changes.
-```
+
+````
 
 ---
 
@@ -2093,7 +2086,7 @@ Modular tools
 Provider abstractions
     ↓
 Future-ready for agent skills and MCP
-```
+````
 
 Recommended framing:
 

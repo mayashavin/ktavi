@@ -7,6 +7,7 @@ import type {
   SeoSuggestion,
   WritingSuggestion,
   CoverPromptResult,
+  ContentSummary,
   DraftPatch,
   WritingMode,
   ImageSize,
@@ -16,6 +17,7 @@ import type {
 import { parseMarkdownTool } from '../tools/parse-markdown/index.js';
 import { reviewSeoTool } from '../tools/review-seo/index.js';
 import { reviewWritingTool } from '../tools/review-writing/index.js';
+import { summarizeContentTool } from '../tools/summarize-content/index.js';
 import { generateCoverPromptTool } from '../tools/generate-cover-prompt/index.js';
 import { generateImageTool } from '../tools/generate-image/index.js';
 import { uploadAssetTool } from '../tools/upload-asset/index.js';
@@ -23,6 +25,7 @@ import { updateFrontmatterTool } from '../tools/update-frontmatter/index.js';
 
 export type PrepareDraftResult = {
   draft: BlogDraft;
+  contentSummary?: ContentSummary;
   seoSuggestions: SeoSuggestion[];
   writingSuggestions: WritingSuggestion[];
   coverPrompt?: CoverPromptResult;
@@ -48,6 +51,11 @@ export async function prepareDraftWorkflow(
   const draft = await parseMarkdownTool({ filePath });
 
   const { suggestions: seoSuggestions } = await reviewSeoTool({ draft }, options.aiProvider);
+
+  let contentSummary: ContentSummary | undefined;
+  if (options.aiProvider) {
+    contentSummary = await summarizeContentTool({ draft }, options.aiProvider);
+  }
 
   let writingSuggestions: WritingSuggestion[] = [];
   if (options.aiProvider) {
@@ -85,5 +93,5 @@ export async function prepareDraftWorkflow(
     }
   }
 
-  return { draft, seoSuggestions, writingSuggestions, coverPrompt, patch };
+  return { draft, contentSummary, seoSuggestions, writingSuggestions, coverPrompt, patch };
 }

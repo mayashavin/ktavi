@@ -2,6 +2,8 @@ import { Command } from 'commander';
 import { analyzeDraftWorkflow } from '../../workflows/analyzeDraftWorkflow.js';
 import { logger } from '../../core/logger.js';
 import { PoliraError, friendlyErrorMessage } from '../../core/errors.js';
+import { createOpenAITextProvider } from '../../providers/ai/openaiTextProvider.js';
+import { loadConfig } from '../../core/config.js';
 
 export function registerAnalyzeCommand(program: Command) {
   program
@@ -11,7 +13,15 @@ export function registerAnalyzeCommand(program: Command) {
     .option('--json', 'Output results as JSON')
     .action(async (file: string, opts: { json?: boolean }) => {
       try {
-        const { draft } = await analyzeDraftWorkflow(file);
+        const apiKey = process.env.OPENAI_API_KEY;
+        let aiProvider;
+
+        if (apiKey) {
+          const config = await loadConfig();
+          aiProvider = createOpenAITextProvider(apiKey, config.ai.textModel);
+        }
+
+        const { draft, contentSummary } = await analyzeDraftWorkflow(file, { aiProvider });
         const { metadata, frontmatter } = draft;
 
         if (opts.json) {
@@ -48,6 +58,14 @@ export function registerAnalyzeCommand(program: Command) {
           for (const img of metadata.images) {
             logger.dim(`  ${img.url}${img.alt ? ` (alt: ${img.alt})` : ' (no alt text)'}`);
           }
+        }
+
+        if (contentSummary) {
+          logger.heading('Summary');
+          logger.label('Summary', contentSummary.shortSummary);
+          logger.label('Key topics', contentSummary.keyTopics.join(', '));
+          logger.label('Target audience', contentSummary.targetAudience);
+          logger.label('Suggested description', contentSummary.suggestedDescription);
         }
 
         const criticalFields = [
