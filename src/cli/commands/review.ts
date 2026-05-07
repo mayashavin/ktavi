@@ -1,7 +1,7 @@
 import { Command } from 'commander';
 import { reviewDraftWorkflow } from '../../workflows/reviewDraftWorkflow.js';
 import { logger } from '../../core/logger.js';
-import { PoliraError } from '../../core/errors.js';
+import { PoliraError, friendlyErrorMessage } from '../../core/errors.js';
 import { createOpenAITextProvider } from '../../providers/ai/openaiTextProvider.js';
 import { loadConfig } from '../../core/config.js';
 import type { WritingMode } from '../../core/types.js';
@@ -39,16 +39,20 @@ export function registerReviewCommand(program: Command) {
         }
 
         for (const s of result.suggestions) {
-          console.log(
-            `  [${s.category}] ${s.reason} (confidence: ${(s.confidence * 100).toFixed(0)}%)`,
+          logger.severity(
+            'info',
+            s.category,
+            `${s.reason} (confidence: ${(s.confidence * 100).toFixed(0)}%)`,
           );
           logger.dim(`    - ${s.original}`);
           logger.dim(`    + ${s.suggested}`);
           logger.blank();
         }
+
+        logger.summary({ info: result.suggestions.length });
       } catch (err) {
         if (err instanceof PoliraError) {
-          logger.error(err.message);
+          logger.error(friendlyErrorMessage(err.code));
           process.exit(1);
         }
         throw err;

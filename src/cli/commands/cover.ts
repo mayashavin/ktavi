@@ -1,7 +1,7 @@
 import { Command } from 'commander';
 import { generateAndAttachCoverWorkflow } from '../../workflows/generateAndAttachCoverWorkflow.js';
 import { logger } from '../../core/logger.js';
-import { PoliraError } from '../../core/errors.js';
+import { PoliraError, friendlyErrorMessage } from '../../core/errors.js';
 import { createOpenAITextProvider } from '../../providers/ai/openaiTextProvider.js';
 import { createOpenAIImageProvider } from '../../providers/image/openaiImageProvider.js';
 import { createLocalStorageProvider } from '../../providers/storage/localStorageProvider.js';
@@ -20,6 +20,7 @@ export function registerCoverCommand(program: Command) {
     .option('--upload <target>', 'Upload target: cloudinary')
     .option('--apply', 'Apply cover image to frontmatter')
     .option('--size <size>', 'Image size', '1792x1024')
+    .option('--json', 'Output results as JSON')
     .action(
       async (
         file: string,
@@ -30,6 +31,7 @@ export function registerCoverCommand(program: Command) {
           upload?: string;
           apply?: boolean;
           size: string;
+          json?: boolean;
         },
       ) => {
         try {
@@ -75,6 +77,11 @@ export function registerCoverCommand(program: Command) {
             storageProvider: opts.generate ? storageProvider : undefined,
           });
 
+          if (opts.json) {
+            console.log(JSON.stringify(result, null, 2));
+            return;
+          }
+
           logger.heading('Cover Image');
           logger.label('Visual concept', result.coverPrompt.visualConcept);
           logger.blank();
@@ -93,13 +100,13 @@ export function registerCoverCommand(program: Command) {
 
           if (result.patch?.diff) {
             logger.heading('Frontmatter Changes');
-            console.log(result.patch.diff);
+            logger.diff(result.patch.diff);
           }
 
           logger.blank();
         } catch (err) {
           if (err instanceof PoliraError) {
-            logger.error(err.message);
+            logger.error(friendlyErrorMessage(err.code));
             process.exit(1);
           }
           throw err;

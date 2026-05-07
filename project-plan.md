@@ -930,15 +930,7 @@ export type MarkdownImage = {
 
 ```ts
 export type SeoSuggestion = {
-  field:
-    | 'title'
-    | 'description'
-    | 'slug'
-    | 'tags'
-    | 'headings'
-    | 'cover'
-    | 'content'
-    | 'images';
+  field: 'title' | 'description' | 'slug' | 'tags' | 'headings' | 'cover' | 'content' | 'images';
   severity: 'info' | 'warning' | 'critical';
   current?: string | string[];
   suggested?: string | string[];
@@ -1335,7 +1327,7 @@ Input:
 Output:
 
 ```ts
-BlogDraft
+BlogDraft;
 ```
 
 Responsibilities:
@@ -1419,7 +1411,7 @@ Input:
 Output:
 
 ```ts
-CoverPromptResult
+CoverPromptResult;
 ```
 
 Responsibilities:
@@ -1446,7 +1438,7 @@ Input:
 Output:
 
 ```ts
-GeneratedImage
+GeneratedImage;
 ```
 
 Responsibilities:
@@ -1472,7 +1464,7 @@ Input:
 Output:
 
 ```ts
-UploadedAsset
+UploadedAsset;
 ```
 
 Responsibilities:
@@ -1498,7 +1490,7 @@ Input:
 Output:
 
 ```ts
-DraftPatch
+DraftPatch;
 ```
 
 Responsibilities:
@@ -2045,7 +2037,7 @@ When generating the boilerplate:
 
 ## 29. Suggested README Summary
 
-```markdown
+````markdown
 # Polira
 
 A CLI-first, workflow-driven AI assistant for preparing Markdown blog drafts for publishing.
@@ -2072,9 +2064,11 @@ polira review ./posts/my-post.md
 polira cover ./posts/my-post.md --prompt-only
 polira prepare ./posts/my-post.md
 ```
+````
 
 Use `--apply` to write changes.
-```
+
+````
 
 ---
 
@@ -2092,7 +2086,7 @@ Modular tools
 Provider abstractions
     ↓
 Future-ready for agent skills and MCP
-```
+````
 
 Recommended framing:
 
