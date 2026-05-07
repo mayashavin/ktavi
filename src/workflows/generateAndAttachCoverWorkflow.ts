@@ -98,15 +98,10 @@ export async function generateAndAttachCoverWorkflow(
       }
 
       if (choice === 'cancel') {
-        // Track local file for cleanup
         if (localPath) rejectedLocalPaths.push(localPath);
-        // Clean up all rejected images and return a result without the cancelled image
-        for (const p of rejectedLocalPaths) {
-          await deleteFile(p);
-        }
         result.generatedImage = undefined;
         result.uploadedAsset = undefined;
-        return result;
+        break;
       }
 
       // choice === 'regenerate'
