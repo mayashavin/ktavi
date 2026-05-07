@@ -1,6 +1,6 @@
-import type { PoliraConfig } from './src/core/config.js';
+import type { KtaviConfig } from './src/core/config.js';
 
-const config: PoliraConfig = {
+const config: KtaviConfig = {
   ai: {
     provider: 'openai',
     textModel: 'gpt-4o',

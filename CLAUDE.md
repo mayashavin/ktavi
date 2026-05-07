@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-Polira is a CLI-first, workflow-driven AI assistant for preparing Markdown blog drafts for publishing. It reviews drafts for grammar, clarity, and SEO metadata, generates cover image concepts/prompts, optionally creates and uploads cover images, and updates Markdown frontmatter — all with reviewable diffs before applying changes.
+Ktavi is a CLI-first, workflow-driven AI assistant for preparing Markdown blog drafts for publishing. It reviews drafts for grammar, clarity, and SEO metadata, generates cover image concepts/prompts, optionally creates and uploads cover images, and updates Markdown frontmatter — all with reviewable diffs before applying changes.
 
 The full project spec is in `project-plan.md`.
 
@@ -20,7 +20,7 @@ npm run format        # Format (prettier --write .)
 npm run typecheck     # Type check without emitting (tsc --noEmit)
 ```
 
-The CLI binary is `polira`. During development, use `npm run dev -- <command> <args>` to invoke it.
+The CLI binary is `ktavi`. During development, use `npm run dev -- <command> <args>` to invoke it.
 
 ## Build
 
@@ -103,12 +103,12 @@ Central types are in `src/core/types.ts`. Key types: `BlogDraft`, `BlogFrontmatt
 ## CLI Commands
 
 ```bash
-polira analyze <file>                              # Parse and summarize Markdown structure
-polira seo <file> [--json] [--apply]               # Review SEO metadata
-polira review <file> [--mode light|medium|strong]  # Grammar/clarity review
-polira fix <file> [--apply] [--mode ...]           # Show diff of suggested fixes
-polira cover <file> [--prompt-only|--generate]     # Cover image workflow
+ktavi analyze <file>                              # Parse and summarize Markdown structure
+ktavi seo <file> [--json] [--apply]               # Review SEO metadata
+ktavi review <file> [--mode light|medium|strong]  # Grammar/clarity review
+ktavi fix <file> [--apply] [--mode ...]           # Show diff of suggested fixes
+ktavi cover <file> [--prompt-only|--generate]     # Cover image workflow
        [--save local] [--upload cloudinary] [--apply] [--size 1792x1024]
-polira prepare <file> [--generate-cover]           # Full publish-prep workflow
+ktavi prepare <file> [--generate-cover]           # Full publish-prep workflow
        [--upload cloudinary|none] [--apply] [--mode ...] [--json]
 ```

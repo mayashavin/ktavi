@@ -1,10 +1,10 @@
 import type { ImageGenerationProvider, GenerateImageInput } from '../../core/providers.js';
 import type { GeneratedImage } from '../../core/types.js';
-import { PoliraError } from '../../core/errors.js';
+import { KtaviError } from '../../core/errors.js';
 
 export function createOpenAIImageProvider(apiKey: string, model?: string): ImageGenerationProvider {
   if (!apiKey) {
-    throw new PoliraError(
+    throw new KtaviError(
       'OPENAI_API_KEY is not set. Please add it to your .env file.',
       'AI_PROVIDER_ERROR',
     );
@@ -24,7 +24,7 @@ export function createOpenAIImageProvider(apiKey: string, model?: string): Image
 
       const imageData = response.data?.[0]?.b64_json;
       if (!imageData) {
-        throw new PoliraError('No image data returned from provider.', 'IMAGE_GENERATION_FAILED');
+        throw new KtaviError('No image data returned from provider.', 'IMAGE_GENERATION_FAILED');
       }
 
       const buffer = Buffer.from(imageData, 'base64');

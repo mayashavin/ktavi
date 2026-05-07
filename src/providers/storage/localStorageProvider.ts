@@ -2,7 +2,7 @@ import path from 'node:path';
 import type { AssetStorageProvider } from '../../core/providers.js';
 import type { GeneratedImage, UploadedAsset } from '../../core/types.js';
 import { writeBuffer } from '../../utils/fileSystem.js';
-import { PoliraError } from '../../core/errors.js';
+import { KtaviError } from '../../core/errors.js';
 
 export function createLocalStorageProvider(
   outputDir: string,
@@ -13,7 +13,7 @@ export function createLocalStorageProvider(
       const buffer = image.buffer ?? (image.base64 ? Buffer.from(image.base64, 'base64') : null);
 
       if (!buffer) {
-        throw new PoliraError('Image has no buffer or base64 data to save.', 'WRITE_FAILED');
+        throw new KtaviError('Image has no buffer or base64 data to save.', 'WRITE_FAILED');
       }
 
       const normalizedFileName = path.parse(image.fileName).name;

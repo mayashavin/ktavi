@@ -1,10 +1,10 @@
 {
-  "name": "polira",
+  "name": "ktavi",
   "version": "0.2.0",
   "description": "A CLI-first, workflow-driven AI assistant for preparing Markdown blog drafts for publishing.",
   "type": "module",
   "bin": {
-    "polira": "dist/cli/index.js"
+    "ktavi": "dist/cli/index.js"
   },
   "scripts": {
     "dev": "tsx src/cli/index.ts",

@@ -1,4 +1,4 @@
-export type PoliraErrorCode =
+export type KtaviErrorCode =
   | 'FILE_NOT_FOUND'
   | 'INVALID_MARKDOWN'
   | 'INVALID_FRONTMATTER'
@@ -10,18 +10,18 @@ export type PoliraErrorCode =
   | 'PATCH_FAILED'
   | 'WRITE_FAILED';
 
-export class PoliraError extends Error {
+export class KtaviError extends Error {
   constructor(
     message: string,
-    public code: PoliraErrorCode,
+    public code: KtaviErrorCode,
     public cause?: unknown,
   ) {
     super(message);
-    this.name = 'PoliraError';
+    this.name = 'KtaviError';
   }
 }
 
-export function friendlyErrorMessage(code: PoliraErrorCode): string {
+export function friendlyErrorMessage(code: KtaviErrorCode): string {
   switch (code) {
     case 'FILE_NOT_FOUND':
       return 'The specified file was not found. Check the path and try again.';
@@ -36,9 +36,9 @@ export function friendlyErrorMessage(code: PoliraErrorCode): string {
     case 'CLOUDINARY_UPLOAD_FAILED':
       return 'Upload to Cloudinary failed. Check your credentials and network connection.';
     case 'CONFIG_NOT_FOUND':
-      return 'No configuration file found. Run `polira config init` to create one.';
+      return 'No configuration file found. Run `ktavi config init` to create one.';
     case 'CONFIG_INVALID':
-      return 'The configuration file is invalid. Run `polira config init` to reset it.';
+      return 'The configuration file is invalid. Run `ktavi config init` to reset it.';
     case 'PATCH_FAILED':
       return 'Failed to apply changes to the file. Check file permissions and try again.';
     case 'WRITE_FAILED':

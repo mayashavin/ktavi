@@ -1,7 +1,7 @@
 import { Command } from 'commander';
 import { prepareDraftWorkflow } from '../../workflows/prepareDraftWorkflow.js';
 import { logger } from '../../core/logger.js';
-import { PoliraError, friendlyErrorMessage } from '../../core/errors.js';
+import { KtaviError, friendlyErrorMessage } from '../../core/errors.js';
 import { createOpenAITextProvider } from '../../providers/ai/openaiTextProvider.js';
 import { createOpenAIImageProvider } from '../../providers/image/openaiImageProvider.js';
 import { createLocalStorageProvider } from '../../providers/storage/localStorageProvider.js';
@@ -144,7 +144,7 @@ export function registerPrepareCommand(program: Command) {
 
           logger.blank();
         } catch (err) {
-          if (err instanceof PoliraError) {
+          if (err instanceof KtaviError) {
             logger.error(friendlyErrorMessage(err.code));
             process.exit(1);
           }
