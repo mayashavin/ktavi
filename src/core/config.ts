@@ -65,7 +65,7 @@ const poliraConfigSchema = z.object({
       provider: z.enum(['local', 'cloudinary']).default('local'),
       local: z
         .object({
-          outputDir: z.string().default('./temp/images/blog'),
+          outputDir: z.string().default('./public/images/blog'),
           publicPathPrefix: z.string().default('/images/blog'),
         })
         .optional()
@@ -86,7 +86,7 @@ const DEFAULT_CONFIG: PoliraConfig = {
   image: { size: '1792x1024' },
   storage: {
     provider: 'local',
-    local: { outputDir: './temp/images/blog', publicPathPrefix: '/images/blog' },
+    local: { outputDir: './public/images/blog', publicPathPrefix: '/images/blog' },
   },
 };
 

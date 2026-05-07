@@ -23,7 +23,7 @@ export function createStorageProvider(
   }
 
   return createLocalStorageProvider(
-    config.storage.local?.outputDir ?? './temp/images/blog',
+    config.storage.local?.outputDir ?? './public/images/blog',
     config.storage.local?.publicPathPrefix ?? '/images/blog',
   );
 }
