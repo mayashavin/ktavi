@@ -58,7 +58,7 @@ function setupPromptMocks(
       overrides.textModel ?? 'gpt-4o',
       overrides.imageModel ?? 'gpt-image-2',
       overrides.imageStyle ?? '',
-      overrides.outputDir ?? './public/images/blog',
+      overrides.outputDir ?? './temp/images/blog',
       overrides.publicPathPrefix ?? '/images/blog',
     ],
   };

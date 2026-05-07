@@ -20,7 +20,7 @@ const baseConfig: PoliraConfig = {
   image: { size: '1792x1024' },
   storage: {
     provider: 'local',
-    local: { outputDir: './public/images/blog', publicPathPrefix: '/images/blog' },
+    local: { outputDir: './temp/images/blog', publicPathPrefix: '/images/blog' },
   },
 };
 
@@ -76,7 +76,7 @@ describe('createStorageProvider', () => {
   it('creates a local provider when target is local', () => {
     createStorageProvider('local', baseConfig, {});
 
-    expect(createLocalStorageProvider).toHaveBeenCalledWith('./public/images/blog', '/images/blog');
+    expect(createLocalStorageProvider).toHaveBeenCalledWith('./temp/images/blog', '/images/blog');
     expect(createCloudinaryStorageProvider).not.toHaveBeenCalled();
   });
 
@@ -85,13 +85,13 @@ describe('createStorageProvider', () => {
       ...baseConfig,
       storage: {
         provider: 'local',
-        local: { outputDir: './public/images/blog', publicPathPrefix: '/images/blog' },
+        local: { outputDir: './temp/images/blog', publicPathPrefix: '/images/blog' },
       },
     };
 
     createStorageProvider('local', config, {});
 
-    expect(createLocalStorageProvider).toHaveBeenCalledWith('./public/images/blog', '/images/blog');
+    expect(createLocalStorageProvider).toHaveBeenCalledWith('./temp/images/blog', '/images/blog');
   });
 
   it('passes empty strings for missing Cloudinary env vars', () => {

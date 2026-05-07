@@ -23,7 +23,7 @@ const SCHEMA_DEFAULTS: PoliraConfig = {
   image: { size: '1792x1024' },
   storage: {
     provider: 'local',
-    local: { outputDir: './public/images/blog', publicPathPrefix: '/images/blog' },
+    local: { outputDir: './temp/images/blog', publicPathPrefix: '/images/blog' },
   },
 };
 
