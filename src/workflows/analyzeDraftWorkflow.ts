@@ -16,7 +16,11 @@ export async function analyzeDraftWorkflow(
 
   let contentSummary: ContentSummary | undefined;
   if (options?.aiProvider) {
-    contentSummary = await summarizeContentTool({ draft }, options.aiProvider);
+    try {
+      contentSummary = await summarizeContentTool({ draft }, options.aiProvider);
+    } catch {
+      // summarization is best-effort; continue without it
+    }
   }
 
   return { draft, contentSummary };
