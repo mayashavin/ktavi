@@ -54,11 +54,7 @@ export async function prepareDraftWorkflow(
 
   let contentSummary: ContentSummary | undefined;
   if (options.aiProvider) {
-    try {
-      contentSummary = await summarizeContentTool({ draft }, options.aiProvider);
-    } catch {
-      // summarization is best-effort; continue without it
-    }
+    contentSummary = await summarizeContentTool({ draft }, options.aiProvider);
   }
 
   let writingSuggestions: WritingSuggestion[] = [];
