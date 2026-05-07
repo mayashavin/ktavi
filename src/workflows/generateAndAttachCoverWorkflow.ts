@@ -81,7 +81,7 @@ export async function generateAndAttachCoverWorkflow(
       // Show the local path so the user can preview the image
       const localPath = result.uploadedAsset?.localPath ?? result.generatedImage?.localPath;
       if (localPath) {
-        console.log(`\n  Image saved to: ${localPath}`);
+        process.stderr.write(`\n  Image saved to: ${localPath}\n`);
       }
 
       const choice = await select({
@@ -107,8 +107,8 @@ export async function generateAndAttachCoverWorkflow(
       // choice === 'regenerate'
       if (attempt === maxRetries) {
         // Reached the retry limit — accept the last image automatically
-        console.log(
-          `\n  Maximum regeneration attempts (${maxRetries}) reached. Using the last generated image.`,
+        process.stderr.write(
+          `\n  Maximum regeneration attempts (${maxRetries}) reached. Using the last generated image.\n`,
         );
         break;
       }
