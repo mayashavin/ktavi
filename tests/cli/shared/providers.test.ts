@@ -80,15 +80,18 @@ describe('createStorageProvider', () => {
     expect(createCloudinaryStorageProvider).not.toHaveBeenCalled();
   });
 
-  it('uses default paths when local storage config is absent', () => {
+  it('uses resolved default paths for local storage config', () => {
     const config: PoliraConfig = {
       ...baseConfig,
-      storage: { provider: 'local' },
+      storage: {
+        provider: 'local',
+        local: { outputDir: './temp/images/blog', publicPathPrefix: '/images/blog' },
+      },
     };
 
     createStorageProvider('local', config, {});
 
-    expect(createLocalStorageProvider).toHaveBeenCalledWith('./public/images/blog', '/images/blog');
+    expect(createLocalStorageProvider).toHaveBeenCalledWith('./temp/images/blog', '/images/blog');
   });
 
   it('passes empty strings for missing Cloudinary env vars', () => {
