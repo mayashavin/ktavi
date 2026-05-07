@@ -1,4 +1,9 @@
-import type { TextAIProvider, ImageGenerationProvider, AssetStorageProvider } from '../core/providers.js';
+import { select, input } from '@inquirer/prompts';
+import type {
+  TextAIProvider,
+  ImageGenerationProvider,
+  AssetStorageProvider,
+} from '../core/providers.js';
 import type {
   CoverPromptResult,
   DraftPatch,
@@ -12,6 +17,9 @@ import { generateCoverPromptTool } from '../tools/generate-cover-prompt/index.js
 import { generateImageTool } from '../tools/generate-image/index.js';
 import { uploadAssetTool } from '../tools/upload-asset/index.js';
 import { updateFrontmatterTool } from '../tools/update-frontmatter/index.js';
+import { deleteFile } from '../utils/fileSystem.js';
+
+const DEFAULT_MAX_RETRIES = 3;
 
 export type GenerateAndAttachCoverResult = {
   coverPrompt: CoverPromptResult;
@@ -29,6 +37,10 @@ export type GenerateAndAttachCoverOptions = {
   aiProvider: TextAIProvider;
   imageProvider?: ImageGenerationProvider;
   storageProvider?: AssetStorageProvider;
+  /** Show an interactive preview/regeneration prompt after generating the image. Default: false. */
+  interactive?: boolean;
+  /** Maximum number of regeneration attempts allowed. Default: 3. */
+  maxRetries?: number;
 };
 
 export async function generateAndAttachCoverWorkflow(
@@ -45,16 +57,77 @@ export async function generateAndAttachCoverWorkflow(
   const result: GenerateAndAttachCoverResult = { coverPrompt };
 
   if (options.generate && options.imageProvider) {
-    result.generatedImage = await generateImageTool(
-      { prompt: coverPrompt, size: options.size },
-      options.imageProvider,
-    );
+    const maxRetries = options.maxRetries ?? DEFAULT_MAX_RETRIES;
+    const rejectedLocalPaths: string[] = [];
+    let feedbackContext: string | undefined;
 
-    if (options.storageProvider && result.generatedImage) {
-      result.uploadedAsset = await uploadAssetTool(
-        { image: result.generatedImage },
-        options.storageProvider,
+    for (let attempt = 0; attempt <= maxRetries; attempt++) {
+      result.generatedImage = await generateImageTool(
+        { prompt: coverPrompt, size: options.size, feedbackContext },
+        options.imageProvider,
       );
+
+      if (options.storageProvider && result.generatedImage) {
+        result.uploadedAsset = await uploadAssetTool(
+          { image: result.generatedImage },
+          options.storageProvider,
+        );
+      }
+
+      if (!options.interactive) {
+        break;
+      }
+
+      // Show the local path so the user can preview the image
+      const localPath = result.uploadedAsset?.localPath ?? result.generatedImage?.localPath;
+      if (localPath) {
+        console.log(`\n  Image saved to: ${localPath}`);
+      }
+
+      const choice = await select({
+        message: 'Happy with this image?',
+        choices: [
+          { name: 'Yes, accept it', value: 'yes' },
+          { name: 'Regenerate with feedback', value: 'regenerate' },
+          { name: 'No, cancel', value: 'cancel' },
+        ],
+      });
+
+      if (choice === 'yes') {
+        break;
+      }
+
+      if (choice === 'cancel') {
+        // Track local file for cleanup
+        if (localPath) rejectedLocalPaths.push(localPath);
+        // Clean up all rejected images and return a result without the cancelled image
+        for (const p of rejectedLocalPaths) {
+          await deleteFile(p);
+        }
+        result.generatedImage = undefined;
+        result.uploadedAsset = undefined;
+        return result;
+      }
+
+      // choice === 'regenerate'
+      if (localPath) rejectedLocalPaths.push(localPath);
+
+      if (attempt === maxRetries) {
+        // Reached the retry limit — accept the last image automatically
+        console.log(
+          `\n  Maximum regeneration attempts (${maxRetries}) reached. Using the last generated image.`,
+        );
+        break;
+      }
+
+      feedbackContext = await input({
+        message: 'Describe what you would like to change:',
+      });
+    }
+
+    // Clean up all rejected local images
+    for (const p of rejectedLocalPaths) {
+      await deleteFile(p);
     }
   }
 
