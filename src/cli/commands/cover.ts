@@ -4,9 +4,8 @@ import { logger } from '../../core/logger.js';
 import { KtaviError, friendlyErrorMessage } from '../../core/errors.js';
 import { createOpenAITextProvider } from '../../providers/ai/openaiTextProvider.js';
 import { createOpenAIImageProvider } from '../../providers/image/openaiImageProvider.js';
-import { createLocalStorageProvider } from '../../providers/storage/localStorageProvider.js';
-import { createCloudinaryStorageProvider } from '../../providers/storage/cloudinaryStorageProvider.js';
 import { loadConfig } from '../../core/config.js';
+import { createStorageProvider } from '../shared/providers.js';
 import type { ImageSize, StorageTarget } from '../../core/types.js';
 
 export function registerCoverCommand(program: Command) {
@@ -21,6 +20,7 @@ export function registerCoverCommand(program: Command) {
     .option('--apply', 'Apply cover image to frontmatter')
     .option('--size <size>', 'Image size', '1792x1024')
     .option('--json', 'Output results as JSON')
+    .option('--autosave', 'Auto-accept generated image without interactive prompts')
     .action(
       async (
         file: string,
@@ -32,6 +32,7 @@ export function registerCoverCommand(program: Command) {
           apply?: boolean;
           size: string;
           json?: boolean;
+          autosave?: boolean;
         },
       ) => {
         try {
@@ -49,18 +50,7 @@ export function registerCoverCommand(program: Command) {
           const storageTarget = (opts.upload ??
             opts.save ??
             config.storage.provider) as StorageTarget;
-          const storageProvider =
-            storageTarget === 'cloudinary'
-              ? createCloudinaryStorageProvider({
-                  cloudName: process.env.CLOUDINARY_CLOUD_NAME ?? '',
-                  apiKey: process.env.CLOUDINARY_API_KEY ?? '',
-                  apiSecret: process.env.CLOUDINARY_API_SECRET ?? '',
-                  folder: config.storage.cloudinary?.folder ?? 'blog-covers',
-                })
-              : createLocalStorageProvider(
-                  config.storage.local?.outputDir ?? './temp/images/blog',
-                  config.storage.local?.publicPathPrefix ?? '/images/blog',
-                );
+          const storageProvider = createStorageProvider(storageTarget, config, process.env);
 
           const imageProvider = opts.generate
             ? createOpenAIImageProvider(apiKey, config.ai.imageModel)
@@ -75,6 +65,7 @@ export function registerCoverCommand(program: Command) {
             aiProvider,
             imageProvider,
             storageProvider: opts.generate ? storageProvider : undefined,
+            interactive: opts.generate && !opts.autosave,
           });
 
           if (opts.json) {
