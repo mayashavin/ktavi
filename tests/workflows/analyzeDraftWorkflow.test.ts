@@ -1,22 +1,9 @@
 import { describe, it, expect } from 'vitest';
 import path from 'node:path';
 import { analyzeDraftWorkflow } from '../../src/workflows/analyzeDraftWorkflow.js';
-import type { TextAIProvider } from '../../src/core/providers.js';
+import { createMockTextAIProvider } from '../shared/createMockTextAIProvider.js';
 
 const VALID_POST = path.resolve('tests/fixtures/valid-post.md');
-
-function makeProvider(): TextAIProvider {
-  return {
-    async generateStructuredOutput() {
-      return {
-        shortSummary: 'A post about testing.',
-        keyTopics: ['testing', 'vitest', 'TypeScript'],
-        targetAudience: 'developers',
-        suggestedDescription: 'Learn about testing with vitest.',
-      };
-    },
-  };
-}
 
 describe('analyzeDraftWorkflow', () => {
   it('returns draft without summary when no AI provider given', async () => {
@@ -32,7 +19,14 @@ describe('analyzeDraftWorkflow', () => {
   });
 
   it('returns content summary when AI provider is given', async () => {
-    const result = await analyzeDraftWorkflow(VALID_POST, { aiProvider: makeProvider() });
+    const result = await analyzeDraftWorkflow(VALID_POST, {
+      aiProvider: createMockTextAIProvider({
+        shortSummary: 'A post about testing.',
+        keyTopics: ['testing', 'vitest', 'TypeScript'],
+        targetAudience: 'developers',
+        suggestedDescription: 'Learn about testing with vitest.',
+      }),
+    });
     expect(result.draft).toBeDefined();
     expect(result.contentSummary).toBeDefined();
     expect(result.contentSummary!.shortSummary).toBe('A post about testing.');

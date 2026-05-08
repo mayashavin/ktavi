@@ -2,15 +2,9 @@ import { describe, it, expect } from 'vitest';
 import path from 'node:path';
 import { reviewDraftWorkflow } from '../../src/workflows/reviewDraftWorkflow.js';
 import { optimizeSeoWorkflow } from '../../src/workflows/optimizeSeoWorkflow.js';
-import type { TextAIProvider } from '../../src/core/providers.js';
+import { createMockTextAIProvider } from '../shared/createMockTextAIProvider.js';
 
 const VALID_POST = path.resolve('tests/fixtures/valid-post.md');
-
-function makeProvider(response: unknown): TextAIProvider {
-  return {
-    generateStructuredOutput: async () => response,
-  };
-}
 
 describe('review and seo workflows schema validation', () => {
   it('accepts a valid writing review provider response', async () => {
@@ -26,7 +20,11 @@ describe('review and seo workflows schema validation', () => {
       ],
     };
 
-    const result = await reviewDraftWorkflow(VALID_POST, 'medium', makeProvider(aiResponse));
+    const result = await reviewDraftWorkflow(
+      VALID_POST,
+      'medium',
+      createMockTextAIProvider(aiResponse),
+    );
     expect(result.suggestions).toHaveLength(1);
     expect(result.suggestions[0].confidence).toBe(0.9);
   });
@@ -45,7 +43,7 @@ describe('review and seo workflows schema validation', () => {
     };
 
     await expect(
-      reviewDraftWorkflow(VALID_POST, 'medium', makeProvider(aiResponse)),
+      reviewDraftWorkflow(VALID_POST, 'medium', createMockTextAIProvider(aiResponse)),
     ).rejects.toThrow();
   });
 
@@ -63,7 +61,9 @@ describe('review and seo workflows schema validation', () => {
       ],
     };
 
-    const result = await optimizeSeoWorkflow(VALID_POST, { aiProvider: makeProvider(aiResponse) });
+    const result = await optimizeSeoWorkflow(VALID_POST, {
+      aiProvider: createMockTextAIProvider(aiResponse),
+    });
     expect(result.suggestions.some((suggestion) => suggestion.source === 'ai')).toBe(true);
   });
 
@@ -80,7 +80,7 @@ describe('review and seo workflows schema validation', () => {
     };
 
     await expect(
-      optimizeSeoWorkflow(VALID_POST, { aiProvider: makeProvider(aiResponse) }),
+      optimizeSeoWorkflow(VALID_POST, { aiProvider: createMockTextAIProvider(aiResponse) }),
     ).rejects.toThrow();
   });
 });
