@@ -18,6 +18,7 @@ import { generateImageTool } from '../tools/generate-image/index.js';
 import { uploadAssetTool } from '../tools/upload-asset/index.js';
 import { updateFrontmatterTool } from '../tools/update-frontmatter/index.js';
 import { deleteFile } from '../utils/fileSystem.js';
+import { logger } from '../core/logger.js';
 
 const DEFAULT_MAX_RETRIES = 3;
 
@@ -81,7 +82,7 @@ export async function generateAndAttachCoverWorkflow(
       // Show the local path so the user can preview the image
       const localPath = result.uploadedAsset?.localPath ?? result.generatedImage?.localPath;
       if (localPath) {
-        process.stderr.write(`\n  Image saved to: ${localPath}\n`);
+        logger.info(`Image saved to: ${localPath}`);
       }
 
       const choice = await select({
@@ -107,8 +108,8 @@ export async function generateAndAttachCoverWorkflow(
       // choice === 'regenerate'
       if (attempt === maxRetries) {
         // Reached the retry limit — accept the last image automatically
-        process.stderr.write(
-          `\n  Maximum regeneration attempts (${maxRetries}) reached. Using the last generated image.\n`,
+        logger.warn(
+          `Maximum regeneration attempts (${maxRetries}) reached. Using the last generated image.`,
         );
         break;
       }
