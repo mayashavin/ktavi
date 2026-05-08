@@ -15,6 +15,6 @@
     "sourceMap": true,
     "noEmit": true
   },
-  "include": ["src/**/*.ts", "polira.config.ts", "vite.config.ts", "vitest.config.ts"],
+  "include": ["src/**/*.ts", "ktavi.config.ts", "vite.config.ts", "vitest.config.ts"],
   "exclude": ["node_modules", "dist", "tests"]
 }

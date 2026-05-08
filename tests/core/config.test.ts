@@ -6,16 +6,16 @@ import { getGlobalConfigPath, getProjectConfigPath } from '../../src/core/config
 const NONEXISTENT_PATH = '/nonexistent/path/config.ts';
 
 describe('getGlobalConfigPath', () => {
-  it('returns path under ~/.config/polira/', () => {
+  it('returns path under ~/.config/ktavi/', () => {
     const result = getGlobalConfigPath();
-    expect(result).toBe(path.join(os.homedir(), '.config', 'polira', 'config.js'));
+    expect(result).toBe(path.join(os.homedir(), '.config', 'ktavi', 'config.js'));
   });
 });
 
 describe('getProjectConfigPath', () => {
-  it('returns polira.config.ts resolved from cwd', () => {
+  it('returns ktavi.config.ts resolved from cwd', () => {
     const result = getProjectConfigPath();
-    expect(result).toBe(path.resolve('polira.config.ts'));
+    expect(result).toBe(path.resolve('ktavi.config.ts'));
   });
 });
 

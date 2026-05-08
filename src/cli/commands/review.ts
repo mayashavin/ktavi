@@ -1,7 +1,7 @@
 import { Command } from 'commander';
 import { reviewDraftWorkflow } from '../../workflows/reviewDraftWorkflow.js';
 import { logger } from '../../core/logger.js';
-import { PoliraError, friendlyErrorMessage } from '../../core/errors.js';
+import { KtaviError, friendlyErrorMessage } from '../../core/errors.js';
 import { createOpenAITextProvider } from '../../providers/ai/openaiTextProvider.js';
 import { loadConfig } from '../../core/config.js';
 import type { WritingMode } from '../../core/types.js';
@@ -51,7 +51,7 @@ export function registerReviewCommand(program: Command) {
 
         logger.summary({ info: result.suggestions.length });
       } catch (err) {
-        if (err instanceof PoliraError) {
+        if (err instanceof KtaviError) {
           logger.error(friendlyErrorMessage(err.code));
           process.exit(1);
         }

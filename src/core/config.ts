@@ -4,7 +4,7 @@ import { createJiti } from 'jiti';
 import { z } from 'zod';
 import type { CoverFieldName, ImageSize, StorageTarget, WritingMode } from './types.js';
 
-export type PoliraConfig = {
+export type KtaviConfig = {
   ai: {
     provider: 'openai';
     textModel: string;
@@ -33,7 +33,7 @@ export type PoliraConfig = {
   };
 };
 
-const poliraConfigSchema = z.object({
+const ktaviConfigSchema = z.object({
   ai: z
     .object({
       provider: z.literal('openai').default('openai'),
@@ -79,7 +79,7 @@ const poliraConfigSchema = z.object({
     .default({}),
 });
 
-const DEFAULT_CONFIG: PoliraConfig = {
+const DEFAULT_CONFIG: KtaviConfig = {
   ai: { provider: 'openai', textModel: 'gpt-4o', imageModel: 'gpt-image-2' },
   markdown: { coverField: 'cover', preserveFrontmatterOrder: true },
   writing: { defaultMode: 'medium' },
@@ -91,19 +91,19 @@ const DEFAULT_CONFIG: PoliraConfig = {
 };
 
 export function getGlobalConfigPath(): string {
-  return path.join(os.homedir(), '.config', 'polira', 'config.js');
+  return path.join(os.homedir(), '.config', 'ktavi', 'config.js');
 }
 
 export function getProjectConfigPath(): string {
-  return path.resolve('polira.config.ts');
+  return path.resolve('ktavi.config.ts');
 }
 
-type LoadedConfig = { config: Partial<PoliraConfig>; resolvedPath: string } | null;
+type LoadedConfig = { config: Partial<KtaviConfig>; resolvedPath: string } | null;
 
 async function loadConfigFile(filePath: string): Promise<LoadedConfig> {
   try {
     const module = await import(filePath);
-    return { config: (module.default ?? module) as Partial<PoliraConfig>, resolvedPath: filePath };
+    return { config: (module.default ?? module) as Partial<KtaviConfig>, resolvedPath: filePath };
   } catch (err) {
     const code = (err as NodeJS.ErrnoException).code;
     const message = (err as Error).message ?? '';
@@ -133,14 +133,14 @@ async function loadConfigFileWithJiti(filePath: string): Promise<LoadedConfig> {
     const jiti = createJiti(import.meta.url, { interopDefault: true });
     const module = await jiti.import(filePath);
     const config =
-      (module as { default?: Partial<PoliraConfig> }).default ?? (module as Partial<PoliraConfig>);
+      (module as { default?: Partial<KtaviConfig> }).default ?? (module as Partial<KtaviConfig>);
     return { config, resolvedPath: filePath };
   } catch {
     return loadConfigFile(filePath.replace(/\.ts$/, '.js'));
   }
 }
 
-function deepMerge(base: PoliraConfig, override: Partial<PoliraConfig>): PoliraConfig {
+function deepMerge(base: KtaviConfig, override: Partial<KtaviConfig>): KtaviConfig {
   const result = { ...base };
 
   if (override.ai) {
@@ -171,13 +171,13 @@ function deepMerge(base: PoliraConfig, override: Partial<PoliraConfig>): PoliraC
     }
   }
 
-  return poliraConfigSchema.parse(result) as PoliraConfig;
+  return ktaviConfigSchema.parse(result) as KtaviConfig;
 }
 
 export async function loadConfig(
   configPath?: string,
   globalConfigPath?: string,
-): Promise<PoliraConfig> {
+): Promise<KtaviConfig> {
   let config = { ...DEFAULT_CONFIG };
 
   const resolvedGlobalPath = globalConfigPath ?? getGlobalConfigPath();
@@ -203,7 +203,7 @@ export type ConfigValueWithSource = {
 };
 
 export type ResolvedConfigWithSources = {
-  config: PoliraConfig;
+  config: KtaviConfig;
   sources: Record<string, ConfigValueWithSource>;
   paths: {
     global: { path: string; loaded: boolean };
@@ -283,9 +283,7 @@ export { DEFAULT_CONFIG };
  * Loads a single config file without merging any other scope.
  * Used by `config init` to prefill prompts from the file being edited only.
  */
-export async function loadSingleConfigFile(
-  filePath: string,
-): Promise<Partial<PoliraConfig> | null> {
+export async function loadSingleConfigFile(filePath: string): Promise<Partial<KtaviConfig> | null> {
   const result = await loadConfigFile(filePath);
   return result?.config ?? null;
 }

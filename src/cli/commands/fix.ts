@@ -1,6 +1,6 @@
 import { Command } from 'commander';
 import { logger } from '../../core/logger.js';
-import { PoliraError, friendlyErrorMessage } from '../../core/errors.js';
+import { KtaviError, friendlyErrorMessage } from '../../core/errors.js';
 import { createOpenAITextProvider } from '../../providers/ai/openaiTextProvider.js';
 import { loadConfig } from '../../core/config.js';
 import { parseMarkdownTool } from '../../tools/parse-markdown/index.js';
@@ -89,7 +89,7 @@ export function registerFixCommand(program: Command) {
 
         logger.blank();
       } catch (err) {
-        if (err instanceof PoliraError) {
+        if (err instanceof KtaviError) {
           logger.error(friendlyErrorMessage(err.code));
           process.exit(1);
         }

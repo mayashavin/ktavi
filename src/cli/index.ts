@@ -11,9 +11,9 @@ import { registerConfigCommand } from './commands/config.js';
 const program = new Command();
 
 program
-  .name('polira')
+  .name('ktavi')
   .description('A CLI-first AI assistant for preparing Markdown blog drafts for publishing.')
-  .version('0.1.0');
+  .version('0.2.0');
 
 registerAnalyzeCommand(program);
 registerSeoCommand(program);

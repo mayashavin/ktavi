@@ -1,10 +1,10 @@
-# Polira — MVP Project Brief
+# Ktavi — MVP Project Brief
 
 ## 1. Project Overview
 
 ### Project name
 
-**Polira**
+**Ktavi**
 
 ### Tagline
 
@@ -12,11 +12,11 @@ Make Markdown drafts publish-ready.
 
 ### Name rationale
 
-Polira is inspired by the idea of polishing and refining a draft before it goes live. The name is short, memorable, and professional while still feeling less plain than a purely functional CLI name.
+Ktavi is inspired by the idea of polishing and refining a draft before it goes live. The name is short, memorable, and professional while still feeling less plain than a purely functional CLI name.
 
 ### MVP positioning
 
-**Polira** is a workflow-driven AI assistant for preparing Markdown blog drafts for publishing.
+**Ktavi** is a workflow-driven AI assistant for preparing Markdown blog drafts for publishing.
 
 The MVP should **not** behave as a fully autonomous AI agent yet. Instead, it should provide a deterministic, CLI-first workflow that uses AI-powered tools for specific tasks such as grammar review, SEO suggestions, and blog cover prompt generation.
 
@@ -157,7 +157,7 @@ The CLI should accept a Markdown file path and parse:
 Example command:
 
 ```bash
-polira analyze ./posts/my-post.md
+ktavi analyze ./posts/my-post.md
 ```
 
 Expected behavior:
@@ -202,7 +202,7 @@ Some checks should be deterministic. AI can be used for qualitative suggestions.
 Example command:
 
 ```bash
-polira seo ./posts/my-post.md
+ktavi seo ./posts/my-post.md
 ```
 
 ---
@@ -236,13 +236,13 @@ The tool should produce structured suggestions with:
 Example command:
 
 ```bash
-polira review ./posts/my-post.md
+ktavi review ./posts/my-post.md
 ```
 
 Example with mode:
 
 ```bash
-polira review ./posts/my-post.md --mode light
+ktavi review ./posts/my-post.md --mode light
 ```
 
 ---
@@ -261,13 +261,13 @@ Example:
 The tool should support:
 
 ```bash
-polira fix ./posts/my-post.md
+ktavi fix ./posts/my-post.md
 ```
 
 This shows suggestions and a diff but does not write changes.
 
 ```bash
-polira fix ./posts/my-post.md --apply
+ktavi fix ./posts/my-post.md --apply
 ```
 
 This applies accepted or safe changes.
@@ -297,7 +297,7 @@ The output should include:
 Example command:
 
 ```bash
-polira cover ./posts/my-post.md --prompt-only
+ktavi cover ./posts/my-post.md --prompt-only
 ```
 
 Expected output:
@@ -342,7 +342,7 @@ The provider should return either:
 Example command:
 
 ```bash
-polira cover ./posts/my-post.md --generate
+ktavi cover ./posts/my-post.md --generate
 ```
 
 ---
@@ -354,7 +354,7 @@ The MVP should support saving the generated image locally.
 Example command:
 
 ```bash
-polira cover ./posts/my-post.md --generate --save local
+ktavi cover ./posts/my-post.md --generate --save local
 ```
 
 Default local output:
@@ -374,7 +374,7 @@ The MVP should support optional Cloudinary upload.
 Example command:
 
 ```bash
-polira cover ./posts/my-post.md --generate --upload cloudinary
+ktavi cover ./posts/my-post.md --generate --upload cloudinary
 ```
 
 Required environment variables:
@@ -416,7 +416,7 @@ cover: https://res.cloudinary.com/example/image/upload/blog/tanstack-query-vue-c
 Example command:
 
 ```bash
-polira cover ./posts/my-post.md --generate --upload cloudinary --apply
+ktavi cover ./posts/my-post.md --generate --upload cloudinary --apply
 ```
 
 Important:
@@ -445,7 +445,7 @@ The main MVP command should run the full publish-preparation workflow.
 Example:
 
 ```bash
-polira prepare ./posts/my-post.md
+ktavi prepare ./posts/my-post.md
 ```
 
 Default behavior:
@@ -461,7 +461,7 @@ Default behavior:
 Apply behavior:
 
 ```bash
-polira prepare ./posts/my-post.md --generate-cover --upload cloudinary --apply
+ktavi prepare ./posts/my-post.md --generate-cover --upload cloudinary --apply
 ```
 
 This may:
@@ -480,13 +480,13 @@ Body text rewriting should remain conservative in the MVP.
 Recommended CLI name:
 
 ```bash
-polira
+ktavi
 ```
 
 ### 7.1 Analyze command
 
 ```bash
-polira analyze <file>
+ktavi analyze <file>
 ```
 
 Purpose:
@@ -500,7 +500,7 @@ Purpose:
 ### 7.2 SEO command
 
 ```bash
-polira seo <file>
+ktavi seo <file>
 ```
 
 Purpose:
@@ -520,7 +520,7 @@ Options:
 ### 7.3 Review command
 
 ```bash
-polira review <file>
+ktavi review <file>
 ```
 
 Purpose:
@@ -540,7 +540,7 @@ Options:
 ### 7.4 Fix command
 
 ```bash
-polira fix <file>
+ktavi fix <file>
 ```
 
 Purpose:
@@ -561,7 +561,7 @@ Options:
 ### 7.5 Cover command
 
 ```bash
-polira cover <file>
+ktavi cover <file>
 ```
 
 Purpose:
@@ -588,7 +588,7 @@ Options:
 ### 7.6 Prepare command
 
 ```bash
-polira prepare <file>
+ktavi prepare <file>
 ```
 
 Purpose:
@@ -787,7 +787,7 @@ workflows/generate-and-attach-cover.ts
 
 ```mermaid
 flowchart TD
-    A[User runs polira prepare post.md] --> B[Parse Markdown and YAML frontmatter]
+    A[User runs ktavi prepare post.md] --> B[Parse Markdown and YAML frontmatter]
     B --> C[Extract metadata, headings, links, images]
     C --> D[Run deterministic SEO checks]
     D --> E[Run AI SEO suggestion task]
@@ -805,7 +805,7 @@ flowchart TD
 
 ```mermaid
 flowchart TD
-    A[User runs polira cover post.md] --> B[Parse Markdown]
+    A[User runs ktavi cover post.md] --> B[Parse Markdown]
     B --> C[Generate cover concept]
     C --> D[Generate image prompt]
     D --> E{--generate?}
@@ -1077,15 +1077,15 @@ export type AssetStorageProvider = {
 Support a config file:
 
 ```text
-polira.config.ts
+ktavi.config.ts
 ```
 
 Example:
 
 ```ts
-import type { PoliraConfig } from './src/core/config';
+import type { KtaviConfig } from './src/core/config';
 
-const config: PoliraConfig = {
+const config: KtaviConfig = {
   ai: {
     provider: 'openai',
     textModel: 'gpt-5.5',
@@ -1120,7 +1120,7 @@ export default config;
 Type:
 
 ```ts
-export type PoliraConfig = {
+export type KtaviConfig = {
   ai: {
     provider: 'openai';
     textModel: string;
@@ -1179,13 +1179,13 @@ CLOUDINARY_API_SECRET=
 ## 15. Recommended Repo Structure
 
 ```text
-polira/
+ktavi/
   README.md
   package.json
   tsconfig.json
   .env.example
   .gitignore
-  polira.config.ts
+  ktavi.config.ts
 
   src/
     cli/
@@ -1802,7 +1802,7 @@ Recommended package fields:
 {
   "type": "module",
   "bin": {
-    "polira": "dist/cli/index.js"
+    "ktavi": "dist/cli/index.js"
   }
 }
 ```
@@ -1899,7 +1899,7 @@ The MVP is complete when:
 1. A user can run:
 
 ```bash
-polira analyze ./posts/example.md
+ktavi analyze ./posts/example.md
 ```
 
 and see parsed metadata and content structure.
@@ -1907,7 +1907,7 @@ and see parsed metadata and content structure.
 2. A user can run:
 
 ```bash
-polira seo ./posts/example.md
+ktavi seo ./posts/example.md
 ```
 
 and receive useful SEO suggestions.
@@ -1915,7 +1915,7 @@ and receive useful SEO suggestions.
 3. A user can run:
 
 ```bash
-polira review ./posts/example.md
+ktavi review ./posts/example.md
 ```
 
 and receive grammar/clarity suggestions.
@@ -1923,7 +1923,7 @@ and receive grammar/clarity suggestions.
 4. A user can run:
 
 ```bash
-polira cover ./posts/example.md --prompt-only
+ktavi cover ./posts/example.md --prompt-only
 ```
 
 and receive a cover concept, prompt, alt text, and filename.
@@ -1931,7 +1931,7 @@ and receive a cover concept, prompt, alt text, and filename.
 5. A user can run:
 
 ```bash
-polira cover ./posts/example.md --generate --save local --apply
+ktavi cover ./posts/example.md --generate --save local --apply
 ```
 
 and the tool saves a generated cover image locally and updates frontmatter.
@@ -1939,7 +1939,7 @@ and the tool saves a generated cover image locally and updates frontmatter.
 6. A user can run:
 
 ```bash
-polira cover ./posts/example.md --generate --upload cloudinary --apply
+ktavi cover ./posts/example.md --generate --upload cloudinary --apply
 ```
 
 and the tool uploads the generated cover image to Cloudinary and updates frontmatter.
@@ -2038,7 +2038,7 @@ When generating the boilerplate:
 ## 29. Suggested README Summary
 
 ````markdown
-# Polira
+# Ktavi
 
 A CLI-first, workflow-driven AI assistant for preparing Markdown blog drafts for publishing.
 
@@ -2058,11 +2058,11 @@ It reviews your draft for grammar, clarity, and SEO metadata, generates a matchi
 ## Usage
 
 ```bash
-polira analyze ./posts/my-post.md
-polira seo ./posts/my-post.md
-polira review ./posts/my-post.md
-polira cover ./posts/my-post.md --prompt-only
-polira prepare ./posts/my-post.md
+ktavi analyze ./posts/my-post.md
+ktavi seo ./posts/my-post.md
+ktavi review ./posts/my-post.md
+ktavi cover ./posts/my-post.md --prompt-only
+ktavi prepare ./posts/my-post.md
 ```
 ````
 

@@ -5,7 +5,7 @@ import {
   getProjectConfigPath,
   loadSingleConfigFile,
 } from '../../core/config.js';
-import type { PoliraConfig } from '../../core/config.js';
+import type { KtaviConfig } from '../../core/config.js';
 import { logger } from '../../core/logger.js';
 import { fileExists } from '../../utils/fileSystem.js';
 import { writeFile } from '../../utils/fileSystem.js';
@@ -16,7 +16,7 @@ export type ConfigInitOptions = {
   defaults?: boolean;
 };
 
-const SCHEMA_DEFAULTS: PoliraConfig = {
+const SCHEMA_DEFAULTS: KtaviConfig = {
   ai: { provider: 'openai', textModel: 'gpt-4o', imageModel: 'gpt-image-2' },
   markdown: { coverField: 'cover', preserveFrontmatterOrder: true },
   writing: { defaultMode: 'medium' },
@@ -31,7 +31,7 @@ async function detectTypeScript(): Promise<boolean> {
   return fileExists(path.resolve('tsconfig.json'));
 }
 
-async function loadExistingConfig(isGlobal: boolean): Promise<Partial<PoliraConfig> | null> {
+async function loadExistingConfig(isGlobal: boolean): Promise<Partial<KtaviConfig> | null> {
   try {
     const configPath = isGlobal ? getGlobalConfigPath() : getProjectConfigPath();
     return await loadSingleConfigFile(configPath);
@@ -40,7 +40,7 @@ async function loadExistingConfig(isGlobal: boolean): Promise<Partial<PoliraConf
   }
 }
 
-function getDefault<T>(existing: Partial<PoliraConfig> | null, path: string, fallback: T): T {
+function getDefault<T>(existing: Partial<KtaviConfig> | null, path: string, fallback: T): T {
   const parts = path.split('.');
   let current: unknown = existing;
   for (const part of parts) {
@@ -51,8 +51,8 @@ function getDefault<T>(existing: Partial<PoliraConfig> | null, path: string, fal
 }
 
 async function promptForConfig(
-  existing: Partial<PoliraConfig> | null,
-): Promise<Partial<PoliraConfig>> {
+  existing: Partial<KtaviConfig> | null,
+): Promise<Partial<KtaviConfig>> {
   const provider = await select({
     message: 'AI provider',
     choices: [{ value: 'openai' as const, name: 'OpenAI' }],
@@ -115,7 +115,7 @@ async function promptForConfig(
     default: getDefault(existing, 'storage.provider', SCHEMA_DEFAULTS.storage.provider),
   });
 
-  const config: Partial<PoliraConfig> = {};
+  const config: Partial<KtaviConfig> = {};
 
   config.ai = { provider, textModel };
   if (imageModel) config.ai.imageModel = imageModel;
@@ -156,7 +156,7 @@ async function promptForConfig(
   return config;
 }
 
-function serializeConfig(config: Partial<PoliraConfig>): string {
+function serializeConfig(config: Partial<KtaviConfig>): string {
   const lines: string[] = [];
 
   function renderObject(obj: Record<string, unknown>, indent: number): void {
@@ -185,7 +185,7 @@ function serializeConfig(config: Partial<PoliraConfig>): string {
   return lines.join('\n');
 }
 
-function printNextSteps(filePath: string, config: Partial<PoliraConfig>): void {
+function printNextSteps(filePath: string, config: Partial<KtaviConfig>): void {
   logger.success(`Config written to ${filePath}`);
   logger.blank();
   logger.heading('Next steps');
@@ -198,7 +198,7 @@ function printNextSteps(filePath: string, config: Partial<PoliraConfig>): void {
   if (config.storage?.provider === 'cloudinary') {
     steps.push('Set CLOUDINARY_CLOUD_NAME, CLOUDINARY_API_KEY, and CLOUDINARY_API_SECRET in .env');
   }
-  steps.push('Run polira analyze <file> to get started');
+  steps.push('Run ktavi analyze <file> to get started');
 
   for (const step of steps) {
     console.log(`  • ${step}`);
@@ -226,7 +226,7 @@ export async function runConfigInit(opts: ConfigInitOptions): Promise<void> {
     });
   }
 
-  const filePath = isGlobal ? getGlobalConfigPath() : path.resolve(`polira.config${ext}`);
+  const filePath = isGlobal ? getGlobalConfigPath() : path.resolve(`ktavi.config${ext}`);
 
   const exists = await fileExists(filePath);
   if (exists && !opts.force) {
@@ -242,7 +242,7 @@ export async function runConfigInit(opts: ConfigInitOptions): Promise<void> {
 
   const existing = await loadExistingConfig(isGlobal);
 
-  let config: Partial<PoliraConfig>;
+  let config: Partial<KtaviConfig>;
   if (opts.defaults) {
     config = {
       ai: { ...SCHEMA_DEFAULTS.ai },

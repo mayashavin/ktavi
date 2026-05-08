@@ -19,7 +19,7 @@ const mockedConfirm = vi.mocked(confirm);
 let tmpDir: string;
 
 beforeEach(async () => {
-  tmpDir = await fs.mkdtemp(path.join(os.tmpdir(), 'polira-config-init-'));
+  tmpDir = await fs.mkdtemp(path.join(os.tmpdir(), 'ktavi-config-init-'));
   vi.resetAllMocks();
 });
 
@@ -97,14 +97,14 @@ function setupCloudinaryPromptMocks(
   mockedConfirm.mockImplementation(async () => overrides.confirmWrite ?? true);
 }
 
-describe('polira config init', () => {
+describe('ktavi config init', () => {
   it('writes a .ts config file with --defaults --force', async () => {
-    const configPath = path.join(tmpDir, 'polira.config.ts');
+    const configPath = path.join(tmpDir, 'ktavi.config.ts');
     await fs.writeFile(path.join(tmpDir, 'tsconfig.json'), '{}');
 
     const originalResolve = path.resolve;
     vi.spyOn(path, 'resolve').mockImplementation((...args: string[]) => {
-      if (args.length === 1 && args[0] === 'polira.config.ts') return configPath;
+      if (args.length === 1 && args[0] === 'ktavi.config.ts') return configPath;
       if (args.length === 1 && args[0] === 'tsconfig.json')
         return originalResolve(tmpDir, 'tsconfig.json');
       return originalResolve(...args);
@@ -127,12 +127,12 @@ describe('polira config init', () => {
   });
 
   it('writes all prompted fields including defaults and overrides', async () => {
-    const configPath = path.join(tmpDir, 'polira.config.ts');
+    const configPath = path.join(tmpDir, 'ktavi.config.ts');
 
     const originalResolve = path.resolve;
     vi.spyOn(path, 'resolve').mockImplementation((...args: string[]) => {
-      if (args.length === 1 && args[0] === 'polira.config.ts') return configPath;
-      if (args.length === 1 && args[0].startsWith('polira.config.'))
+      if (args.length === 1 && args[0] === 'ktavi.config.ts') return configPath;
+      if (args.length === 1 && args[0].startsWith('ktavi.config.'))
         return path.join(tmpDir, args[0]);
       if (args.length === 1 && args[0] === 'tsconfig.json')
         return originalResolve(tmpDir, 'tsconfig.json');
@@ -161,12 +161,12 @@ describe('polira config init', () => {
   });
 
   it('writes cloudinary config when cloudinary storage is selected', async () => {
-    const configPath = path.join(tmpDir, 'polira.config.ts');
+    const configPath = path.join(tmpDir, 'ktavi.config.ts');
 
     const originalResolve = path.resolve;
     vi.spyOn(path, 'resolve').mockImplementation((...args: string[]) => {
-      if (args.length === 1 && args[0] === 'polira.config.ts') return configPath;
-      if (args.length === 1 && args[0].startsWith('polira.config.'))
+      if (args.length === 1 && args[0] === 'ktavi.config.ts') return configPath;
+      if (args.length === 1 && args[0].startsWith('ktavi.config.'))
         return path.join(tmpDir, args[0]);
       if (args.length === 1 && args[0] === 'tsconfig.json')
         return originalResolve(tmpDir, 'tsconfig.json');
@@ -185,13 +185,13 @@ describe('polira config init', () => {
   });
 
   it('aborts when user declines overwrite of existing file', async () => {
-    const configPath = path.join(tmpDir, 'polira.config.ts');
+    const configPath = path.join(tmpDir, 'ktavi.config.ts');
     await fs.writeFile(configPath, 'existing content');
 
     const originalResolve = path.resolve;
     vi.spyOn(path, 'resolve').mockImplementation((...args: string[]) => {
-      if (args.length === 1 && args[0] === 'polira.config.ts') return configPath;
-      if (args.length === 1 && args[0].startsWith('polira.config.'))
+      if (args.length === 1 && args[0] === 'ktavi.config.ts') return configPath;
+      if (args.length === 1 && args[0].startsWith('ktavi.config.'))
         return path.join(tmpDir, args[0]);
       if (args.length === 1 && args[0] === 'tsconfig.json')
         return originalResolve(tmpDir, 'tsconfig.json');
@@ -211,14 +211,14 @@ describe('polira config init', () => {
   });
 
   it('overwrites existing file with --force', async () => {
-    const configPath = path.join(tmpDir, 'polira.config.ts');
+    const configPath = path.join(tmpDir, 'ktavi.config.ts');
     await fs.writeFile(configPath, 'old content');
     await fs.writeFile(path.join(tmpDir, 'tsconfig.json'), '{}');
 
     const originalResolve = path.resolve;
     vi.spyOn(path, 'resolve').mockImplementation((...args: string[]) => {
-      if (args.length === 1 && args[0] === 'polira.config.ts') return configPath;
-      if (args.length === 1 && args[0].startsWith('polira.config.'))
+      if (args.length === 1 && args[0] === 'ktavi.config.ts') return configPath;
+      if (args.length === 1 && args[0].startsWith('ktavi.config.'))
         return path.join(tmpDir, args[0]);
       if (args.length === 1 && args[0] === 'tsconfig.json')
         return originalResolve(tmpDir, 'tsconfig.json');
@@ -235,14 +235,14 @@ describe('polira config init', () => {
   });
 
   it('prompts for overwrite when --defaults is used without --force on existing file', async () => {
-    const configPath = path.join(tmpDir, 'polira.config.ts');
+    const configPath = path.join(tmpDir, 'ktavi.config.ts');
     await fs.writeFile(configPath, 'old content');
     await fs.writeFile(path.join(tmpDir, 'tsconfig.json'), '{}');
 
     const originalResolve = path.resolve;
     vi.spyOn(path, 'resolve').mockImplementation((...args: string[]) => {
-      if (args.length === 1 && args[0] === 'polira.config.ts') return configPath;
-      if (args.length === 1 && args[0].startsWith('polira.config.'))
+      if (args.length === 1 && args[0] === 'ktavi.config.ts') return configPath;
+      if (args.length === 1 && args[0].startsWith('ktavi.config.'))
         return path.join(tmpDir, args[0]);
       if (args.length === 1 && args[0] === 'tsconfig.json')
         return originalResolve(tmpDir, 'tsconfig.json');
@@ -263,14 +263,14 @@ describe('polira config init', () => {
   });
 
   it('overwrites existing file when --defaults confirms overwrite', async () => {
-    const configPath = path.join(tmpDir, 'polira.config.ts');
+    const configPath = path.join(tmpDir, 'ktavi.config.ts');
     await fs.writeFile(configPath, 'old content');
     await fs.writeFile(path.join(tmpDir, 'tsconfig.json'), '{}');
 
     const originalResolve = path.resolve;
     vi.spyOn(path, 'resolve').mockImplementation((...args: string[]) => {
-      if (args.length === 1 && args[0] === 'polira.config.ts') return configPath;
-      if (args.length === 1 && args[0].startsWith('polira.config.'))
+      if (args.length === 1 && args[0] === 'ktavi.config.ts') return configPath;
+      if (args.length === 1 && args[0].startsWith('ktavi.config.'))
         return path.join(tmpDir, args[0]);
       if (args.length === 1 && args[0] === 'tsconfig.json')
         return originalResolve(tmpDir, 'tsconfig.json');
@@ -289,14 +289,14 @@ describe('polira config init', () => {
   });
 
   it('writes .js extension when user selects JavaScript format', async () => {
-    const configPathTs = path.join(tmpDir, 'polira.config.ts');
-    const configPathJs = path.join(tmpDir, 'polira.config.js');
+    const configPathTs = path.join(tmpDir, 'ktavi.config.ts');
+    const configPathJs = path.join(tmpDir, 'ktavi.config.js');
 
     const originalResolve = path.resolve;
     vi.spyOn(path, 'resolve').mockImplementation((...args: string[]) => {
-      if (args.length === 1 && args[0] === 'polira.config.ts') return configPathTs;
-      if (args.length === 1 && args[0] === 'polira.config.js') return configPathJs;
-      if (args.length === 1 && args[0].startsWith('polira.config.'))
+      if (args.length === 1 && args[0] === 'ktavi.config.ts') return configPathTs;
+      if (args.length === 1 && args[0] === 'ktavi.config.js') return configPathJs;
+      if (args.length === 1 && args[0].startsWith('ktavi.config.'))
         return path.join(tmpDir, args[0]);
       if (args.length === 1 && args[0] === 'tsconfig.json')
         return originalResolve(tmpDir, 'tsconfig.json');
@@ -314,12 +314,12 @@ describe('polira config init', () => {
   });
 
   it('aborts when user declines write confirmation', async () => {
-    const configPath = path.join(tmpDir, 'polira.config.ts');
+    const configPath = path.join(tmpDir, 'ktavi.config.ts');
 
     const originalResolve = path.resolve;
     vi.spyOn(path, 'resolve').mockImplementation((...args: string[]) => {
-      if (args.length === 1 && args[0] === 'polira.config.ts') return configPath;
-      if (args.length === 1 && args[0].startsWith('polira.config.'))
+      if (args.length === 1 && args[0] === 'ktavi.config.ts') return configPath;
+      if (args.length === 1 && args[0].startsWith('ktavi.config.'))
         return path.join(tmpDir, args[0]);
       if (args.length === 1 && args[0] === 'tsconfig.json')
         return originalResolve(tmpDir, 'tsconfig.json');
@@ -340,12 +340,12 @@ describe('polira config init', () => {
   });
 
   it('escapes special characters in string values', async () => {
-    const configPath = path.join(tmpDir, 'polira.config.ts');
+    const configPath = path.join(tmpDir, 'ktavi.config.ts');
 
     const originalResolve = path.resolve;
     vi.spyOn(path, 'resolve').mockImplementation((...args: string[]) => {
-      if (args.length === 1 && args[0] === 'polira.config.ts') return configPath;
-      if (args.length === 1 && args[0].startsWith('polira.config.'))
+      if (args.length === 1 && args[0] === 'ktavi.config.ts') return configPath;
+      if (args.length === 1 && args[0].startsWith('ktavi.config.'))
         return path.join(tmpDir, args[0]);
       if (args.length === 1 && args[0] === 'tsconfig.json')
         return originalResolve(tmpDir, 'tsconfig.json');

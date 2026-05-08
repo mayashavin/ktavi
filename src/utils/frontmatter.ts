@@ -1,6 +1,6 @@
 import matter from 'gray-matter';
 import type { BlogFrontmatter } from '../core/types.js';
-import { PoliraError } from '../core/errors.js';
+import { KtaviError } from '../core/errors.js';
 
 export type ParsedFrontmatter = {
   frontmatter: BlogFrontmatter;
@@ -17,7 +17,7 @@ export function parseFrontmatter(rawContent: string): ParsedFrontmatter {
       rawContent,
     };
   } catch (err) {
-    throw new PoliraError(
+    throw new KtaviError(
       'Could not parse frontmatter. Please check that the YAML block starts and ends with ---.',
       'INVALID_FRONTMATTER',
       err,

@@ -12,7 +12,7 @@ const SOURCE_LABELS: Record<ConfigSource, string> = {
 };
 
 export function registerConfigCommand(program: Command) {
-  const configCmd = program.command('config').description('View and manage Polira configuration');
+  const configCmd = program.command('config').description('View and manage Ktavi configuration');
 
   configCmd
     .command('show')
@@ -56,8 +56,8 @@ export function registerConfigCommand(program: Command) {
 
   configCmd
     .command('init')
-    .description('Interactively create a polira config file')
-    .option('--global', 'Create global config at ~/.config/polira/config.js')
+    .description('Interactively create a ktavi config file')
+    .option('--global', 'Create global config at ~/.config/ktavi/config.js')
     .option('--force', 'Overwrite existing config without confirmation')
     .option('--defaults', 'Skip prompts and write default config')
     .action(async (opts: ConfigInitOptions) => {

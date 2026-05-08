@@ -1,9 +1,9 @@
 import type { TextAIProvider } from '../../core/providers.js';
-import { PoliraError } from '../../core/errors.js';
+import { KtaviError } from '../../core/errors.js';
 
 export function createOpenAITextProvider(apiKey: string, model: string): TextAIProvider {
   if (!apiKey) {
-    throw new PoliraError(
+    throw new KtaviError(
       'OPENAI_API_KEY is not set. Please add it to your .env file.',
       'AI_PROVIDER_ERROR',
     );
@@ -29,7 +29,7 @@ export function createOpenAITextProvider(apiKey: string, model: string): TextAIP
 
       const content = response.choices[0]?.message?.content;
       if (!content) {
-        throw new PoliraError('Empty response from AI provider.', 'AI_PROVIDER_ERROR');
+        throw new KtaviError('Empty response from AI provider.', 'AI_PROVIDER_ERROR');
       }
 
       return JSON.parse(content) as TOutput;
