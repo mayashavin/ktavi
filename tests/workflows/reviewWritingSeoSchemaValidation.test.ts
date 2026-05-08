@@ -72,7 +72,7 @@ describe('review and seo workflows schema validation', () => {
       suggestions: [
         {
           field: 'title',
-          severity: 'severe',
+          severity: 'invalid-severity',
           reason: 'Missing an informative title.',
           source: 'ai',
         },
