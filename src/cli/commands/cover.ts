@@ -20,6 +20,7 @@ export function registerCoverCommand(program: Command) {
     .option('--apply', 'Apply cover image to frontmatter')
     .option('--size <size>', 'Image size', '1792x1024')
     .option('--json', 'Output results as JSON')
+    .option('--autosave', 'Auto-accept generated image without interactive prompts')
     .action(
       async (
         file: string,
@@ -31,6 +32,7 @@ export function registerCoverCommand(program: Command) {
           apply?: boolean;
           size: string;
           json?: boolean;
+          autosave?: boolean;
         },
       ) => {
         try {
@@ -63,6 +65,7 @@ export function registerCoverCommand(program: Command) {
             aiProvider,
             imageProvider,
             storageProvider: opts.generate ? storageProvider : undefined,
+            interactive: opts.generate && !opts.autosave,
           });
 
           if (opts.json) {
