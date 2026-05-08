@@ -45,9 +45,8 @@ describe('optimizeSeoWorkflow', () => {
     expect(calls).toHaveLength(1);
     expect(calls[0].schemaName).toBe('seo_suggestions');
     expect(calls[0].userPrompt).toContain('Title: TanStack Query in Vue');
-    expect(calls[0].userPrompt).toContain(
-      'This post explain how TanStack Query can make data fetching more easier in Vue apps.',
-    );
+    expect(calls[0].userPrompt).toContain('TanStack Query can make data fetching');
+    expect(calls[0].userPrompt).toContain('## Why it matters');
 
     expect(result.patch).toBeUndefined();
     expect(result.suggestions).toEqual([
