@@ -6,6 +6,13 @@ import { generateAndAttachCoverWorkflow } from '../../src/workflows/generateAndA
 import { createMockTextAIProvider } from '../shared/createMockTextAIProvider.js';
 
 const VALID_POST = path.resolve('tests/fixtures/valid-post.md');
+const COVER_WORKFLOW_OPTIONS = {
+  generate: false,
+  apply: false,
+  size: '1792x1024' as const,
+  coverField: 'cover' as const,
+  interactive: false,
+};
 
 describe('review, seo, and cover workflows schema validation', () => {
   it('accepts a valid writing review provider response', async () => {
@@ -94,12 +101,8 @@ describe('review, seo, and cover workflows schema validation', () => {
     };
 
     const result = await generateAndAttachCoverWorkflow(VALID_POST, {
-      generate: false,
-      apply: false,
-      size: '1792x1024',
-      coverField: 'cover',
+      ...COVER_WORKFLOW_OPTIONS,
       aiProvider: createMockTextAIProvider(aiResponse),
-      interactive: false,
     });
 
     expect(result.coverPrompt.suggestedFilename).toBe('mountain-sunrise-trail');
@@ -115,12 +118,8 @@ describe('review, seo, and cover workflows schema validation', () => {
 
     await expect(
       generateAndAttachCoverWorkflow(VALID_POST, {
-        generate: false,
-        apply: false,
-        size: '1792x1024',
-        coverField: 'cover',
+        ...COVER_WORKFLOW_OPTIONS,
         aiProvider: createMockTextAIProvider(aiResponse),
-        interactive: false,
       }),
     ).rejects.toThrow();
   });
