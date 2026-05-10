@@ -19,12 +19,9 @@ vi.mock('../../src/utils/fileSystem.js', async (importOriginal) => {
 import { select, input } from '@inquirer/prompts';
 import { deleteFile } from '../../src/utils/fileSystem.js';
 import { generateAndAttachCoverWorkflow } from '../../src/workflows/generateAndAttachCoverWorkflow.js';
-import type {
-  TextAIProvider,
-  ImageGenerationProvider,
-  AssetStorageProvider,
-} from '../../src/core/providers.js';
-import type { CoverPromptResult, GeneratedImage, UploadedAsset } from '../../src/core/types.js';
+import { createMockAssetStorageProvider } from '../shared/createMockAssetStorageProvider.js';
+import type { TextAIProvider, ImageGenerationProvider } from '../../src/core/providers.js';
+import type { CoverPromptResult, GeneratedImage } from '../../src/core/types.js';
 
 const VALID_POST = path.resolve('tests/fixtures/valid-post.md');
 const MISSING_META_POST = path.resolve('tests/fixtures/missing-meta.md');
@@ -54,20 +51,6 @@ function makeImageProvider(localPath?: string): ImageGenerationProvider {
         localPath,
       };
       return image;
-    },
-  };
-}
-
-function makeStorageProvider(
-  localPath = '/tmp/polira-test/mountain-landscape.png',
-): AssetStorageProvider {
-  return {
-    async upload(): Promise<UploadedAsset> {
-      return {
-        provider: 'local',
-        url: '/images/blog/mountain-landscape.png',
-        localPath,
-      };
     },
   };
 }
@@ -182,7 +165,9 @@ describe('generateAndAttachCoverWorkflow — interactive mode', () => {
   it('accepts image when user selects "yes"', async () => {
     vi.mocked(select).mockResolvedValueOnce('yes');
 
-    const storageProvider = makeStorageProvider();
+    const storageProvider = createMockAssetStorageProvider({
+      localPath: '/tmp/polira-test/mountain-landscape.png',
+    });
     const result = await generateAndAttachCoverWorkflow(VALID_POST, {
       generate: true,
       apply: false,
@@ -202,7 +187,9 @@ describe('generateAndAttachCoverWorkflow — interactive mode', () => {
   it('returns without patch and clears image fields when user cancels', async () => {
     vi.mocked(select).mockResolvedValueOnce('cancel');
 
-    const storageProvider = makeStorageProvider('/tmp/polira-test/mountain-landscape.png');
+    const storageProvider = createMockAssetStorageProvider({
+      localPath: '/tmp/polira-test/mountain-landscape.png',
+    });
     const result = await generateAndAttachCoverWorkflow(VALID_POST, {
       generate: true,
       apply: false,
