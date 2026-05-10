@@ -1,7 +1,7 @@
 import { createCloudinaryStorageProvider } from '../../providers/storage/cloudinaryStorageProvider.js';
 import { createLocalStorageProvider } from '../../providers/storage/localStorageProvider.js';
 import type { AssetStorageProvider } from '../../core/providers.js';
-import type { PoliraConfig } from '../../core/config.js';
+import type { KtaviConfig } from '../../core/config.js';
 import type { StorageTarget } from '../../core/types.js';
 
 /**
@@ -10,7 +10,7 @@ import type { StorageTarget } from '../../core/types.js';
  */
 export function createStorageProvider(
   target: StorageTarget,
-  config: PoliraConfig,
+  config: KtaviConfig,
   env: NodeJS.ProcessEnv,
 ): AssetStorageProvider {
   if (target === 'cloudinary') {
