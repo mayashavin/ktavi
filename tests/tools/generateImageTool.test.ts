@@ -2,7 +2,6 @@ import { describe, it, expect } from 'vitest';
 import { generateImageTool } from '../../src/tools/generate-image/generateImageTool.js';
 import type { ImageGenerationProvider } from '../../src/core/providers.js';
 import type { CoverPromptResult, GeneratedImage } from '../../src/core/types.js';
-import { KtaviError } from '../../src/core/errors.js';
 
 const coverPrompt: CoverPromptResult = {
   visualConcept: 'A futuristic city skyline',
@@ -56,9 +55,10 @@ describe('generateImageTool', () => {
 
   it('throws IMAGE_GENERATION_FAILED when provider returns no base64 or buffer', async () => {
     const provider = makeImageProvider({ base64: undefined, buffer: undefined });
-    const resultPromise = generateImageTool({ prompt: coverPrompt, size: '1792x1024' }, provider);
-    await expect(resultPromise).rejects.toThrow(KtaviError);
-    await expect(resultPromise).rejects.toMatchObject({
+    await expect(
+      generateImageTool({ prompt: coverPrompt, size: '1792x1024' }, provider),
+    ).rejects.toMatchObject({
+      name: 'KtaviError',
       code: 'IMAGE_GENERATION_FAILED',
     });
   });
