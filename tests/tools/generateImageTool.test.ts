@@ -1,7 +1,7 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 import { generateImageTool } from '../../src/tools/generate-image/generateImageTool.js';
 import type { ImageGenerationProvider } from '../../src/core/providers.js';
-import type { CoverPromptResult } from '../../src/core/types.js';
+import type { CoverPromptResult, ImageSize } from '../../src/core/types.js';
 
 const coverPrompt: CoverPromptResult = {
   visualConcept: 'A futuristic city skyline',
@@ -10,11 +10,15 @@ const coverPrompt: CoverPromptResult = {
   suggestedFilename: 'futuristic-city-skyline',
 };
 
-function makeImageProvider(): ImageGenerationProvider & { lastPrompt: string } {
+type GenerateImageParams = Parameters<ImageGenerationProvider['generateImage']>[0];
+
+function makeImageProvider(): ImageGenerationProvider & { lastPrompt: string; lastSize: GenerateImageParams['size'] } {
   const provider = {
     lastPrompt: '',
-    async generateImage(params: { prompt: string; fileName: string; size: string }) {
+    lastSize: undefined as GenerateImageParams['size'],
+    async generateImage(params: GenerateImageParams) {
       provider.lastPrompt = params.prompt;
+      provider.lastSize = params.size;
       return {
         fileName: params.fileName,
         mimeType: 'image/png',
@@ -48,5 +52,28 @@ describe('generateImageTool', () => {
     const result = await generateImageTool({ prompt: coverPrompt, size: '1792x1024' }, provider);
     expect(result.fileName).toBe('futuristic-city-skyline');
     expect(result.mimeType).toBe('image/png');
+  });
+
+  it.each<ImageSize>(['1024x1024', '1536x1024', '1792x1024'])(
+    'forwards size %s to the image provider',
+    async (size) => {
+      const provider = makeImageProvider();
+      await generateImageTool({ prompt: coverPrompt, size }, provider);
+      expect(provider.lastSize).toBe(size);
+    },
+  );
+
+  it('forwards the suggested filename to the image provider', async () => {
+    const generateImage = vi.fn().mockResolvedValue({
+      fileName: coverPrompt.suggestedFilename,
+      mimeType: 'image/png',
+      base64: 'abc123',
+    });
+    const provider: ImageGenerationProvider = { generateImage };
+
+    await generateImageTool({ prompt: coverPrompt, size: '1792x1024' }, provider);
+
+    expect(generateImage).toHaveBeenCalledOnce();
+    expect(generateImage.mock.calls[0][0].fileName).toBe(coverPrompt.suggestedFilename);
   });
 });
