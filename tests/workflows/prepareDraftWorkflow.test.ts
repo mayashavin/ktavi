@@ -1,5 +1,16 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi, afterEach } from 'vitest';
 import path from 'node:path';
+
+// Spy on writeFile to verify apply=false never writes to disk
+vi.mock('../../src/utils/fileSystem.js', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('../../src/utils/fileSystem.js')>();
+  return {
+    ...actual,
+    writeFile: vi.fn(),
+  };
+});
+
+import { writeFile } from '../../src/utils/fileSystem.js';
 import { prepareDraftWorkflow } from '../../src/workflows/prepareDraftWorkflow.js';
 import type {
   TextAIProvider,
@@ -10,6 +21,10 @@ import type { GeneratedImage, UploadedAsset } from '../../src/core/types.js';
 
 const VALID_POST = path.resolve('tests/fixtures/valid-post.md');
 const MISSING_META_POST = path.resolve('tests/fixtures/missing-meta.md');
+
+afterEach(() => {
+  vi.clearAllMocks();
+});
 
 /**
  * A multi-response mock AI provider that returns the correct structure
@@ -163,10 +178,12 @@ describe('prepareDraftWorkflow', () => {
     expect(result.patch!.diff).toBeTruthy();
     expect(result.patch!.changes.length).toBeGreaterThan(0);
     expect(result.patch!.changes[0].field).toBe('cover');
-    // apply=false: updated content should contain the new cover URL but the file is not written
+    // apply=false: updated content contains the new cover URL
     expect(result.patch!.updatedContent).toContain(
       'https://res.cloudinary.com/demo/image/upload/tanstack-query-vue-cover.png',
     );
+    // apply=false: the fixture file must not have been written to disk
+    expect(writeFile).not.toHaveBeenCalled();
   });
 
   it('returns no patch when generateCover=true but no storageProvider given', async () => {
