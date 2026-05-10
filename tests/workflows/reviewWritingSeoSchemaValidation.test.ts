@@ -2,11 +2,12 @@ import { describe, it, expect } from 'vitest';
 import path from 'node:path';
 import { reviewDraftWorkflow } from '../../src/workflows/reviewDraftWorkflow.js';
 import { optimizeSeoWorkflow } from '../../src/workflows/optimizeSeoWorkflow.js';
+import { generateAndAttachCoverWorkflow } from '../../src/workflows/generateAndAttachCoverWorkflow.js';
 import { createMockTextAIProvider } from '../shared/createMockTextAIProvider.js';
 
 const VALID_POST = path.resolve('tests/fixtures/valid-post.md');
 
-describe('review and seo workflows schema validation', () => {
+describe('review, seo, and cover workflows schema validation', () => {
   it('accepts a valid writing review provider response', async () => {
     const aiResponse = {
       suggestions: [
@@ -81,6 +82,46 @@ describe('review and seo workflows schema validation', () => {
 
     await expect(
       optimizeSeoWorkflow(VALID_POST, { aiProvider: createMockTextAIProvider(aiResponse) }),
+    ).rejects.toThrow();
+  });
+
+  it('accepts a valid cover prompt provider response', async () => {
+    const aiResponse = {
+      visualConcept: 'A mountain sunrise over a winding trail',
+      prompt: 'Editorial illustration of a mountain sunrise over a winding trail',
+      altText: 'Mountain sunrise over a winding trail',
+      suggestedFilename: 'mountain-sunrise-trail',
+    };
+
+    const result = await generateAndAttachCoverWorkflow(VALID_POST, {
+      generate: false,
+      apply: false,
+      size: '1792x1024',
+      coverField: 'cover',
+      aiProvider: createMockTextAIProvider(aiResponse),
+      interactive: false,
+    });
+
+    expect(result.coverPrompt.suggestedFilename).toBe('mountain-sunrise-trail');
+  });
+
+  it('throws when cover prompt provider returns invalid schema', async () => {
+    const aiResponse = {
+      visualConcept: 'A mountain sunrise over a winding trail',
+      prompt: 'Editorial illustration of a mountain sunrise over a winding trail',
+      altText: 'Mountain sunrise over a winding trail',
+      suggestedFilename: 123,
+    };
+
+    await expect(
+      generateAndAttachCoverWorkflow(VALID_POST, {
+        generate: false,
+        apply: false,
+        size: '1792x1024',
+        coverField: 'cover',
+        aiProvider: createMockTextAIProvider(aiResponse),
+        interactive: false,
+      }),
     ).rejects.toThrow();
   });
 });
