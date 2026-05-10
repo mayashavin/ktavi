@@ -1,6 +1,6 @@
 # CLI Commands
 
-All commands accept a Markdown file as their first argument. Use `--json` on any command to get machine-readable JSON output.
+The content commands (`analyze`, `seo`, `review`, `fix`, `cover`, and `prepare`) accept a Markdown file as their first argument. Use `--json` on any command to get machine-readable JSON output.
 
 ## analyze
 

@@ -27,7 +27,7 @@ npm install -g ktavi
 Set your OpenAI API key:
 
 ```bash
-echo "OPENAI_API_KEY=sk-..." > .env
+echo "OPENAI_API_KEY=sk-..." >> .env
 ```
 
 Run your first analysis:
