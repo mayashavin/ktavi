@@ -46,7 +46,6 @@ function makeAiProvider(): TextAIProvider {
 
 function makeImageProvider(localPath?: string): ImageGenerationProvider {
   return createMockImageGenerationProvider({
-    fileName: 'mountain-landscape',
     localPath,
   });
 }
