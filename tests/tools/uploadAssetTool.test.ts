@@ -14,7 +14,7 @@ describe('uploadAssetTool', () => {
     const uploadedAsset: UploadedAsset = {
       provider: 'local',
       url: '/images/blog/cover-image.png',
-      localPath: '/tmp/polira-test/cover-image.png',
+      localPath: '/tmp/ktavi-test/cover-image.png',
     };
 
     const upload = vi.fn(async () => uploadedAsset);
