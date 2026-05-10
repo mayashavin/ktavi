@@ -24,7 +24,8 @@ import type {
   ImageGenerationProvider,
   AssetStorageProvider,
 } from '../../src/core/providers.js';
-import type { CoverPromptResult, GeneratedImage, UploadedAsset } from '../../src/core/types.js';
+import type { CoverPromptResult, UploadedAsset } from '../../src/core/types.js';
+import { createMockImageGenerationProvider } from '../shared/createMockImageGenerationProvider.js';
 
 const VALID_POST = path.resolve('tests/fixtures/valid-post.md');
 
@@ -44,17 +45,10 @@ function makeAiProvider(): TextAIProvider {
 }
 
 function makeImageProvider(localPath?: string): ImageGenerationProvider {
-  return {
-    async generateImage() {
-      const image: GeneratedImage = {
-        fileName: 'mountain-landscape',
-        mimeType: 'image/png',
-        base64: 'abc123',
-        localPath,
-      };
-      return image;
-    },
-  };
+  return createMockImageGenerationProvider({
+    fileName: 'mountain-landscape',
+    localPath,
+  });
 }
 
 function makeStorageProvider(
@@ -161,7 +155,7 @@ describe('generateAndAttachCoverWorkflow — interactive mode', () => {
         return {
           fileName: 'mountain-landscape',
           mimeType: 'image/png',
-          base64: 'abc123',
+          buffer: Buffer.from('regenerated-image'),
           localPath: `/tmp/polira-test/mountain-landscape-${callCount}.png`,
         };
       },
@@ -197,7 +191,7 @@ describe('generateAndAttachCoverWorkflow — interactive mode', () => {
         return {
           fileName: 'mountain-landscape',
           mimeType: 'image/png',
-          base64: 'abc123',
+          buffer: Buffer.from('auto-accepted-image'),
         };
       },
     };
@@ -233,7 +227,7 @@ describe('generateAndAttachCoverWorkflow — interactive mode', () => {
         return {
           fileName: 'mountain-landscape',
           mimeType: 'image/png',
-          base64: 'abc123',
+          buffer: Buffer.from('cleanup-image'),
           localPath: `/tmp/polira-test/mountain-landscape-${callCount}.png`,
         };
       },
