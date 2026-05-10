@@ -2,11 +2,25 @@ import { describe, it, expect } from 'vitest';
 import path from 'node:path';
 import { reviewDraftWorkflow } from '../../src/workflows/reviewDraftWorkflow.js';
 import { optimizeSeoWorkflow } from '../../src/workflows/optimizeSeoWorkflow.js';
+import { generateAndAttachCoverWorkflow } from '../../src/workflows/generateAndAttachCoverWorkflow.js';
 import { createMockTextAIProvider } from '../shared/createMockTextAIProvider.js';
 
 const VALID_POST = path.resolve('tests/fixtures/valid-post.md');
+const COVER_WORKFLOW_OPTIONS = {
+  generate: false,
+  apply: false,
+  size: '1792x1024' as const,
+  coverField: 'cover' as const,
+  interactive: false,
+};
+const VALID_COVER_PROMPT_RESPONSE = {
+  visualConcept: 'A mountain sunrise over a winding trail',
+  prompt: 'Editorial illustration of a mountain sunrise over a winding trail',
+  altText: 'Mountain sunrise over a winding trail',
+  suggestedFilename: 'mountain-sunrise-trail',
+};
 
-describe('review and seo workflows schema validation', () => {
+describe('review, seo, and cover workflows schema validation', () => {
   it('accepts a valid writing review provider response', async () => {
     const aiResponse = {
       suggestions: [
@@ -81,6 +95,29 @@ describe('review and seo workflows schema validation', () => {
 
     await expect(
       optimizeSeoWorkflow(VALID_POST, { aiProvider: createMockTextAIProvider(aiResponse) }),
+    ).rejects.toThrow();
+  });
+
+  it('accepts a valid cover prompt provider response', async () => {
+    const result = await generateAndAttachCoverWorkflow(VALID_POST, {
+      ...COVER_WORKFLOW_OPTIONS,
+      aiProvider: createMockTextAIProvider(VALID_COVER_PROMPT_RESPONSE),
+    });
+
+    expect(result.coverPrompt.suggestedFilename).toBe('mountain-sunrise-trail');
+  });
+
+  it('throws when cover prompt provider returns invalid schema', async () => {
+    const aiResponse = {
+      ...VALID_COVER_PROMPT_RESPONSE,
+      suggestedFilename: 123,
+    };
+
+    await expect(
+      generateAndAttachCoverWorkflow(VALID_POST, {
+        ...COVER_WORKFLOW_OPTIONS,
+        aiProvider: createMockTextAIProvider(aiResponse),
+      }),
     ).rejects.toThrow();
   });
 });
