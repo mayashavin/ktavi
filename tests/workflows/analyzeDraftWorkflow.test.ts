@@ -5,48 +5,10 @@ import { analyzeDraftWorkflow } from '../../src/workflows/analyzeDraftWorkflow.j
 import type { TextAIProvider } from '../../src/core/providers.js';
 
 const VALID_POST = path.resolve('tests/fixtures/valid-post.md');
-const VALID_POST_BODY = `
-# Using TanStack Query in Vue
 
-TanStack Query brings powerful data fetching, caching, and synchronization to Vue applications.
-
-## Why TanStack Query?
-
-Managing loading states, errors, caching, and refetching manually can become complex. TanStack Query abstracts all of this into a simple, declarative API.
-
-## Getting Started
-
-First, install the package:
-
-\`\`\`bash
-npm install @tanstack/vue-query
-\`\`\`
-
-Then set up the query client in your app:
-
-\`\`\`ts
-import { VueQueryPlugin } from '@tanstack/vue-query';
-
-app.use(VueQueryPlugin);
-\`\`\`
-
-## Fetching Data
-
-Use the \`useQuery\` composable to fetch data:
-
-\`\`\`ts
-import { useQuery } from '@tanstack/vue-query';
-
-const { data, isLoading, error } = useQuery({
-  queryKey: ['todos'],
-  queryFn: fetchTodos,
-});
-\`\`\`
-
-## Conclusion
-
-TanStack Query simplifies data management in Vue apps significantly. Give it a try in your next project.
-
+function getPostBodyFromRawContent(rawContent: string): string {
+  return rawContent.replace(/^---\r?\n[\s\S]*?\r?\n---(\r?\n)?/, '');
+}
 Check out the [official documentation](https://tanstack.com/query) for more details.
 
 ![TanStack Query diagram](./images/query-diagram.png "Query flow diagram")
