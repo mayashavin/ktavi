@@ -19,9 +19,14 @@ vi.mock('../../src/utils/fileSystem.js', async (importOriginal) => {
 import { select, input } from '@inquirer/prompts';
 import { deleteFile } from '../../src/utils/fileSystem.js';
 import { generateAndAttachCoverWorkflow } from '../../src/workflows/generateAndAttachCoverWorkflow.js';
+import type {
+  TextAIProvider,
+  ImageGenerationProvider,
+  AssetStorageProvider,
+} from '../../src/core/providers.js';
+import type { CoverPromptResult, GeneratedImage, UploadedAsset } from '../../src/core/types.js';
 import { createMockAssetStorageProvider } from '../shared/createMockAssetStorageProvider.js';
-import type { TextAIProvider, ImageGenerationProvider } from '../../src/core/providers.js';
-import type { CoverPromptResult, GeneratedImage } from '../../src/core/types.js';
+import { createMockImageGenerationProvider } from '../shared/createMockImageGenerationProvider.js';
 
 const VALID_POST = path.resolve('tests/fixtures/valid-post.md');
 const MISSING_META_POST = path.resolve('tests/fixtures/missing-meta.md');
@@ -42,17 +47,9 @@ function makeAiProvider(): TextAIProvider {
 }
 
 function makeImageProvider(localPath?: string): ImageGenerationProvider {
-  return {
-    async generateImage() {
-      const image: GeneratedImage = {
-        fileName: 'mountain-landscape',
-        mimeType: 'image/png',
-        base64: 'abc123',
-        localPath,
-      };
-      return image;
-    },
-  };
+  return createMockImageGenerationProvider({
+    localPath,
+  });
 }
 
 afterEach(() => {
@@ -84,7 +81,7 @@ describe('generateAndAttachCoverWorkflow — non-interactive mode', () => {
     const generatedImage: GeneratedImage = {
       fileName: 'mountain-landscape',
       mimeType: 'image/png',
-      base64: 'abc123',
+      buffer: Buffer.from('abc123'),
       localPath: '/tmp/polira-test/mountain-landscape.png',
     };
     const generateImage = vi.fn().mockResolvedValue(generatedImage);
@@ -220,7 +217,7 @@ describe('generateAndAttachCoverWorkflow — interactive mode', () => {
         return {
           fileName: 'mountain-landscape',
           mimeType: 'image/png',
-          base64: 'abc123',
+          buffer: Buffer.from('regenerated-image'),
           localPath: `/tmp/polira-test/mountain-landscape-${callCount}.png`,
         };
       },
@@ -256,7 +253,7 @@ describe('generateAndAttachCoverWorkflow — interactive mode', () => {
         return {
           fileName: 'mountain-landscape',
           mimeType: 'image/png',
-          base64: 'abc123',
+          buffer: Buffer.from('auto-accepted-image'),
         };
       },
     };
@@ -292,7 +289,7 @@ describe('generateAndAttachCoverWorkflow — interactive mode', () => {
         return {
           fileName: 'mountain-landscape',
           mimeType: 'image/png',
-          base64: 'abc123',
+          buffer: Buffer.from('cleanup-image'),
           localPath: `/tmp/polira-test/mountain-landscape-${callCount}.png`,
         };
       },
