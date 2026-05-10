@@ -42,7 +42,7 @@ describe('analyzeDraftWorkflow', () => {
         slug: 'tanstack-query-vue',
         tags: ['vue', 'tanstack-query', 'frontend'],
         cover: '/images/blog/tanstack-query-vue-cover.png',
-        date: new Date('2025-01-15T00:00:00.000Z'),
+        date: '2025-01-15T00:00:00.000Z',
       },
       markdownBody: VALID_POST_BODY,
       metadata: {
