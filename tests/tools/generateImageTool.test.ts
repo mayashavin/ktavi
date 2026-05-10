@@ -10,11 +10,13 @@ const coverPrompt: CoverPromptResult = {
   suggestedFilename: 'futuristic-city-skyline',
 };
 
-function makeImageProvider(): ImageGenerationProvider & { lastPrompt: string; lastSize: string } {
+type GenerateImageParams = Parameters<ImageGenerationProvider['generateImage']>[0];
+
+function makeImageProvider(): ImageGenerationProvider & { lastPrompt: string; lastSize: GenerateImageParams['size'] } {
   const provider = {
     lastPrompt: '',
-    lastSize: '',
-    async generateImage(params: { prompt: string; fileName: string; size: string }) {
+    lastSize: undefined as GenerateImageParams['size'],
+    async generateImage(params: GenerateImageParams) {
       provider.lastPrompt = params.prompt;
       provider.lastSize = params.size;
       return {

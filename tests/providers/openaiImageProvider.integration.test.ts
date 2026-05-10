@@ -32,7 +32,7 @@ describe.skipIf(!RUN_INTEGRATION)(
         expect(result.base64).toBeTruthy();
         expect(typeof result.base64).toBe('string');
         expect(result.buffer).toBeInstanceOf(Buffer);
-        expect(result.buffer!.length).toBeGreaterThan(0);
+        expect(result.buffer?.length).toBeGreaterThan(0);
       },
       30_000,
     );
