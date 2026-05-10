@@ -64,8 +64,9 @@ const DEFAULT_RESPONSES: Record<string, unknown> = {
 export function createMockTextAIProvider(overrides?: Record<string, unknown>): TextAIProvider {
   const responses = { ...DEFAULT_RESPONSES, ...overrides };
   return {
-    generateStructuredOutput: async <TOutput>(input: { schemaName: string }) =>
-      responses[input.schemaName] as TOutput,
+    generateStructuredOutput: async <TOutput>(
+      input: Parameters<TextAIProvider['generateStructuredOutput']>[0],
+    ) => responses[input.schemaName] as TOutput,
   };
 }
 
