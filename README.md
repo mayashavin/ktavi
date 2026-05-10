@@ -1,85 +1,66 @@
 # Ktavi
 
+[![npm version](https://img.shields.io/npm/v/ktavi.svg)](https://www.npmjs.com/package/ktavi)
+[![license](https://img.shields.io/npm/l/ktavi.svg)](./LICENSE)
+
 A CLI-first, workflow-driven AI assistant for preparing Markdown blog drafts for publishing.
 
-It reviews your draft for grammar, clarity, and SEO metadata, generates a matching cover image concept, optionally creates and uploads the image, and updates your Markdown frontmatter with a reviewable diff.
+Ktavi reviews your draft for grammar, clarity, and SEO metadata, generates a matching cover image concept, optionally creates and uploads the image, and updates your Markdown frontmatter -- all with a reviewable diff before any changes are written.
 
 ## Features
 
-- Parse Markdown and YAML frontmatter
-- Review SEO metadata
-- Suggest grammar and clarity improvements
-- Generate blog cover image prompts
-- Generate cover images
-- Save images locally or upload to Cloudinary
-- Update Markdown frontmatter
-- Show diffs before applying changes
-- Interactive config scaffolding with `ktavi config init`
-- View resolved config with source attribution via `ktavi config show`
+- **Analyze** -- parse Markdown structure, frontmatter, and content metrics
+- **SEO review** -- deterministic checks plus AI-powered suggestions for title, description, slug, tags, headings, and images
+- **Writing review** -- grammar, clarity, tone, and structure suggestions with configurable intensity
+- **Content summary** -- AI-generated summary, key topics, target audience, and suggested meta description
+- **Cover images** -- generate a visual concept and prompt, create the image, save locally or upload to Cloudinary
+- **Interactive feedback** -- preview generated images and regenerate with feedback before accepting
+- **Diff before apply** -- every change is shown as a unified diff; nothing is written without `--apply`
+- **Layered config** -- project, global, and default settings with `ktavi config init` and `ktavi config show`
 
-## Setup
+## Quickstart
 
 ```bash
-npm install
-cp .env.example .env
-# Add your API keys to .env
+npm install -g ktavi
 ```
 
-### Quick config setup
+Set your OpenAI API key:
 
 ```bash
-ktavi config init                  # Interactive config wizard
-ktavi config init --defaults       # Write default config without prompts
-ktavi config init --global         # Create global config at ~/.config/ktavi/config.js
+echo "OPENAI_API_KEY=sk-..." > .env
 ```
 
-This creates a `ktavi.config.ts` (or `.js`) with your preferred AI provider, models, writing mode, image settings, and storage configuration.
-
-## Usage
+Run your first analysis:
 
 ```bash
 ktavi analyze ./posts/my-post.md
-ktavi seo ./posts/my-post.md
-ktavi review ./posts/my-post.md
-ktavi cover ./posts/my-post.md --prompt-only
-ktavi prepare ./posts/my-post.md
 ```
 
-Use `--apply` to write changes.
-
-### Configuration
+## Commands
 
 ```bash
-ktavi config show                  # Display resolved config with sources
-ktavi config show --json           # Output as JSON
+ktavi analyze <file>              # Metadata summary and content analysis
+ktavi seo <file> [--apply]        # SEO review with optional auto-fix
+ktavi review <file> [--mode ...]  # Writing quality review
+ktavi fix <file> [--apply]        # Auto-fix critical SEO issues
+ktavi cover <file> [--generate]   # Cover image generation
+ktavi prepare <file> [--apply]    # Full publish-preparation workflow
+ktavi config show                 # View resolved config with sources
+ktavi config init                 # Interactive config wizard
 ```
 
-Config is loaded with the following precedence: **project config** > **global config** > **defaults**.
+Use `--json` on any command for machine-readable output.
 
-- **Project config**: `ktavi.config.ts` or `ktavi.config.js` in the current directory
-- **Global config**: `~/.config/ktavi/config.js`
+## Documentation
 
-## Development
-
-```bash
-npm run dev -- analyze ./posts/my-post.md   # Run locally via tsx
-npm run build                                # Build with Vite
-npm test                                     # Run tests
-npm run typecheck                            # Type check
-npm run lint                                 # Lint
-npm run format                               # Format
-```
-
-## Releasing
-
-This project uses [Changesets](https://github.com/changesets/changesets) for versioning and changelogs.
-
-```bash
-npx changeset           # Add a changeset after making notable changes
-npm run version          # Bump version and update CHANGELOG.md
-npm run release          # Build and publish to npm
-```
+- [Getting Started](./docs/getting-started.md)
+- [CLI Commands](./docs/commands.md) -- full flag reference
+- [Configuration](./docs/configuration.md) -- all config fields and defaults
+- [Environment Variables](./docs/environment-variables.md) -- API keys and setup
+- [Provider Setup](./docs/providers.md) -- OpenAI and Cloudinary guides
+- [Workflows](./docs/workflows.md) -- usage patterns and examples
+- [Contributing](./CONTRIBUTING.md) -- development setup and guidelines
 
 ## Privacy
 
-Markdown content may be sent to the configured AI provider (e.g. OpenAI) for grammar review, SEO suggestions, and cover image generation.
+Markdown content is sent to the configured AI provider (e.g. OpenAI) for grammar review, SEO suggestions, content summarization, and cover image generation. No data is stored by Ktavi itself.
