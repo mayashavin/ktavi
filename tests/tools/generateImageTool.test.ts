@@ -56,12 +56,9 @@ describe('generateImageTool', () => {
 
   it('throws IMAGE_GENERATION_FAILED when provider returns no base64 or buffer', async () => {
     const provider = makeImageProvider({ base64: undefined, buffer: undefined });
-    await expect(
-      generateImageTool({ prompt: coverPrompt, size: '1792x1024' }, provider),
-    ).rejects.toThrow(KtaviError);
-    await expect(
-      generateImageTool({ prompt: coverPrompt, size: '1792x1024' }, provider),
-    ).rejects.toMatchObject({
+    const resultPromise = generateImageTool({ prompt: coverPrompt, size: '1792x1024' }, provider);
+    await expect(resultPromise).rejects.toThrow(KtaviError);
+    await expect(resultPromise).rejects.toMatchObject({
       code: 'IMAGE_GENERATION_FAILED',
     });
   });
