@@ -24,6 +24,17 @@ describe.skipIf(!RUN_INTEGRATION)('openaiImageProvider (integration)', () => {
   });
 
   it('throws KtaviError when API key is empty', () => {
-    expect(() => createOpenAIImageProvider('')).toThrow('OPENAI_API_KEY is not set');
+    let thrown: unknown;
+
+    try {
+      createOpenAIImageProvider('');
+    } catch (error) {
+      thrown = error;
+    }
+
+    expect(thrown).toBeDefined();
+    expect(thrown).toBeInstanceOf(Error);
+    expect((thrown as Error).name).toBe('KtaviError');
+    expect((thrown as Error).message).toContain('OPENAI_API_KEY is not set');
   });
 });
