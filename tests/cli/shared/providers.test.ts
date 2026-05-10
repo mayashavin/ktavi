@@ -11,9 +11,9 @@ vi.mock('../../../src/providers/storage/localStorageProvider.js', () => ({
 import { createStorageProvider } from '../../../src/cli/shared/providers.js';
 import { createCloudinaryStorageProvider } from '../../../src/providers/storage/cloudinaryStorageProvider.js';
 import { createLocalStorageProvider } from '../../../src/providers/storage/localStorageProvider.js';
-import type { PoliraConfig } from '../../../src/core/config.js';
+import type { KtaviConfig } from '../../../src/core/config.js';
 
-const baseConfig: PoliraConfig = {
+const baseConfig: KtaviConfig = {
   ai: { provider: 'openai', textModel: 'gpt-4o' },
   markdown: { coverField: 'cover', preserveFrontmatterOrder: true },
   writing: { defaultMode: 'medium' },
@@ -30,7 +30,7 @@ describe('createStorageProvider', () => {
   });
 
   it('creates a Cloudinary provider when target is cloudinary', () => {
-    const config: PoliraConfig = {
+    const config: KtaviConfig = {
       ...baseConfig,
       storage: {
         ...baseConfig.storage,
@@ -56,7 +56,7 @@ describe('createStorageProvider', () => {
   });
 
   it('falls back to blog-covers folder when cloudinary config is absent', () => {
-    const config: PoliraConfig = {
+    const config: KtaviConfig = {
       ...baseConfig,
       storage: { provider: 'cloudinary' },
     };
@@ -81,7 +81,7 @@ describe('createStorageProvider', () => {
   });
 
   it('uses the schema default path for local storage config', () => {
-    const config: PoliraConfig = {
+    const config: KtaviConfig = {
       ...baseConfig,
       storage: {
         provider: 'local',
@@ -95,7 +95,7 @@ describe('createStorageProvider', () => {
   });
 
   it('passes empty strings for missing Cloudinary env vars', () => {
-    const config: PoliraConfig = {
+    const config: KtaviConfig = {
       ...baseConfig,
       storage: { provider: 'cloudinary', cloudinary: { folder: 'covers' } },
     };

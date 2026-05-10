@@ -275,6 +275,56 @@ describe('generateAndAttachCoverWorkflow — interactive mode', () => {
     expect(result.generatedImage).toBeDefined();
   });
 
+  it('generates unique filenames for each attempt to avoid collisions', async () => {
+    vi.mocked(select).mockResolvedValueOnce('regenerate').mockResolvedValueOnce('yes');
+    vi.mocked(input).mockResolvedValueOnce('Make it brighter.');
+    vi.mocked(deleteFile).mockResolvedValue(undefined);
+
+    const fileNames: string[] = [];
+    const imageProvider: ImageGenerationProvider = {
+      async generateImage(params) {
+        fileNames.push(params.fileName);
+        return {
+          fileName: params.fileName,
+          mimeType: 'image/png',
+          buffer: Buffer.from('image-data'),
+          localPath: `/tmp/polira-test/${params.fileName}.png`,
+        };
+      },
+    };
+
+    const storageProvider: AssetStorageProvider = {
+      async upload(image) {
+        return {
+          provider: 'local',
+          url: `/images/${image.fileName}.png`,
+          localPath: `/tmp/polira-test/${image.fileName}.png`,
+        };
+      },
+    };
+
+    const result = await generateAndAttachCoverWorkflow(VALID_POST, {
+      generate: true,
+      apply: false,
+      size: '1792x1024',
+      coverField: 'cover',
+      aiProvider: makeAiProvider(),
+      imageProvider,
+      storageProvider,
+      interactive: true,
+      maxRetries: 3,
+    });
+
+    expect(fileNames).toHaveLength(2);
+    expect(fileNames[0]).toBe('mountain-landscape');
+    expect(fileNames[1]).toBe('mountain-landscape-1');
+    expect(result.generatedImage).toBeDefined();
+
+    const deletedPaths = vi.mocked(deleteFile).mock.calls.map((c) => c[0]);
+    expect(deletedPaths).toContain('/tmp/polira-test/mountain-landscape.png');
+    expect(deletedPaths).not.toContain('/tmp/polira-test/mountain-landscape-1.png');
+  });
+
   it('does not delete the auto-accepted image when maxRetries is reached', async () => {
     // Always select regenerate to exhaust retries
     vi.mocked(select).mockResolvedValue('regenerate');
