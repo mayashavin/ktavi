@@ -54,13 +54,13 @@ describeCloudinary('createCloudinaryStorageProvider integration', () => {
         'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO9f2foAAAAASUVORK5CYII=',
     });
 
+    if (result.publicId) {
+      uploadedPublicIds.push(result.publicId);
+    }
+
     expect(result.provider).toBe('cloudinary');
     expect(result.url).toBeTruthy();
     expect(result.secureUrl).toContain('https://');
     expect(result.publicId).toBeTruthy();
-
-    if (result.publicId) {
-      uploadedPublicIds.push(result.publicId);
-    }
   });
 });
