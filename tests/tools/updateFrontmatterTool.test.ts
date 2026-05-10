@@ -1,4 +1,6 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach } from 'vitest';
+import fs from 'node:fs/promises';
+import os from 'node:os';
 import path from 'node:path';
 import { parseMarkdownTool } from '../../src/tools/parse-markdown/index.js';
 import { updateFrontmatterTool } from '../../src/tools/update-frontmatter/index.js';
@@ -63,5 +65,53 @@ describe('updateFrontmatterTool', () => {
     expect(patch.updatedContent).toContain('title: Using TanStack Query in Vue');
     expect(patch.updatedContent).toContain('slug: tanstack-query-vue');
     expect(patch.updatedContent).toContain('description: Updated description.');
+  });
+});
+
+describe('updateFrontmatterTool — apply vs dry-run (disk I/O)', () => {
+  let tempDir: string;
+  let tempFile: string;
+
+  beforeEach(async () => {
+    tempDir = await fs.mkdtemp(path.join(os.tmpdir(), 'ktavi-apply-test-'));
+    tempFile = path.join(tempDir, 'test-post.md');
+    await fs.copyFile(fixture('missing-meta.md'), tempFile);
+  });
+
+  afterEach(async () => {
+    await fs.rm(tempDir, { recursive: true, force: true });
+  });
+
+  it('writes updated frontmatter to disk when apply is true', async () => {
+    const draft = await parseMarkdownTool({ filePath: tempFile });
+    const originalContent = await fs.readFile(tempFile, 'utf-8');
+
+    await updateFrontmatterTool({
+      draft,
+      updates: {
+        description: 'A new description for testing.',
+        slug: 'tanstack-query-in-vue',
+      },
+      apply: true,
+    });
+
+    const updatedContent = await fs.readFile(tempFile, 'utf-8');
+    expect(updatedContent).not.toBe(originalContent);
+    expect(updatedContent).toContain('description: A new description for testing.');
+    expect(updatedContent).toContain('slug: tanstack-query-in-vue');
+  });
+
+  it('does not write to disk when apply is false', async () => {
+    const draft = await parseMarkdownTool({ filePath: tempFile });
+    const originalContent = await fs.readFile(tempFile, 'utf-8');
+
+    await updateFrontmatterTool({
+      draft,
+      updates: { description: 'This should not be written to disk.' },
+      apply: false,
+    });
+
+    const afterContent = await fs.readFile(tempFile, 'utf-8');
+    expect(afterContent).toBe(originalContent);
   });
 });
