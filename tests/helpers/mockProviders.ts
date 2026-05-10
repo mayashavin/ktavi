@@ -66,7 +66,14 @@ export function createMockTextAIProvider(overrides?: Record<string, unknown>): T
   return {
     generateStructuredOutput: async <TOutput>(
       input: Parameters<TextAIProvider['generateStructuredOutput']>[0],
-    ) => responses[input.schemaName] as TOutput,
+    ) => {
+      if (!(input.schemaName in responses)) {
+        throw new Error(
+          `MockTextAIProvider: unknown schemaName "${input.schemaName}". Available schemas: ${Object.keys(responses).join(', ')}`,
+        );
+      }
+      return responses[input.schemaName] as TOutput;
+    },
   };
 }
 
