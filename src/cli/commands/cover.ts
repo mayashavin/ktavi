@@ -21,6 +21,7 @@ export function registerCoverCommand(program: Command) {
     .option('--size <size>', 'Image size', '1792x1024')
     .option('--json', 'Output results as JSON')
     .option('--autosave', 'Auto-accept generated image without interactive prompts')
+    .option('--side-by-side', 'Show diff in side-by-side view')
     .action(
       async (
         file: string,
@@ -33,6 +34,7 @@ export function registerCoverCommand(program: Command) {
           size: string;
           json?: boolean;
           autosave?: boolean;
+          sideBySide?: boolean;
         },
       ) => {
         try {
@@ -91,7 +93,7 @@ export function registerCoverCommand(program: Command) {
 
           if (result.patch?.diff) {
             logger.heading('Frontmatter Changes');
-            logger.diff(result.patch.diff);
+            logger.diff(result.patch.diff, { sideBySide: opts.sideBySide });
           }
 
           logger.blank();

@@ -4,6 +4,7 @@ import { logger } from '../../core/logger.js';
 import { KtaviError, friendlyErrorMessage } from '../../core/errors.js';
 import { createOpenAITextProvider } from '../../providers/ai/openaiTextProvider.js';
 import { loadConfig } from '../../core/config.js';
+import { renderInlineSuggestion } from '../../utils/diffRenderer.js';
 import type { WritingMode } from '../../core/types.js';
 
 export function registerReviewCommand(program: Command) {
@@ -44,8 +45,7 @@ export function registerReviewCommand(program: Command) {
             s.category,
             `${s.reason} (confidence: ${(s.confidence * 100).toFixed(0)}%)`,
           );
-          logger.dim(`    - ${s.original}`);
-          logger.dim(`    + ${s.suggested}`);
+          console.log(renderInlineSuggestion(s.original, s.suggested));
           logger.blank();
         }
 

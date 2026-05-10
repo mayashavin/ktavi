@@ -1,3 +1,5 @@
+import { renderColoredDiff, renderSideBySideDiff } from '../utils/diffRenderer.js';
+
 const COLORS = {
   reset: '\x1b[0m',
   bold: '\x1b[1m',
@@ -63,18 +65,11 @@ export const logger = {
     );
   },
 
-  diff(diffText: string) {
-    for (const line of diffText.split('\n')) {
-      if (line.startsWith('+') && !line.startsWith('+++')) {
-        console.log(`${COLORS.green}${line}${COLORS.reset}`);
-      } else if (line.startsWith('-') && !line.startsWith('---')) {
-        console.log(`${COLORS.red}${line}${COLORS.reset}`);
-      } else if (line.startsWith('@@')) {
-        console.log(`${COLORS.cyan}${line}${COLORS.reset}`);
-      } else {
-        console.log(line);
-      }
-    }
+  diff(diffText: string, options?: { sideBySide?: boolean }) {
+    const rendered = options?.sideBySide
+      ? renderSideBySideDiff(diffText)
+      : renderColoredDiff(diffText);
+    console.log(rendered);
   },
 
   summary(counts: { info?: number; warning?: number; critical?: number }) {
