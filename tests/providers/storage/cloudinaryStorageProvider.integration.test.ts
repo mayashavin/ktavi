@@ -1,4 +1,4 @@
-import { afterAll, describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it } from 'vitest';
 import { createCloudinaryStorageProvider } from '../../../src/providers/storage/cloudinaryStorageProvider.js';
 
 const RUN_CLOUDINARY_INTEGRATION_TESTS = process.env.RUN_CLOUDINARY_INTEGRATION_TESTS === 'true';
@@ -11,7 +11,7 @@ const apiSecret = process.env.CLOUDINARY_API_SECRET ?? '';
 
 const uploadedPublicIds: string[] = [];
 
-afterAll(async () => {
+afterEach(async () => {
   if (!RUN_CLOUDINARY_INTEGRATION_TESTS || uploadedPublicIds.length === 0) {
     return;
   }
@@ -28,6 +28,8 @@ afterAll(async () => {
       cloudinary.uploader.destroy(publicId, { invalidate: true, resource_type: 'image' }),
     ),
   );
+
+  uploadedPublicIds.length = 0;
 });
 
 describeCloudinary('createCloudinaryStorageProvider integration', () => {
