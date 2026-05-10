@@ -96,9 +96,10 @@ describe('updateFrontmatterTool — apply vs dry-run (disk I/O)', () => {
     });
 
     const updatedContent = await fs.readFile(tempFile, 'utf-8');
+    const updatedDraft = await parseMarkdownTool({ filePath: tempFile });
     expect(updatedContent).not.toBe(originalContent);
-    expect(updatedContent).toContain('description: A new description for testing.');
-    expect(updatedContent).toContain('slug: tanstack-query-in-vue');
+    expect(updatedDraft.frontmatter.description).toBe('A new description for testing.');
+    expect(updatedDraft.frontmatter.slug).toBe('tanstack-query-in-vue');
   });
 
   it('does not write to disk when apply is false', async () => {
