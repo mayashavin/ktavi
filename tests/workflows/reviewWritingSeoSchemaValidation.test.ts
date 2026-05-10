@@ -13,6 +13,12 @@ const COVER_WORKFLOW_OPTIONS = {
   coverField: 'cover' as const,
   interactive: false,
 };
+const VALID_COVER_PROMPT_RESPONSE = {
+  visualConcept: 'A mountain sunrise over a winding trail',
+  prompt: 'Editorial illustration of a mountain sunrise over a winding trail',
+  altText: 'Mountain sunrise over a winding trail',
+  suggestedFilename: 'mountain-sunrise-trail',
+};
 
 describe('review, seo, and cover workflows schema validation', () => {
   it('accepts a valid writing review provider response', async () => {
@@ -93,16 +99,9 @@ describe('review, seo, and cover workflows schema validation', () => {
   });
 
   it('accepts a valid cover prompt provider response', async () => {
-    const aiResponse = {
-      visualConcept: 'A mountain sunrise over a winding trail',
-      prompt: 'Editorial illustration of a mountain sunrise over a winding trail',
-      altText: 'Mountain sunrise over a winding trail',
-      suggestedFilename: 'mountain-sunrise-trail',
-    };
-
     const result = await generateAndAttachCoverWorkflow(VALID_POST, {
       ...COVER_WORKFLOW_OPTIONS,
-      aiProvider: createMockTextAIProvider(aiResponse),
+      aiProvider: createMockTextAIProvider(VALID_COVER_PROMPT_RESPONSE),
     });
 
     expect(result.coverPrompt.suggestedFilename).toBe('mountain-sunrise-trail');
@@ -110,9 +109,7 @@ describe('review, seo, and cover workflows schema validation', () => {
 
   it('throws when cover prompt provider returns invalid schema', async () => {
     const aiResponse = {
-      visualConcept: 'A mountain sunrise over a winding trail',
-      prompt: 'Editorial illustration of a mountain sunrise over a winding trail',
-      altText: 'Mountain sunrise over a winding trail',
+      ...VALID_COVER_PROMPT_RESPONSE,
       suggestedFilename: 123,
     };
 
