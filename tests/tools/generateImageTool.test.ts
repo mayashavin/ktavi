@@ -10,11 +10,16 @@ const coverPrompt: CoverPromptResult = {
   suggestedFilename: 'futuristic-city-skyline',
 };
 
-function makeImageProvider(): ImageGenerationProvider & { lastPrompt: string } {
+function makeImageProvider(): ImageGenerationProvider & {
+  lastPrompt: string;
+  lastFileName: string;
+} {
   const provider = {
     lastPrompt: '',
+    lastFileName: '',
     async generateImage(params: { prompt: string; fileName: string; size: string }) {
       provider.lastPrompt = params.prompt;
+      provider.lastFileName = params.fileName;
       return {
         fileName: params.fileName,
         mimeType: 'image/png',
@@ -48,5 +53,33 @@ describe('generateImageTool', () => {
     const result = await generateImageTool({ prompt: coverPrompt, size: '1792x1024' }, provider);
     expect(result.fileName).toBe('futuristic-city-skyline');
     expect(result.mimeType).toBe('image/png');
+  });
+
+  it('uses original filename when attempt is 0', async () => {
+    const provider = makeImageProvider();
+    await generateImageTool({ prompt: coverPrompt, size: '1792x1024', attempt: 0 }, provider);
+    expect(provider.lastFileName).toBe('futuristic-city-skyline');
+  });
+
+  it('uses original filename when attempt is not provided', async () => {
+    const provider = makeImageProvider();
+    await generateImageTool({ prompt: coverPrompt, size: '1792x1024' }, provider);
+    expect(provider.lastFileName).toBe('futuristic-city-skyline');
+  });
+
+  it('appends attempt suffix to filename when attempt > 0', async () => {
+    const provider = makeImageProvider();
+    await generateImageTool({ prompt: coverPrompt, size: '1792x1024', attempt: 1 }, provider);
+    expect(provider.lastFileName).toBe('futuristic-city-skyline-1');
+  });
+
+  it('appends attempt suffix to filename with extension', async () => {
+    const promptWithExt: CoverPromptResult = {
+      ...coverPrompt,
+      suggestedFilename: 'futuristic-city-skyline.png',
+    };
+    const provider = makeImageProvider();
+    await generateImageTool({ prompt: promptWithExt, size: '1792x1024', attempt: 2 }, provider);
+    expect(provider.lastFileName).toBe('futuristic-city-skyline-2.png');
   });
 });

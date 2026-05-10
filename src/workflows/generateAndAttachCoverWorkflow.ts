@@ -64,7 +64,7 @@ export async function generateAndAttachCoverWorkflow(
 
     for (let attempt = 0; attempt <= maxRetries; attempt++) {
       result.generatedImage = await generateImageTool(
-        { prompt: coverPrompt, size: options.size, feedbackContext },
+        { prompt: coverPrompt, size: options.size, feedbackContext, attempt },
         options.imageProvider,
       );
 
