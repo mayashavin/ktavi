@@ -1,7 +1,8 @@
 import { describe, it, expect } from 'vitest';
 import { generateImageTool } from '../../src/tools/generate-image/generateImageTool.js';
 import type { ImageGenerationProvider } from '../../src/core/providers.js';
-import type { CoverPromptResult } from '../../src/core/types.js';
+import type { CoverPromptResult, GeneratedImage } from '../../src/core/types.js';
+import { KtaviError } from '../../src/core/errors.js';
 
 const coverPrompt: CoverPromptResult = {
   visualConcept: 'A futuristic city skyline',
@@ -10,7 +11,9 @@ const coverPrompt: CoverPromptResult = {
   suggestedFilename: 'futuristic-city-skyline',
 };
 
-function makeImageProvider(): ImageGenerationProvider & { lastPrompt: string } {
+function makeImageProvider(
+  overrides?: Partial<GeneratedImage>,
+): ImageGenerationProvider & { lastPrompt: string } {
   const provider = {
     lastPrompt: '',
     async generateImage(params: { prompt: string; fileName: string; size: string }) {
@@ -19,6 +22,7 @@ function makeImageProvider(): ImageGenerationProvider & { lastPrompt: string } {
         fileName: params.fileName,
         mimeType: 'image/png',
         base64: 'abc123',
+        ...overrides,
       };
     },
   };
@@ -48,5 +52,38 @@ describe('generateImageTool', () => {
     const result = await generateImageTool({ prompt: coverPrompt, size: '1792x1024' }, provider);
     expect(result.fileName).toBe('futuristic-city-skyline');
     expect(result.mimeType).toBe('image/png');
+  });
+
+  it('throws IMAGE_GENERATION_FAILED when provider returns no base64 or buffer', async () => {
+    const provider = makeImageProvider({ base64: undefined, buffer: undefined });
+    await expect(
+      generateImageTool({ prompt: coverPrompt, size: '1792x1024' }, provider),
+    ).rejects.toThrow(KtaviError);
+    await expect(
+      generateImageTool({ prompt: coverPrompt, size: '1792x1024' }, provider),
+    ).rejects.toMatchObject({
+      code: 'IMAGE_GENERATION_FAILED',
+    });
+  });
+
+  it('throws IMAGE_GENERATION_FAILED when provider returns an empty base64 string and no buffer', async () => {
+    const provider = makeImageProvider({ base64: '', buffer: undefined });
+    await expect(
+      generateImageTool({ prompt: coverPrompt, size: '1792x1024' }, provider),
+    ).rejects.toMatchObject({
+      code: 'IMAGE_GENERATION_FAILED',
+    });
+  });
+
+  it('accepts a valid buffer when base64 is absent', async () => {
+    const provider = makeImageProvider({ base64: undefined, buffer: Buffer.from('image-data') });
+    const result = await generateImageTool({ prompt: coverPrompt, size: '1792x1024' }, provider);
+    expect(result.buffer).toBeDefined();
+  });
+
+  it('accepts a valid base64 string when buffer is absent', async () => {
+    const provider = makeImageProvider({ base64: 'validbase64data', buffer: undefined });
+    const result = await generateImageTool({ prompt: coverPrompt, size: '1792x1024' }, provider);
+    expect(result.base64).toBe('validbase64data');
   });
 });
