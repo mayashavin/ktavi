@@ -23,7 +23,7 @@ describe('uploadAssetTool', () => {
     const result = await uploadAssetTool({ image }, storageProvider);
 
     expect(upload).toHaveBeenCalledOnce();
-    expect(upload).toHaveBeenCalledWith(image);
-    expect(result).toEqual(uploadedAsset);
+    expect(upload.mock.calls[0][0]).toBe(image);
+    expect(result).toBe(uploadedAsset);
   });
 });
