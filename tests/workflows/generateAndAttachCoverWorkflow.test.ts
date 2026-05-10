@@ -27,6 +27,7 @@ import type {
 import type { CoverPromptResult, GeneratedImage, UploadedAsset } from '../../src/core/types.js';
 
 const VALID_POST = path.resolve('tests/fixtures/valid-post.md');
+const MISSING_META_POST = path.resolve('tests/fixtures/missing-meta.md');
 
 const COVER_PROMPT: CoverPromptResult = {
   visualConcept: 'A scenic mountain landscape',
@@ -88,6 +89,77 @@ describe('generateAndAttachCoverWorkflow — non-interactive mode', () => {
     });
     expect(result.coverPrompt).toBeDefined();
     expect(result.generatedImage).toBeDefined();
+    expect(select).not.toHaveBeenCalled();
+  });
+
+  it('returns a frontmatter patch after the full prompt-generate-upload chain', async () => {
+    const aiGenerateStructuredOutput = vi.fn().mockResolvedValue(COVER_PROMPT);
+    const aiProvider: TextAIProvider = {
+      generateStructuredOutput: aiGenerateStructuredOutput,
+    };
+
+    const generatedImage: GeneratedImage = {
+      fileName: 'mountain-landscape',
+      mimeType: 'image/png',
+      base64: 'abc123',
+      localPath: '/tmp/polira-test/mountain-landscape.png',
+    };
+    const generateImage = vi.fn().mockResolvedValue(generatedImage);
+    const imageProvider: ImageGenerationProvider = {
+      generateImage,
+    };
+
+    const uploadedAsset: UploadedAsset = {
+      provider: 'local',
+      url: '/images/blog/mountain-landscape.png',
+      localPath: '/tmp/polira-test/mountain-landscape.png',
+    };
+    const upload = vi.fn().mockResolvedValue(uploadedAsset);
+    const storageProvider: AssetStorageProvider = {
+      upload,
+    };
+
+    const result = await generateAndAttachCoverWorkflow(MISSING_META_POST, {
+      generate: true,
+      apply: false,
+      size: '1792x1024',
+      coverField: 'cover',
+      aiProvider,
+      imageProvider,
+      storageProvider,
+      interactive: false,
+    });
+
+    expect(aiGenerateStructuredOutput).toHaveBeenCalledOnce();
+    expect(aiGenerateStructuredOutput.mock.calls[0]?.[0].userPrompt).toContain(
+      'Title: TanStack Query in Vue',
+    );
+    expect(aiGenerateStructuredOutput.mock.calls[0]?.[0].userPrompt).toContain(
+      'Description: (none)',
+    );
+    expect(aiGenerateStructuredOutput.mock.calls[0]?.[0].userPrompt).toContain('Slug: (none)');
+    expect(generateImage).toHaveBeenCalledOnce();
+    expect(generateImage).toHaveBeenCalledWith({
+      prompt: 'A scenic mountain landscape at sunrise.',
+      fileName: 'mountain-landscape',
+      size: '1792x1024',
+    });
+    expect(upload).toHaveBeenCalledOnce();
+    expect(upload).toHaveBeenCalledWith(generatedImage);
+    expect(result.generatedImage).toEqual(generatedImage);
+    expect(result.uploadedAsset).toEqual(uploadedAsset);
+    expect(result.patch).toBeDefined();
+    expect(result.patch?.changes).toEqual([
+      {
+        type: 'frontmatter',
+        field: 'cover',
+        original: undefined,
+        updated: '/images/blog/mountain-landscape.png',
+        reason: 'Updated cover',
+      },
+    ]);
+    expect(result.patch?.updatedContent).toContain('cover: /images/blog/mountain-landscape.png');
+    expect(result.patch?.updatedContent).toContain('title: TanStack Query in Vue');
     expect(select).not.toHaveBeenCalled();
   });
 

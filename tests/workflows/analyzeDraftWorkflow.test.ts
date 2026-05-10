@@ -2,29 +2,12 @@ import { describe, it, expect } from 'vitest';
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import { analyzeDraftWorkflow } from '../../src/workflows/analyzeDraftWorkflow.js';
-import type { TextAIProvider } from '../../src/core/providers.js';
+import { createMockTextAIProvider } from '../shared/createMockTextAIProvider.js';
 
 const VALID_POST = path.resolve('tests/fixtures/valid-post.md');
 
 function getPostBodyFromRawContent(rawContent: string): string {
   return rawContent.replace(/^---\r?\n[\s\S]*?\r?\n---(\r?\n)?/, '');
-}
-Check out the [official documentation](https://tanstack.com/query) for more details.
-
-![TanStack Query diagram](./images/query-diagram.png "Query flow diagram")
-`;
-
-function makeProvider(): TextAIProvider {
-  return {
-    async generateStructuredOutput() {
-      return {
-        shortSummary: 'A post about testing.',
-        keyTopics: ['testing', 'vitest', 'TypeScript'],
-        targetAudience: 'developers',
-        suggestedDescription: 'Learn about testing with vitest.',
-      };
-    },
-  };
 }
 
 describe('analyzeDraftWorkflow', () => {
@@ -42,9 +25,9 @@ describe('analyzeDraftWorkflow', () => {
         slug: 'tanstack-query-vue',
         tags: ['vue', 'tanstack-query', 'frontend'],
         cover: '/images/blog/tanstack-query-vue-cover.png',
-        date: '2025-01-15T00:00:00.000Z',
+        date: new Date('2025-01-15T00:00:00.000Z'),
       },
-      markdownBody: VALID_POST_BODY,
+      markdownBody: getPostBodyFromRawContent(rawContent),
       metadata: {
         title: 'Using TanStack Query in Vue',
         description:
@@ -81,7 +64,15 @@ describe('analyzeDraftWorkflow', () => {
   });
 
   it('returns content summary when AI provider is given', async () => {
-    const result = await analyzeDraftWorkflow(VALID_POST, { aiProvider: makeProvider() });
+    const result = await analyzeDraftWorkflow(VALID_POST, {
+      aiProvider: createMockTextAIProvider({
+        shortSummary: 'A post about testing.',
+        keyTopics: ['testing', 'vitest', 'TypeScript'],
+        targetAudience: 'developers',
+        suggestedDescription: 'Learn about testing with vitest.',
+      }),
+    });
+
     expect(result.draft).toBeDefined();
     expect(result.contentSummary).toBeDefined();
     expect(result.contentSummary!.shortSummary).toBe('A post about testing.');
