@@ -1,7 +1,7 @@
 node_modules/
 dist/
 .env
-.claude
 coverage/
 *.tsbuildinfo
 temp/
+.claude/settings.local.json
