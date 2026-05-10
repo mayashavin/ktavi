@@ -8,7 +8,7 @@ export function createMockAssetStorageProvider(
     async upload(image): Promise<UploadedAsset> {
       return {
         provider: 'local',
-        url: `https://example.test/assets/${image.fileName}.png`,
+        url: `https://example.test/assets/${image.fileName}`,
         ...uploadedAsset,
       };
     },
