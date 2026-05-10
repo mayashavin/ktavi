@@ -62,5 +62,5 @@ describeCloudinary('createCloudinaryStorageProvider integration', () => {
     expect(result.url).toBeTruthy();
     expect(result.secureUrl).toContain('https://');
     expect(result.publicId).toBeTruthy();
-  });
+  }, 30_000);
 });
