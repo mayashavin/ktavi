@@ -10,7 +10,7 @@
     "dev": "tsx src/cli/index.ts",
     "build": "vite build",
     "test": "vitest run",
-    "test:e2e:cloudinary": "vitest run --config vitest.e2e.config.ts",
+    "test:e2e": "vitest run --config vitest.e2e.config.ts",
     "test:watch": "vitest",
     "lint": "eslint .",
     "format": "prettier --write .",
