@@ -4,7 +4,7 @@ import { parseMarkdownTool } from '../../src/tools/parse-markdown/index.js';
 import { reviewSeoTool } from '../../src/tools/review-seo/index.js';
 import { createMockTextAIProvider } from '../shared/createMockTextAIProvider.js';
 
-const MISSING_META_POST = path.resolve('tests/fixtures/missing-meta.md');
+const MISSING_META_POST = path.resolve(import.meta.dirname, '../fixtures/missing-meta.md');
 
 describe('reviewSeoTool', () => {
   it('merges deterministic and AI suggestions', async () => {
