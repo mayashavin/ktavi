@@ -11,7 +11,7 @@ export function createMockImageGenerationProvider(
       return {
         fileName: input.fileName,
         mimeType: 'image/png',
-        buffer: TEST_IMAGE_BUFFER,
+        buffer: Buffer.from(TEST_IMAGE_BUFFER),
         ...response,
       };
     },
