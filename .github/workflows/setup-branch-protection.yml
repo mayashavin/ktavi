@@ -1,0 +1,50 @@
+name: Setup Branch Protection
+
+# Manually trigger this workflow once (after the first CI run completes on main)
+# to configure branch-protection rules on the `main` branch.
+#
+# Requirements:
+#   Create a repository secret named BRANCH_PROTECTION_TOKEN containing a
+#   GitHub Personal Access Token (classic) with the `repo` scope, or a
+#   fine-grained token with "Administration" read/write permission on this repo.
+#
+# What this configures:
+#   - Requires the `CI / CI success` status check to pass before merging.
+#   - Requires branches to be up-to-date before merging (strict mode).
+#   - Enforces the rules for repository admins as well.
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  protect:
+    name: Configure main branch protection
+    runs-on: ubuntu-latest
+    steps:
+      - name: Enable branch protection on main
+        env:
+          GH_TOKEN: ${{ secrets.BRANCH_PROTECTION_TOKEN }}
+        run: |
+          gh api \
+            --method PUT \
+            -H "Accept: application/vnd.github+json" \
+            "/repos/${{ github.repository }}/branches/main/protection" \
+            --input - <<'EOF'
+          {
+            "required_status_checks": {
+              "strict": true,
+              "contexts": ["CI / CI success"]
+            },
+            "enforce_admins": true,
+            "required_pull_request_reviews": null,
+            "restrictions": null
+          }
+          EOF
+
+          echo "Branch protection enabled on main."
+          echo "Required check: 'CI / CI success'"
+          echo "Strict mode   : true (branch must be up-to-date before merge)"
+          echo "Enforce admins: true"
