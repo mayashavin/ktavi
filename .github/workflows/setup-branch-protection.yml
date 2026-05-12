@@ -9,7 +9,7 @@ name: Setup Branch Protection
 #   fine-grained token with "Administration" read/write permission on this repo.
 #
 # What this configures:
-#   - Requires the `CI success` status check to pass before merging.
+#   - Requires the `CI / CI success` status check to pass before merging.
 #   - Requires branches to be up-to-date before merging (strict mode).
 #   - Enforces the rules for repository admins as well.
 
@@ -36,7 +36,7 @@ jobs:
           {
             "required_status_checks": {
               "strict": true,
-              "contexts": ["CI success"]
+              "contexts": ["CI / CI success"]
             },
             "enforce_admins": true,
             "required_pull_request_reviews": null,
@@ -45,6 +45,6 @@ jobs:
           EOF
 
           echo "Branch protection enabled on main."
-          echo "Required check: 'CI success'"
+          echo "Required check: 'CI / CI success'"
           echo "Strict mode   : true (branch must be up-to-date before merge)"
           echo "Enforce admins: true"
