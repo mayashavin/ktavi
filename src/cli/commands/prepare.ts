@@ -6,6 +6,7 @@ import { createOpenAITextProvider } from '../../providers/ai/openaiTextProvider.
 import { createOpenAIImageProvider } from '../../providers/image/openaiImageProvider.js';
 import { loadConfig } from '../../core/config.js';
 import { createStorageProvider } from '../shared/providers.js';
+import { renderInlineSuggestion, renderFrontmatterDiff } from '../../utils/diffRenderer.js';
 import type { ImageSize, StorageTarget, WritingMode } from '../../core/types.js';
 
 export function registerPrepareCommand(program: Command) {
@@ -19,6 +20,7 @@ export function registerPrepareCommand(program: Command) {
     .option('--apply', 'Apply safe changes')
     .option('--mode <mode>', 'Writing review mode: light, medium, or strong', 'medium')
     .option('--json', 'Output results as JSON')
+    .option('--side-by-side', 'Show diff in side-by-side view')
     .action(
       async (
         file: string,
@@ -29,6 +31,7 @@ export function registerPrepareCommand(program: Command) {
           apply?: boolean;
           mode: string;
           json?: boolean;
+          sideBySide?: boolean;
         },
       ) => {
         try {
@@ -95,8 +98,7 @@ export function registerPrepareCommand(program: Command) {
             logger.heading('Writing Suggestions');
             for (const s of result.writingSuggestions) {
               logger.severity('info', s.category, s.reason);
-              logger.dim(`    - ${s.original}`);
-              logger.dim(`    + ${s.suggested}`);
+              console.log(renderInlineSuggestion(s.original, s.suggested));
               logger.blank();
             }
           }
@@ -107,9 +109,15 @@ export function registerPrepareCommand(program: Command) {
             logger.label('Alt text', result.coverPrompt.altText);
           }
 
-          if (result.patch?.diff) {
-            logger.heading('Changes');
-            logger.diff(result.patch.diff);
+          if (result.patch) {
+            if (result.patch.changes.length > 0) {
+              logger.heading('Field Changes');
+              console.log(renderFrontmatterDiff(result.patch.changes));
+            }
+            if (result.patch.diff) {
+              logger.heading('Diff');
+              logger.diff(result.patch.diff, { sideBySide: opts.sideBySide });
+            }
           }
 
           if (!opts.apply) {
