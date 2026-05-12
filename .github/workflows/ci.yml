@@ -53,3 +53,21 @@ jobs:
           token: ${{ secrets.CODECOV_TOKEN }}
           files: coverage/coverage-final.json
           fail_ci_if_error: false
+
+  ci-success:
+    name: CI success
+    needs: [lint, test]
+    runs-on: ubuntu-latest
+    if: always()
+    steps:
+      - name: All required checks passed
+        if: needs.lint.result == 'success' && needs.test.result == 'success'
+        run: echo "All required checks passed."
+
+      - name: Some required checks failed
+        if: needs.lint.result != 'success' || needs.test.result != 'success'
+        run: |
+          echo "Required checks failed:"
+          echo "  lint : ${{ needs.lint.result }}"
+          echo "  test : ${{ needs.test.result }}"
+          exit 1
