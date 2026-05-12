@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import path from 'node:path';
 import { parseMarkdownTool } from '../../src/tools/parse-markdown/index.js';
+import { KtaviError } from '../../src/core/errors.js';
 
 const fixture = (name: string) => path.join(import.meta.dirname, '..', 'fixtures', name);
 
@@ -126,6 +127,21 @@ describe('parseMarkdownTool', () => {
   it('throws on non-existent file', async () => {
     await expect(parseMarkdownTool({ filePath: '/nonexistent/file.md' })).rejects.toThrow(
       'Could not read file',
+    );
+  });
+
+  it('throws KtaviError with code INVALID_FRONTMATTER for invalid YAML frontmatter', async () => {
+    let caught: unknown;
+    try {
+      await parseMarkdownTool({ filePath: fixture('invalid-frontmatter.md') });
+    } catch (err) {
+      caught = err;
+    }
+
+    expect(caught).toBeInstanceOf(KtaviError);
+    expect((caught as KtaviError).code).toBe('INVALID_FRONTMATTER');
+    expect((caught as KtaviError).message).toBe(
+      'Could not parse frontmatter. Please check that the YAML block starts and ends with ---.',
     );
   });
 });
