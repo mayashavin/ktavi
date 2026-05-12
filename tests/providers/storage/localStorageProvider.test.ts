@@ -32,7 +32,7 @@ describe('createLocalStorageProvider', () => {
 
     await provider.upload(image);
 
-    const written = await fs.readFile(path.join(dir, 'hero.png'), null);
+    const written = await fs.readFile(path.join(dir, 'hero.png'));
     expect(written).toEqual(content);
   });
 
@@ -48,7 +48,7 @@ describe('createLocalStorageProvider', () => {
 
     await provider.upload(image);
 
-    const written = await fs.readFile(path.join(dir, 'cover.png'), null);
+    const written = await fs.readFile(path.join(dir, 'cover.png'));
     expect(written).toEqual(content);
   });
 
@@ -65,7 +65,7 @@ describe('createLocalStorageProvider', () => {
 
     await provider.upload(image);
 
-    const written = await fs.readFile(path.join(dir, 'test.png'), null);
+    const written = await fs.readFile(path.join(dir, 'test.png'));
     expect(written).toEqual(bufferContent);
   });
 
@@ -138,7 +138,7 @@ describe('createLocalStorageProvider', () => {
 
     const result = await provider.upload(image);
 
-    const written = await fs.readFile(path.join(nestedDir, 'nested.png'), null);
+    const written = await fs.readFile(path.join(nestedDir, 'nested.png'));
     expect(written).toEqual(Buffer.from('nested-data'));
     expect(result.localPath).toBe(path.join(nestedDir, 'nested.png'));
   });
