@@ -1,0 +1,88 @@
+import { describe, it, expect, vi } from 'vitest';
+import { KtaviError } from '../../../src/core/errors.js';
+
+vi.mock('@anthropic-ai/sdk', () => {
+  const create = vi.fn();
+  return {
+    default: vi.fn(() => ({ messages: { create } })),
+    __mockCreate: create,
+  };
+});
+
+import { createAnthropicTextProvider } from '../../../src/providers/ai/anthropicTextProvider.js';
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const { __mockCreate: mockCreate } = (await import('@anthropic-ai/sdk')) as any;
+
+describe('createAnthropicTextProvider', () => {
+  it('throws KtaviError when API key is empty', () => {
+    expect(() => createAnthropicTextProvider('', 'claude-sonnet-4-20250514')).toThrow(KtaviError);
+    expect(() => createAnthropicTextProvider('', 'claude-sonnet-4-20250514')).toThrow(
+      'ANTHROPIC_API_KEY',
+    );
+  });
+
+  it('returns parsed JSON from text response', async () => {
+    const provider = createAnthropicTextProvider('test-key', 'claude-sonnet-4-20250514');
+    mockCreate.mockResolvedValueOnce({
+      content: [{ type: 'text', text: '{"suggestions": []}' }],
+    });
+
+    const result = await provider.generateStructuredOutput<{ suggestions: unknown[] }>({
+      systemPrompt: 'You are helpful.',
+      userPrompt: 'Review this.',
+      schemaName: 'test',
+    });
+
+    expect(result).toEqual({ suggestions: [] });
+    expect(mockCreate).toHaveBeenCalledWith(
+      expect.objectContaining({
+        model: 'claude-sonnet-4-20250514',
+        system: 'You are helpful.',
+        messages: [{ role: 'user', content: 'Review this.' }],
+      }),
+    );
+  });
+
+  it('extracts JSON from response with surrounding text', async () => {
+    const provider = createAnthropicTextProvider('test-key', 'claude-sonnet-4-20250514');
+    mockCreate.mockResolvedValueOnce({
+      content: [{ type: 'text', text: 'Here is the result:\n{"data": "value"}\nDone.' }],
+    });
+
+    const result = await provider.generateStructuredOutput<{ data: string }>({
+      systemPrompt: 'system',
+      userPrompt: 'user',
+      schemaName: 'test',
+    });
+
+    expect(result).toEqual({ data: 'value' });
+  });
+
+  it('throws KtaviError when response has no text block', async () => {
+    const provider = createAnthropicTextProvider('test-key', 'claude-sonnet-4-20250514');
+    mockCreate.mockResolvedValueOnce({ content: [] });
+
+    await expect(
+      provider.generateStructuredOutput({
+        systemPrompt: 'system',
+        userPrompt: 'user',
+        schemaName: 'test',
+      }),
+    ).rejects.toThrow('Empty response');
+  });
+
+  it('throws KtaviError when response contains no JSON', async () => {
+    const provider = createAnthropicTextProvider('test-key', 'claude-sonnet-4-20250514');
+    mockCreate.mockResolvedValueOnce({
+      content: [{ type: 'text', text: 'No JSON here at all.' }],
+    });
+
+    await expect(
+      provider.generateStructuredOutput({
+        systemPrompt: 'system',
+        userPrompt: 'user',
+        schemaName: 'test',
+      }),
+    ).rejects.toThrow('did not return valid JSON');
+  });
+});

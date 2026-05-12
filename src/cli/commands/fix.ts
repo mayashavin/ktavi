@@ -1,8 +1,8 @@
 import { Command } from 'commander';
 import { logger } from '../../core/logger.js';
 import { KtaviError, friendlyErrorMessage } from '../../core/errors.js';
-import { createOpenAITextProvider } from '../../providers/ai/openaiTextProvider.js';
 import { loadConfig } from '../../core/config.js';
+import { createTextAIProvider } from '../shared/providers.js';
 import { parseMarkdownTool } from '../../tools/parse-markdown/index.js';
 import { reviewSeoTool } from '../../tools/review-seo/index.js';
 import { updateFrontmatterTool } from '../../tools/update-frontmatter/index.js';
@@ -24,10 +24,7 @@ export function registerFixCommand(program: Command) {
       ) => {
         try {
           const config = await loadConfig();
-          const apiKey = process.env.OPENAI_API_KEY;
-          const aiProvider = apiKey
-            ? createOpenAITextProvider(apiKey, config.ai.textModel)
-            : undefined;
+          const aiProvider = createTextAIProvider(config, process.env);
 
           const draft = await parseMarkdownTool({ filePath: file });
           const { suggestions } = await reviewSeoTool({ draft }, aiProvider);

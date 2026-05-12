@@ -2,8 +2,8 @@ import { Command } from 'commander';
 import { analyzeDraftWorkflow } from '../../workflows/analyzeDraftWorkflow.js';
 import { logger } from '../../core/logger.js';
 import { KtaviError, friendlyErrorMessage } from '../../core/errors.js';
-import { createOpenAITextProvider } from '../../providers/ai/openaiTextProvider.js';
 import { loadConfig } from '../../core/config.js';
+import { createTextAIProvider } from '../shared/providers.js';
 
 export function registerAnalyzeCommand(program: Command) {
   program
@@ -13,13 +13,8 @@ export function registerAnalyzeCommand(program: Command) {
     .option('--json', 'Output results as JSON')
     .action(async (file: string, opts: { json?: boolean }) => {
       try {
-        const apiKey = process.env.OPENAI_API_KEY;
-        let aiProvider;
-
-        if (apiKey) {
-          const config = await loadConfig();
-          aiProvider = createOpenAITextProvider(apiKey, config.ai.textModel);
-        }
+        const config = await loadConfig();
+        const aiProvider = createTextAIProvider(config, process.env);
 
         const { draft, contentSummary } = await analyzeDraftWorkflow(file, { aiProvider });
         const { metadata, frontmatter } = draft;

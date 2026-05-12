@@ -2,11 +2,16 @@
 
 Ktavi reads environment variables from a `.env` file in your project root (loaded via `dotenv`).
 
-## Required
+## AI provider keys
 
-| Variable         | Description    | Required for                                                                                                      |
-| ---------------- | -------------- | ----------------------------------------------------------------------------------------------------------------- |
-| `OPENAI_API_KEY` | OpenAI API key | `review`, `cover` (always required). `analyze`, `seo`, `fix`, `prepare` (optional -- enables AI-powered features) |
+Set the API key for your configured AI provider (`ai.provider` in config):
+
+| Variable            | Description       | Provider    |
+| ------------------- | ----------------- | ----------- |
+| `OPENAI_API_KEY`    | OpenAI API key    | `openai`    |
+| `ANTHROPIC_API_KEY` | Anthropic API key | `anthropic` |
+
+Only the key for your configured provider is required. If using Anthropic for text but need image generation, you'll also need `OPENAI_API_KEY` since image generation currently only supports OpenAI.
 
 ## Cloudinary (optional)
 
@@ -30,6 +35,7 @@ cp .env.example .env
 
 ```
 OPENAI_API_KEY=
+ANTHROPIC_API_KEY=
 CLOUDINARY_CLOUD_NAME=
 CLOUDINARY_API_KEY=
 CLOUDINARY_API_SECRET=
@@ -37,7 +43,7 @@ CLOUDINARY_API_SECRET=
 
 ## Commands and their AI requirements
 
-| Command   | Without `OPENAI_API_KEY`    | With `OPENAI_API_KEY`                                        |
+| Command   | Without AI key              | With AI key                                                  |
 | --------- | --------------------------- | ------------------------------------------------------------ |
 | `analyze` | Metadata and structure only | Adds content summary                                         |
 | `seo`     | Deterministic checks only   | Adds AI-powered suggestions                                  |

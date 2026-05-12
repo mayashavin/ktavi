@@ -2,11 +2,11 @@ import path from 'node:path';
 import os from 'node:os';
 import { createJiti } from 'jiti';
 import { z } from 'zod';
-import type { CoverFieldName, ImageSize, StorageTarget, WritingMode } from './types.js';
+import type { AIProvider, CoverFieldName, ImageSize, StorageTarget, WritingMode } from './types.js';
 
 export type KtaviConfig = {
   ai: {
-    provider: 'openai';
+    provider: AIProvider;
     textModel: string;
     imageModel?: string;
   };
@@ -36,7 +36,7 @@ export type KtaviConfig = {
 const ktaviConfigSchema = z.object({
   ai: z
     .object({
-      provider: z.literal('openai').default('openai'),
+      provider: z.enum(['openai', 'anthropic']).default('openai'),
       textModel: z.string().default('gpt-4o'),
       imageModel: z.string().optional(),
     })

@@ -2,10 +2,12 @@ import { Command } from 'commander';
 import { prepareDraftWorkflow } from '../../workflows/prepareDraftWorkflow.js';
 import { logger } from '../../core/logger.js';
 import { KtaviError, friendlyErrorMessage } from '../../core/errors.js';
-import { createOpenAITextProvider } from '../../providers/ai/openaiTextProvider.js';
-import { createOpenAIImageProvider } from '../../providers/image/openaiImageProvider.js';
 import { loadConfig } from '../../core/config.js';
-import { createStorageProvider } from '../shared/providers.js';
+import {
+  createTextAIProvider,
+  createImageProvider,
+  createStorageProvider,
+} from '../shared/providers.js';
 import { renderInlineSuggestion, renderFrontmatterDiff } from '../../utils/diffRenderer.js';
 import type { ImageSize, StorageTarget, WritingMode } from '../../core/types.js';
 
@@ -36,10 +38,7 @@ export function registerPrepareCommand(program: Command) {
       ) => {
         try {
           const config = await loadConfig();
-          const apiKey = process.env.OPENAI_API_KEY;
-          const aiProvider = apiKey
-            ? createOpenAITextProvider(apiKey, config.ai.textModel)
-            : undefined;
+          const aiProvider = createTextAIProvider(config, process.env);
 
           const storageTarget = (
             opts.upload !== 'none'
@@ -50,10 +49,9 @@ export function registerPrepareCommand(program: Command) {
           ) as StorageTarget;
           const storageProvider = createStorageProvider(storageTarget, config, process.env);
 
-          const imageProvider =
-            opts.generateCover && apiKey
-              ? createOpenAIImageProvider(apiKey, config.ai.imageModel)
-              : undefined;
+          const imageProvider = opts.generateCover
+            ? createImageProvider(config, process.env)
+            : undefined;
 
           const result = await prepareDraftWorkflow(file, {
             mode: (opts.mode as WritingMode) ?? config.writing.defaultMode,

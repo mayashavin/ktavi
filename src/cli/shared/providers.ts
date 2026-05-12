@@ -1,13 +1,53 @@
 import { createCloudinaryStorageProvider } from '../../providers/storage/cloudinaryStorageProvider.js';
 import { createLocalStorageProvider } from '../../providers/storage/localStorageProvider.js';
-import type { AssetStorageProvider } from '../../core/providers.js';
+import { createOpenAITextProvider } from '../../providers/ai/openaiTextProvider.js';
+import { createOpenAIImageProvider } from '../../providers/image/openaiImageProvider.js';
+import { createAnthropicTextProvider } from '../../providers/ai/anthropicTextProvider.js';
+import type {
+  AssetStorageProvider,
+  ImageGenerationProvider,
+  TextAIProvider,
+} from '../../core/providers.js';
 import type { KtaviConfig } from '../../core/config.js';
-import type { StorageTarget } from '../../core/types.js';
+import type { AIProvider, StorageTarget } from '../../core/types.js';
 
-/**
- * Factory function that resolves the correct storage provider based on the
- * given target, config, and environment variables.
- */
+const API_KEY_ENV: Record<AIProvider, string> = {
+  openai: 'OPENAI_API_KEY',
+  anthropic: 'ANTHROPIC_API_KEY',
+};
+
+export function getApiKeyForProvider(
+  provider: AIProvider,
+  env: NodeJS.ProcessEnv,
+): string | undefined {
+  return env[API_KEY_ENV[provider]];
+}
+
+export function createTextAIProvider(
+  config: KtaviConfig,
+  env: NodeJS.ProcessEnv,
+): TextAIProvider | undefined {
+  const apiKey = getApiKeyForProvider(config.ai.provider, env);
+  if (!apiKey) return undefined;
+
+  switch (config.ai.provider) {
+    case 'anthropic':
+      return createAnthropicTextProvider(apiKey, config.ai.textModel);
+    case 'openai':
+    default:
+      return createOpenAITextProvider(apiKey, config.ai.textModel);
+  }
+}
+
+export function createImageProvider(
+  config: KtaviConfig,
+  env: NodeJS.ProcessEnv,
+): ImageGenerationProvider | undefined {
+  const apiKey = env.OPENAI_API_KEY;
+  if (!apiKey) return undefined;
+  return createOpenAIImageProvider(apiKey, config.ai.imageModel);
+}
+
 export function createStorageProvider(
   target: StorageTarget,
   config: KtaviConfig,

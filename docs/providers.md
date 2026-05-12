@@ -2,11 +2,24 @@
 
 Ktavi uses a provider abstraction for AI text generation, image generation, and asset storage. This guide covers how to set up each provider.
 
-## OpenAI (text and image)
+## AI providers
 
-OpenAI is currently the only supported AI provider for both text and image generation.
+Ktavi supports multiple AI providers for text generation. Set the provider in your `ktavi.config.ts`:
 
-### Setup
+```typescript
+export default {
+  ai: {
+    provider: 'openai', // or 'anthropic'
+    textModel: 'gpt-4o',
+  },
+};
+```
+
+**Text model** is used by: `analyze` (summary), `seo` (AI suggestions), `review`, `fix` (AI suggestions), `cover` (prompt generation), and `prepare`.
+
+**Image model** is used by: `cover --generate` and `prepare --generate-cover`. Image generation currently uses OpenAI regardless of the text provider setting.
+
+### OpenAI
 
 1. Get an API key from [platform.openai.com](https://platform.openai.com)
 2. Add it to your `.env` file:
@@ -15,23 +28,35 @@ OpenAI is currently the only supported AI provider for both text and image gener
 OPENAI_API_KEY=sk-...
 ```
 
-### Models
-
-Configure which models to use in your `ktavi.config.ts`:
-
 ```typescript
 export default {
   ai: {
     provider: 'openai',
-    textModel: 'gpt-4o', // Used for review, SEO, summary, cover prompt
-    imageModel: 'gpt-image-2', // Used for cover image generation
+    textModel: 'gpt-4o',
+    imageModel: 'gpt-image-2',
   },
 };
 ```
 
-**Text model** is used by: `analyze` (summary), `seo` (AI suggestions), `review`, `fix` (AI suggestions), `cover` (prompt generation), and `prepare`.
+### Anthropic (Claude)
 
-**Image model** is used by: `cover --generate` and `prepare --generate-cover`.
+1. Get an API key from [console.anthropic.com](https://console.anthropic.com)
+2. Add it to your `.env` file:
+
+```
+ANTHROPIC_API_KEY=sk-ant-...
+```
+
+```typescript
+export default {
+  ai: {
+    provider: 'anthropic',
+    textModel: 'claude-sonnet-4-20250514',
+  },
+};
+```
+
+Note: Anthropic does not offer image generation, so cover image generation still requires an `OPENAI_API_KEY`.
 
 ### Supported image sizes
 

@@ -55,7 +55,10 @@ async function promptForConfig(
 ): Promise<Partial<KtaviConfig>> {
   const provider = await select({
     message: 'AI provider',
-    choices: [{ value: 'openai' as const, name: 'OpenAI' }],
+    choices: [
+      { value: 'openai' as const, name: 'OpenAI' },
+      { value: 'anthropic' as const, name: 'Anthropic (Claude)' },
+    ],
     default: getDefault(existing, 'ai.provider', SCHEMA_DEFAULTS.ai.provider),
   });
 
@@ -194,6 +197,8 @@ function printNextSteps(filePath: string, config: Partial<KtaviConfig>): void {
   const provider = config.ai?.provider ?? SCHEMA_DEFAULTS.ai.provider;
   if (provider === 'openai') {
     steps.push('Set OPENAI_API_KEY in your .env');
+  } else if (provider === 'anthropic') {
+    steps.push('Set ANTHROPIC_API_KEY in your .env');
   }
   if (config.storage?.provider === 'cloudinary') {
     steps.push('Set CLOUDINARY_CLOUD_NAME, CLOUDINARY_API_KEY, and CLOUDINARY_API_SECRET in .env');

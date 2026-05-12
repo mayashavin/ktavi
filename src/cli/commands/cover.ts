@@ -2,10 +2,12 @@ import { Command } from 'commander';
 import { generateAndAttachCoverWorkflow } from '../../workflows/generateAndAttachCoverWorkflow.js';
 import { logger } from '../../core/logger.js';
 import { KtaviError, friendlyErrorMessage } from '../../core/errors.js';
-import { createOpenAITextProvider } from '../../providers/ai/openaiTextProvider.js';
-import { createOpenAIImageProvider } from '../../providers/image/openaiImageProvider.js';
 import { loadConfig } from '../../core/config.js';
-import { createStorageProvider } from '../shared/providers.js';
+import {
+  createTextAIProvider,
+  createImageProvider,
+  createStorageProvider,
+} from '../shared/providers.js';
 import type { ImageSize, StorageTarget } from '../../core/types.js';
 
 export function registerCoverCommand(program: Command) {
@@ -39,15 +41,13 @@ export function registerCoverCommand(program: Command) {
       ) => {
         try {
           const config = await loadConfig();
-          const apiKey = process.env.OPENAI_API_KEY;
-          if (!apiKey) {
+          const aiProvider = createTextAIProvider(config, process.env);
+          if (!aiProvider) {
             logger.error(
-              'OPENAI_API_KEY is required for cover generation. Add it to your .env file.',
+              'An AI API key is required for cover generation. Add it to your .env file.',
             );
             process.exit(1);
           }
-
-          const aiProvider = createOpenAITextProvider(apiKey, config.ai.textModel);
 
           const storageTarget = (opts.upload ??
             opts.save ??
@@ -55,7 +55,7 @@ export function registerCoverCommand(program: Command) {
           const storageProvider = createStorageProvider(storageTarget, config, process.env);
 
           const imageProvider = opts.generate
-            ? createOpenAIImageProvider(apiKey, config.ai.imageModel)
+            ? createImageProvider(config, process.env)
             : undefined;
 
           const result = await generateAndAttachCoverWorkflow(file, {
