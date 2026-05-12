@@ -1,6 +1,8 @@
 # Ktavi
 
 [![npm version](https://img.shields.io/npm/v/ktavi.svg)](https://www.npmjs.com/package/ktavi)
+[![CI](https://github.com/mayashavin/polira/actions/workflows/ci.yml/badge.svg)](https://github.com/mayashavin/polira/actions/workflows/ci.yml)
+[![codecov](https://codecov.io/gh/mayashavin/polira/branch/main/graph/badge.svg)](https://codecov.io/gh/mayashavin/polira)
 [![license](https://img.shields.io/npm/l/ktavi.svg)](./LICENSE)
 
 A CLI-first, workflow-driven AI assistant for preparing Markdown blog drafts for publishing.
