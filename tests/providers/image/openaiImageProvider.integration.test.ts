@@ -1,8 +1,23 @@
 import { describe, it, expect } from 'vitest';
 import { createOpenAIImageProvider } from '../../../src/providers/image/openaiImageProvider.js';
+import { KtaviError } from '../../../src/core/errors.js';
 
 const RUN_INTEGRATION = process.env.RUN_OPENAI_IMAGE_INTEGRATION_TESTS === 'true';
 const apiKey = process.env.OPENAI_API_KEY ?? '';
+
+describe('openaiImageProvider', () => {
+  it('throws KtaviError when API key is empty', () => {
+    expect(() => createOpenAIImageProvider('')).toThrow(KtaviError);
+    expect(() => createOpenAIImageProvider('')).toThrow('OPENAI_API_KEY is not set');
+
+    try {
+      createOpenAIImageProvider('');
+    } catch (error) {
+      expect(error).toBeInstanceOf(KtaviError);
+      expect((error as KtaviError).code).toBe('AI_PROVIDER_ERROR');
+    }
+  });
+});
 
 describe.skipIf(!RUN_INTEGRATION)('openaiImageProvider (integration)', () => {
   it('generates an image and returns a valid GeneratedImage', { timeout: 30_000 }, async () => {
@@ -21,20 +36,5 @@ describe.skipIf(!RUN_INTEGRATION)('openaiImageProvider (integration)', () => {
     expect(result.base64!.length).toBeGreaterThan(0);
     expect(result.buffer).toBeInstanceOf(Buffer);
     expect(result.buffer!.length).toBeGreaterThan(0);
-  });
-
-  it('throws KtaviError when API key is empty', () => {
-    let thrown: unknown;
-
-    try {
-      createOpenAIImageProvider('');
-    } catch (error) {
-      thrown = error;
-    }
-
-    expect(thrown).toBeDefined();
-    expect(thrown).toBeInstanceOf(Error);
-    expect((thrown as Error).name).toBe('KtaviError');
-    expect((thrown as Error).message).toContain('OPENAI_API_KEY is not set');
   });
 });
