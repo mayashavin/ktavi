@@ -151,8 +151,15 @@ describe('createLocalStorageProvider', () => {
       mimeType: 'image/png',
     };
 
-    await expect(provider.upload(image)).rejects.toThrow(KtaviError);
-    await expect(provider.upload(image)).rejects.toThrow('no buffer or base64');
+    let error: unknown;
+    try {
+      await provider.upload(image);
+    } catch (e) {
+      error = e;
+    }
+    expect(error).toBeInstanceOf(KtaviError);
+    expect((error as KtaviError).code).toBe('WRITE_FAILED');
+    expect((error as KtaviError).message).toMatch(/no buffer or base64/i);
   });
 
   it('throws KtaviError with WRITE_FAILED when filesystem write fails', async () => {
@@ -167,8 +174,15 @@ describe('createLocalStorageProvider', () => {
       buffer: Buffer.from('data'),
     };
 
-    await expect(provider.upload(image)).rejects.toThrow(KtaviError);
-    await expect(provider.upload(image)).rejects.toThrow('Could not write file');
+    let error: unknown;
+    try {
+      await provider.upload(image);
+    } catch (e) {
+      error = e;
+    }
+    expect(error).toBeInstanceOf(KtaviError);
+    expect((error as KtaviError).code).toBe('WRITE_FAILED');
+    expect((error as KtaviError).message).toMatch(/Could not write file/i);
   });
 
   it('normalizes filename by stripping original extension and using .png', async () => {
