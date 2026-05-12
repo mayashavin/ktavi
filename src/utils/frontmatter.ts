@@ -8,11 +8,11 @@ export type ParsedFrontmatter = {
   rawContent: string;
 };
 
+type MatterOptions = Parameters<typeof matter>[1] & { strict?: boolean };
+
 export function parseFrontmatter(rawContent: string): ParsedFrontmatter {
   try {
-    const parsed = matter(rawContent, { strict: true } as Parameters<typeof matter>[1] & {
-      strict?: boolean;
-    });
+    const parsed = matter(rawContent, { strict: true } as MatterOptions);
     return {
       frontmatter: parsed.data as BlogFrontmatter,
       body: parsed.content,
