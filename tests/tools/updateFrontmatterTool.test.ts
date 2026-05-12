@@ -13,7 +13,8 @@ const extractFrontmatterKeys = (content: string): string[] => {
 
   const keys: string[] = [];
   for (const line of block.split('\n')) {
-    if (!line.trim() || /^\s/.test(line)) continue;
+    if (/^\s/.test(line)) continue;
+    if (!line.trim()) continue;
     const key = line.match(/^([^:#][^:]*?):(?:\s|$)/)?.[1]?.trim();
     if (key) keys.push(key);
   }

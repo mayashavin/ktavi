@@ -38,8 +38,12 @@ function extractTopLevelFrontmatterKeys(rawContent: string): string[] {
   const seen = new Set<string>();
 
   for (const line of rawFrontmatter.split('\n')) {
+    if (/^\s/.test(line)) {
+      continue;
+    }
+
     const trimmed = line.trim();
-    if (!trimmed || trimmed.startsWith('#') || /^\s/.test(line)) {
+    if (!trimmed || trimmed.startsWith('#')) {
       continue;
     }
 
