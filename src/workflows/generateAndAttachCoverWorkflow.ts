@@ -35,6 +35,7 @@ export type GenerateAndAttachCoverOptions = {
   size: ImageSize;
   style?: string;
   coverField: CoverFieldName;
+  preserveFrontmatterOrder?: boolean;
   aiProvider: TextAIProvider;
   imageProvider?: ImageGenerationProvider;
   storageProvider?: AssetStorageProvider;
@@ -134,6 +135,7 @@ export async function generateAndAttachCoverWorkflow(
       draft,
       updates: { [options.coverField]: coverUrl },
       apply: options.apply,
+      preserveFrontmatterOrder: options.preserveFrontmatterOrder,
     });
   }
 

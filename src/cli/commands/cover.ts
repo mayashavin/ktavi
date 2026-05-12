@@ -64,6 +64,7 @@ export function registerCoverCommand(program: Command) {
             size: (opts.size as ImageSize) ?? config.image.size,
             style: config.image.style,
             coverField: config.markdown.coverField,
+            preserveFrontmatterOrder: config.markdown.preserveFrontmatterOrder,
             aiProvider,
             imageProvider,
             storageProvider: opts.generate ? storageProvider : undefined,

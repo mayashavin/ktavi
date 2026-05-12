@@ -62,6 +62,7 @@ export function registerPrepareCommand(program: Command) {
             size: config.image.size as ImageSize,
             style: config.image.style,
             coverField: config.markdown.coverField,
+            preserveFrontmatterOrder: config.markdown.preserveFrontmatterOrder,
             aiProvider,
             imageProvider,
             storageProvider,

@@ -2,10 +2,38 @@ import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import fs from 'node:fs/promises';
 import os from 'node:os';
 import path from 'node:path';
+import type { BlogDraft, BlogFrontmatter } from '../../src/core/types.js';
 import { parseMarkdownTool } from '../../src/tools/parse-markdown/index.js';
 import { updateFrontmatterTool } from '../../src/tools/update-frontmatter/index.js';
 
 const fixture = (name: string) => path.join(import.meta.dirname, '..', 'fixtures', name);
+const extractFrontmatterKeys = (content: string): string[] => {
+  const block = content.match(/^---\n([\s\S]*?)\n---/)?.[1];
+  if (!block) return [];
+
+  const keys: string[] = [];
+  for (const line of block.split('\n')) {
+    if (!line.trim() || /^\s/.test(line)) continue;
+    const key = line.match(/^([^:#][^:]*?):(?:\s|$)/)?.[1]?.trim();
+    if (key) keys.push(key);
+  }
+  return keys;
+};
+
+const createDraft = (frontmatter: BlogFrontmatter, rawContent: string): BlogDraft => ({
+  filePath: '/tmp/test-post.md',
+  rawContent,
+  frontmatter,
+  markdownBody: '\nBody\n',
+  metadata: {
+    tags: [],
+    headings: [],
+    links: [],
+    images: [],
+    wordCount: 1,
+    estimatedReadingTimeMinutes: 1,
+  },
+});
 
 describe('updateFrontmatterTool', () => {
   it('generates a patch with updated fields', async () => {
@@ -65,6 +93,59 @@ describe('updateFrontmatterTool', () => {
     expect(patch.updatedContent).toContain('title: Using TanStack Query in Vue');
     expect(patch.updatedContent).toContain('slug: tanstack-query-vue');
     expect(patch.updatedContent).toContain('description: Updated description.');
+  });
+
+  it('preserves original key order by default even when frontmatter object order differs', async () => {
+    const rawContent = `---
+title: My title
+description: My description
+slug: my-slug
+---
+Body`;
+    const draft = createDraft(
+      { slug: 'my-slug', title: 'My title', description: 'My description' },
+      rawContent,
+    );
+
+    const patch = await updateFrontmatterTool({
+      draft,
+      updates: { canonical: 'https://example.com/my-slug' },
+      apply: false,
+    });
+
+    expect(extractFrontmatterKeys(patch.updatedContent)).toEqual([
+      'title',
+      'description',
+      'slug',
+      'canonical',
+    ]);
+  });
+
+  it('uses current object key order when preserveFrontmatterOrder is false', async () => {
+    const rawContent = `---
+title: My title
+description: My description
+slug: my-slug
+---
+Body`;
+    const draft = createDraft(
+      { slug: 'my-slug', title: 'My title', description: 'My description' },
+      rawContent,
+    );
+
+    const patch = await updateFrontmatterTool({
+      draft,
+      updates: { canonical: 'https://example.com/my-slug' },
+      apply: false,
+      preserveFrontmatterOrder: false,
+    });
+
+    expect(extractFrontmatterKeys(patch.updatedContent)).toEqual([
+      'slug',
+      'title',
+      'description',
+      'canonical',
+    ]);
   });
 });
 
