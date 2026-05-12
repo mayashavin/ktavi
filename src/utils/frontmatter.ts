@@ -66,16 +66,16 @@ function orderFrontmatterByOriginalKeys(
   frontmatter: BlogFrontmatter,
   originalKeys: string[],
 ): BlogFrontmatter {
-  const ordered: BlogFrontmatter = {};
+  const ordered = Object.create(null) as BlogFrontmatter;
 
   for (const key of originalKeys) {
-    if (key in frontmatter) {
+    if (Object.prototype.hasOwnProperty.call(frontmatter, key)) {
       ordered[key] = frontmatter[key];
     }
   }
 
   for (const [key, value] of Object.entries(frontmatter)) {
-    if (!(key in ordered)) {
+    if (!Object.prototype.hasOwnProperty.call(ordered, key)) {
       ordered[key] = value;
     }
   }
