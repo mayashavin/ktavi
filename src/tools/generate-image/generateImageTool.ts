@@ -17,7 +17,7 @@ export async function generateImageTool(
     fileName = `${parsed.name}-${input.attempt}${parsed.ext}`;
   }
 
-  return imageProvider.generateImage({
+  const image = await imageProvider.generateImage({
     prompt,
     fileName,
     size: input.size,

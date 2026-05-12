@@ -12,7 +12,7 @@ const coverPrompt: CoverPromptResult = {
 
 type GenerateImageParams = Parameters<ImageGenerationProvider['generateImage']>[0];
 
-function makeImageProvider(): ImageGenerationProvider & {
+function makeImageProvider(overrides: Partial<GeneratedImage> = {}): ImageGenerationProvider & {
   lastPrompt: string;
   lastFileName: string;
   lastSize: GenerateImageParams['size'];
@@ -113,6 +113,8 @@ describe('generateImageTool', () => {
     const provider = makeImageProvider({ base64: 'validbase64data', buffer: undefined });
     const result = await generateImageTool({ prompt: coverPrompt, size: '1792x1024' }, provider);
     expect(result.base64).toBe('validbase64data');
+  });
+
   it('uses original filename when attempt is 0', async () => {
     const provider = makeImageProvider();
     await generateImageTool({ prompt: coverPrompt, size: '1792x1024', attempt: 0 }, provider);
