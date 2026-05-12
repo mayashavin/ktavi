@@ -131,21 +131,16 @@ describe('parseMarkdownTool', () => {
   });
 
   it('throws KtaviError with code INVALID_FRONTMATTER for invalid YAML frontmatter', async () => {
-    await expect(
-      parseMarkdownTool({ filePath: fixture('invalid-frontmatter.md') }),
-    ).rejects.toThrow(KtaviError);
+    let caught: unknown;
+    try {
+      await parseMarkdownTool({ filePath: fixture('invalid-frontmatter.md') });
+    } catch (err) {
+      caught = err;
+    }
 
-    await expect(
-      parseMarkdownTool({ filePath: fixture('invalid-frontmatter.md') }),
-    ).rejects.toMatchObject({
-      code: 'INVALID_FRONTMATTER',
-    });
-  });
-
-  it('throws with the expected message for invalid YAML frontmatter', async () => {
-    await expect(
-      parseMarkdownTool({ filePath: fixture('invalid-frontmatter.md') }),
-    ).rejects.toThrow(
+    expect(caught).toBeInstanceOf(KtaviError);
+    expect((caught as KtaviError).code).toBe('INVALID_FRONTMATTER');
+    expect((caught as KtaviError).message).toBe(
       'Could not parse frontmatter. Please check that the YAML block starts and ends with ---.',
     );
   });
