@@ -157,6 +157,7 @@ describe('createLocalStorageProvider', () => {
     } catch (e) {
       error = e;
     }
+    expect(error).toBeDefined();
     expect(error).toBeInstanceOf(KtaviError);
     expect((error as KtaviError).code).toBe('WRITE_FAILED');
     expect((error as KtaviError).message).toMatch(/no buffer or base64/i);
@@ -180,6 +181,7 @@ describe('createLocalStorageProvider', () => {
     } catch (e) {
       error = e;
     }
+    expect(error).toBeDefined();
     expect(error).toBeInstanceOf(KtaviError);
     expect((error as KtaviError).code).toBe('WRITE_FAILED');
     expect((error as KtaviError).message).toMatch(/Could not write file/i);
