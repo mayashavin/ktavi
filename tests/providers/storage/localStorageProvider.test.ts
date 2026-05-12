@@ -155,6 +155,22 @@ describe('createLocalStorageProvider', () => {
     await expect(provider.upload(image)).rejects.toThrow('no buffer or base64');
   });
 
+  it('throws KtaviError with WRITE_FAILED when filesystem write fails', async () => {
+    const dir = await makeTmpDir();
+    const blockingFile = path.join(dir, 'not-a-dir');
+    await fs.writeFile(blockingFile, 'block');
+    // outputDir points to a path nested under a file, so mkdir will fail
+    const provider = createLocalStorageProvider(path.join(blockingFile, 'sub'), '/images');
+    const image: GeneratedImage = {
+      fileName: 'fail.png',
+      mimeType: 'image/png',
+      buffer: Buffer.from('data'),
+    };
+
+    await expect(provider.upload(image)).rejects.toThrow(KtaviError);
+    await expect(provider.upload(image)).rejects.toThrow('Could not write file');
+  });
+
   it('normalizes filename by stripping original extension and using .png', async () => {
     const dir = await makeTmpDir();
     const provider = createLocalStorageProvider(dir, '/images');
