@@ -19,14 +19,15 @@ export default {
 
 **Image model** is used by: `cover --generate` and `prepare --generate-cover`. Image generation currently uses OpenAI regardless of the text provider setting.
 
+Set your API key in `.env`:
+
+```
+KTAVI_TEXT_API_KEY=sk-...
+```
+
+Provider-specific keys (`OPENAI_API_KEY`, `ANTHROPIC_API_KEY`) are also supported as fallbacks.
+
 ### OpenAI
-
-1. Get an API key from [platform.openai.com](https://platform.openai.com)
-2. Add it to your `.env` file:
-
-```
-OPENAI_API_KEY=sk-...
-```
 
 ```typescript
 export default {
@@ -40,13 +41,6 @@ export default {
 
 ### Anthropic (Claude)
 
-1. Get an API key from [console.anthropic.com](https://console.anthropic.com)
-2. Add it to your `.env` file:
-
-```
-ANTHROPIC_API_KEY=sk-ant-...
-```
-
 ```typescript
 export default {
   ai: {
@@ -56,7 +50,7 @@ export default {
 };
 ```
 
-Note: Anthropic does not offer image generation, so cover image generation still requires an `OPENAI_API_KEY`.
+Note: Anthropic does not offer image generation, so cover image generation requires `KTAVI_IMAGE_API_KEY` set to an OpenAI key.
 
 ### Supported image sizes
 

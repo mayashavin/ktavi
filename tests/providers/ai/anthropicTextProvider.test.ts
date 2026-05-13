@@ -17,7 +17,7 @@ describe('createAnthropicTextProvider', () => {
   it('throws KtaviError when API key is empty', () => {
     expect(() => createAnthropicTextProvider('', 'claude-sonnet-4-20250514')).toThrow(KtaviError);
     expect(() => createAnthropicTextProvider('', 'claude-sonnet-4-20250514')).toThrow(
-      'ANTHROPIC_API_KEY',
+      'KTAVI_TEXT_API_KEY',
     );
   });
 

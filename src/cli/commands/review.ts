@@ -3,7 +3,7 @@ import { reviewDraftWorkflow } from '../../workflows/reviewDraftWorkflow.js';
 import { logger } from '../../core/logger.js';
 import { KtaviError, friendlyErrorMessage } from '../../core/errors.js';
 import { loadConfig } from '../../core/config.js';
-import { createTextAIProvider, getApiKeyEnvName } from '../shared/providers.js';
+import { createTextAIProvider } from '../shared/providers.js';
 import { renderInlineSuggestion } from '../../utils/diffRenderer.js';
 import type { WritingMode } from '../../core/types.js';
 
@@ -20,7 +20,7 @@ export function registerReviewCommand(program: Command) {
         const aiProvider = createTextAIProvider(config, process.env);
         if (!aiProvider) {
           logger.error(
-            `${getApiKeyEnvName(config.ai.provider)} is required for writing review. Add it to your .env file.`,
+            'KTAVI_TEXT_API_KEY is required for writing review. Add it to your .env file.',
           );
           process.exit(1);
         }

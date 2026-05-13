@@ -24,8 +24,8 @@ import {
   createStorageProvider,
   createTextAIProvider,
   createImageProvider,
-  getApiKeyForProvider,
-  getApiKeyEnvName,
+  resolveTextApiKey,
+  resolveImageApiKey,
 } from '../../../src/cli/shared/providers.js';
 import { createCloudinaryStorageProvider } from '../../../src/providers/storage/cloudinaryStorageProvider.js';
 import { createLocalStorageProvider } from '../../../src/providers/storage/localStorageProvider.js';
@@ -132,29 +132,42 @@ describe('createStorageProvider', () => {
   });
 });
 
-describe('getApiKeyEnvName', () => {
-  it('returns OPENAI_API_KEY for openai', () => {
-    expect(getApiKeyEnvName('openai')).toBe('OPENAI_API_KEY');
+describe('resolveTextApiKey', () => {
+  it('prefers KTAVI_TEXT_API_KEY over provider-specific key', () => {
+    expect(
+      resolveTextApiKey('openai', {
+        KTAVI_TEXT_API_KEY: 'ktavi-key',
+        OPENAI_API_KEY: 'openai-key',
+      }),
+    ).toBe('ktavi-key');
   });
 
-  it('returns ANTHROPIC_API_KEY for anthropic', () => {
-    expect(getApiKeyEnvName('anthropic')).toBe('ANTHROPIC_API_KEY');
+  it('falls back to OPENAI_API_KEY for openai provider', () => {
+    expect(resolveTextApiKey('openai', { OPENAI_API_KEY: 'sk-123' })).toBe('sk-123');
+  });
+
+  it('falls back to ANTHROPIC_API_KEY for anthropic provider', () => {
+    expect(resolveTextApiKey('anthropic', { ANTHROPIC_API_KEY: 'sk-ant-123' })).toBe('sk-ant-123');
+  });
+
+  it('returns undefined when no key is set', () => {
+    expect(resolveTextApiKey('openai', {})).toBeUndefined();
   });
 });
 
-describe('getApiKeyForProvider', () => {
-  it('returns OPENAI_API_KEY for openai provider', () => {
-    expect(getApiKeyForProvider('openai', { OPENAI_API_KEY: 'sk-123' })).toBe('sk-123');
+describe('resolveImageApiKey', () => {
+  it('prefers KTAVI_IMAGE_API_KEY over OPENAI_API_KEY', () => {
+    expect(
+      resolveImageApiKey({ KTAVI_IMAGE_API_KEY: 'ktavi-img', OPENAI_API_KEY: 'openai-key' }),
+    ).toBe('ktavi-img');
   });
 
-  it('returns ANTHROPIC_API_KEY for anthropic provider', () => {
-    expect(getApiKeyForProvider('anthropic', { ANTHROPIC_API_KEY: 'sk-ant-123' })).toBe(
-      'sk-ant-123',
-    );
+  it('falls back to OPENAI_API_KEY', () => {
+    expect(resolveImageApiKey({ OPENAI_API_KEY: 'sk-123' })).toBe('sk-123');
   });
 
-  it('returns undefined when key is not set', () => {
-    expect(getApiKeyForProvider('openai', {})).toBeUndefined();
+  it('returns undefined when no key is set', () => {
+    expect(resolveImageApiKey({})).toBeUndefined();
   });
 });
 
@@ -165,7 +178,7 @@ describe('createTextAIProvider', () => {
 
   it('creates OpenAI provider when config.ai.provider is openai', () => {
     const config = { ...baseConfig, ai: { provider: 'openai' as const, textModel: 'gpt-4o' } };
-    createTextAIProvider(config, { OPENAI_API_KEY: 'sk-123' });
+    createTextAIProvider(config, { KTAVI_TEXT_API_KEY: 'sk-123' });
 
     expect(createOpenAITextProvider).toHaveBeenCalledWith('sk-123', 'gpt-4o');
     expect(createAnthropicTextProvider).not.toHaveBeenCalled();
@@ -176,7 +189,7 @@ describe('createTextAIProvider', () => {
       ...baseConfig,
       ai: { provider: 'anthropic' as const, textModel: 'claude-sonnet-4-20250514' },
     };
-    createTextAIProvider(config, { ANTHROPIC_API_KEY: 'sk-ant-123' });
+    createTextAIProvider(config, { KTAVI_TEXT_API_KEY: 'sk-ant-123' });
 
     expect(createAnthropicTextProvider).toHaveBeenCalledWith(
       'sk-ant-123',
@@ -185,7 +198,14 @@ describe('createTextAIProvider', () => {
     expect(createOpenAITextProvider).not.toHaveBeenCalled();
   });
 
-  it('returns undefined when API key is not set', () => {
+  it('uses fallback key when KTAVI_TEXT_API_KEY is not set', () => {
+    const config = { ...baseConfig, ai: { provider: 'openai' as const, textModel: 'gpt-4o' } };
+    createTextAIProvider(config, { OPENAI_API_KEY: 'fallback-key' });
+
+    expect(createOpenAITextProvider).toHaveBeenCalledWith('fallback-key', 'gpt-4o');
+  });
+
+  it('returns undefined when no API key is available', () => {
     const result = createTextAIProvider(baseConfig, {});
 
     expect(result).toBeUndefined();
@@ -198,7 +218,17 @@ describe('createImageProvider', () => {
     vi.clearAllMocks();
   });
 
-  it('creates OpenAI image provider when OPENAI_API_KEY is set', () => {
+  it('creates OpenAI image provider with KTAVI_IMAGE_API_KEY', () => {
+    const config = {
+      ...baseConfig,
+      ai: { provider: 'openai' as const, textModel: 'gpt-4o', imageModel: 'gpt-image-2' },
+    };
+    createImageProvider(config, { KTAVI_IMAGE_API_KEY: 'img-key' });
+
+    expect(createOpenAIImageProvider).toHaveBeenCalledWith('img-key', 'gpt-image-2');
+  });
+
+  it('falls back to OPENAI_API_KEY for image provider', () => {
     const config = {
       ...baseConfig,
       ai: { provider: 'openai' as const, textModel: 'gpt-4o', imageModel: 'gpt-image-2' },
@@ -208,7 +238,7 @@ describe('createImageProvider', () => {
     expect(createOpenAIImageProvider).toHaveBeenCalledWith('sk-123', 'gpt-image-2');
   });
 
-  it('returns undefined when OPENAI_API_KEY is not set', () => {
+  it('returns undefined when no image key is available', () => {
     const result = createImageProvider(baseConfig, {});
 
     expect(result).toBeUndefined();

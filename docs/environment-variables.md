@@ -2,16 +2,25 @@
 
 Ktavi reads environment variables from a `.env` file in your project root (loaded via `dotenv`).
 
-## AI provider keys
+## AI keys
 
-Set the API key for your configured AI provider (`ai.provider` in config):
+| Variable              | Description                                             |
+| --------------------- | ------------------------------------------------------- |
+| `KTAVI_TEXT_API_KEY`  | API key for text generation (review, SEO, cover prompt) |
+| `KTAVI_IMAGE_API_KEY` | API key for image generation (cover images)             |
 
-| Variable            | Description       | Provider    |
-| ------------------- | ----------------- | ----------- |
-| `OPENAI_API_KEY`    | OpenAI API key    | `openai`    |
-| `ANTHROPIC_API_KEY` | Anthropic API key | `anthropic` |
+Set the key that matches your configured provider. For example, if `ai.provider` is `anthropic`, set `KTAVI_TEXT_API_KEY` to your Anthropic key. If you also use cover image generation (OpenAI), set `KTAVI_IMAGE_API_KEY` to your OpenAI key.
 
-Only the key for your configured provider is required. If using Anthropic for text but need image generation, you'll also need `OPENAI_API_KEY` since image generation currently only supports OpenAI.
+### Fallback keys
+
+If the Ktavi-specific variables are not set, provider-specific keys are used as fallbacks:
+
+| Ktavi variable        | Fallback                                                         |
+| --------------------- | ---------------------------------------------------------------- |
+| `KTAVI_TEXT_API_KEY`  | `OPENAI_API_KEY` or `ANTHROPIC_API_KEY` (based on `ai.provider`) |
+| `KTAVI_IMAGE_API_KEY` | `OPENAI_API_KEY`                                                 |
+
+This means existing setups with `OPENAI_API_KEY` continue to work without changes.
 
 ## Cloudinary (optional)
 
@@ -34,8 +43,8 @@ cp .env.example .env
 `.env.example` contents:
 
 ```
-OPENAI_API_KEY=
-ANTHROPIC_API_KEY=
+KTAVI_TEXT_API_KEY=
+KTAVI_IMAGE_API_KEY=
 CLOUDINARY_CLOUD_NAME=
 CLOUDINARY_API_KEY=
 CLOUDINARY_API_SECRET=

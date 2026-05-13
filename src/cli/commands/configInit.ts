@@ -194,12 +194,9 @@ function printNextSteps(filePath: string, config: Partial<KtaviConfig>): void {
   logger.heading('Next steps');
 
   const steps: string[] = [];
-  const provider = config.ai?.provider ?? SCHEMA_DEFAULTS.ai.provider;
-  if (provider === 'openai') {
-    steps.push('Set OPENAI_API_KEY in your .env');
-  } else if (provider === 'anthropic') {
-    steps.push('Set ANTHROPIC_API_KEY in your .env');
-  }
+  steps.push(
+    'Set KTAVI_TEXT_API_KEY in your .env (or the provider-specific key like OPENAI_API_KEY)',
+  );
   if (config.storage?.provider === 'cloudinary') {
     steps.push('Set CLOUDINARY_CLOUD_NAME, CLOUDINARY_API_KEY, and CLOUDINARY_API_SECRET in .env');
   }

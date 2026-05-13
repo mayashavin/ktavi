@@ -17,7 +17,7 @@ function extractJsonObject(text: string): string | null {
 export function createAnthropicTextProvider(apiKey: string, model: string): TextAIProvider {
   if (!apiKey) {
     throw new KtaviError(
-      'ANTHROPIC_API_KEY is not set. Please add it to your .env file.',
+      'API key is not set. Please set KTAVI_TEXT_API_KEY in your .env file.',
       'AI_PROVIDER_ERROR',
     );
   }

@@ -11,27 +11,27 @@ import type {
 import type { KtaviConfig } from '../../core/config.js';
 import type { AIProvider, StorageTarget } from '../../core/types.js';
 
-const API_KEY_ENV: Record<AIProvider, string> = {
+const FALLBACK_TEXT_KEY: Record<AIProvider, string> = {
   openai: 'OPENAI_API_KEY',
   anthropic: 'ANTHROPIC_API_KEY',
 };
 
-export function getApiKeyEnvName(provider: AIProvider): string {
-  return API_KEY_ENV[provider];
-}
-
-export function getApiKeyForProvider(
+export function resolveTextApiKey(
   provider: AIProvider,
   env: NodeJS.ProcessEnv,
 ): string | undefined {
-  return env[API_KEY_ENV[provider]];
+  return env.KTAVI_TEXT_API_KEY ?? env[FALLBACK_TEXT_KEY[provider]];
+}
+
+export function resolveImageApiKey(env: NodeJS.ProcessEnv): string | undefined {
+  return env.KTAVI_IMAGE_API_KEY ?? env.OPENAI_API_KEY;
 }
 
 export function createTextAIProvider(
   config: KtaviConfig,
   env: NodeJS.ProcessEnv,
 ): TextAIProvider | undefined {
-  const apiKey = getApiKeyForProvider(config.ai.provider, env);
+  const apiKey = resolveTextApiKey(config.ai.provider, env);
   if (!apiKey) return undefined;
 
   switch (config.ai.provider) {
@@ -47,7 +47,7 @@ export function createImageProvider(
   config: KtaviConfig,
   env: NodeJS.ProcessEnv,
 ): ImageGenerationProvider | undefined {
-  const apiKey = env.OPENAI_API_KEY;
+  const apiKey = resolveImageApiKey(env);
   if (!apiKey) return undefined;
   return createOpenAIImageProvider(apiKey, config.ai.imageModel);
 }
