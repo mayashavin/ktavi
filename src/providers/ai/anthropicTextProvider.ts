@@ -2,15 +2,30 @@ import type { TextAIProvider } from '../../core/providers.js';
 import { KtaviError } from '../../core/errors.js';
 
 function extractJsonObject(text: string): string | null {
-  const start = text.indexOf('{');
-  if (start === -1) return null;
+  let searchFrom = 0;
 
-  let depth = 0;
-  for (let i = start; i < text.length; i++) {
-    if (text[i] === '{') depth++;
-    else if (text[i] === '}') depth--;
-    if (depth === 0) return text.slice(start, i + 1);
+  while (searchFrom < text.length) {
+    const start = text.indexOf('{', searchFrom);
+    if (start === -1) return null;
+
+    let depth = 0;
+    for (let i = start; i < text.length; i++) {
+      if (text[i] === '{') depth++;
+      else if (text[i] === '}') depth--;
+      if (depth === 0) {
+        const candidate = text.slice(start, i + 1);
+        try {
+          JSON.parse(candidate);
+          return candidate;
+        } catch {
+          break;
+        }
+      }
+    }
+
+    searchFrom = start + 1;
   }
+
   return null;
 }
 
@@ -50,7 +65,7 @@ export function createAnthropicTextProvider(apiKey: string, model: string): Text
 
       if (!jsonStr) {
         throw new KtaviError(
-          'AI provider did not return valid JSON. Response may need retry.',
+          'AI provider did not return valid JSON. You may need to retry the request.',
           'AI_PROVIDER_ERROR',
         );
       }
@@ -59,7 +74,7 @@ export function createAnthropicTextProvider(apiKey: string, model: string): Text
         return JSON.parse(jsonStr) as TOutput;
       } catch (cause) {
         throw new KtaviError(
-          'AI provider returned malformed JSON. Response may need retry.',
+          'AI provider returned malformed JSON. You may need to retry the request.',
           'AI_PROVIDER_ERROR',
           cause,
         );

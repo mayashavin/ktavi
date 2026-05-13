@@ -126,10 +126,50 @@ describe('createAnthropicTextProvider', () => {
     expect(result).toEqual({ first: true });
   });
 
-  it('throws KtaviError with cause when JSON is malformed', async () => {
+  it('skips non-JSON brace pairs in explanatory text', async () => {
+    const provider = createAnthropicTextProvider('test-key', 'claude-sonnet-4-20250514');
+    mockCreate.mockResolvedValueOnce({
+      content: [
+        {
+          type: 'text',
+          text: 'Use {field} to configure. Here is the result: {"data": "value"}',
+        },
+      ],
+    });
+
+    const result = await provider.generateStructuredOutput<{ data: string }>({
+      systemPrompt: 'system',
+      userPrompt: 'user',
+      schemaName: 'test',
+    });
+
+    expect(result).toEqual({ data: 'value' });
+  });
+
+  it('throws KtaviError when no parseable JSON object exists', async () => {
     const provider = createAnthropicTextProvider('test-key', 'claude-sonnet-4-20250514');
     mockCreate.mockResolvedValueOnce({
       content: [{ type: 'text', text: '{invalid json}' }],
+    });
+
+    await expect(
+      provider.generateStructuredOutput({
+        systemPrompt: 'system',
+        userPrompt: 'user',
+        schemaName: 'test',
+      }),
+    ).rejects.toThrow('did not return valid JSON');
+  });
+
+  it('throws KtaviError with cause when code block JSON is malformed', async () => {
+    const provider = createAnthropicTextProvider('test-key', 'claude-sonnet-4-20250514');
+    mockCreate.mockResolvedValueOnce({
+      content: [
+        {
+          type: 'text',
+          text: '```json\n{invalid json}\n```',
+        },
+      ],
     });
 
     await expect(
