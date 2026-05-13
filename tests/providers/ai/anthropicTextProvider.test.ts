@@ -85,4 +85,59 @@ describe('createAnthropicTextProvider', () => {
       }),
     ).rejects.toThrow('did not return valid JSON');
   });
+
+  it('extracts JSON from fenced code block', async () => {
+    const provider = createAnthropicTextProvider('test-key', 'claude-sonnet-4-20250514');
+    mockCreate.mockResolvedValueOnce({
+      content: [
+        {
+          type: 'text',
+          text: 'Here is the result:\n```json\n{"key": "value"}\n```\nDone.',
+        },
+      ],
+    });
+
+    const result = await provider.generateStructuredOutput<{ key: string }>({
+      systemPrompt: 'system',
+      userPrompt: 'user',
+      schemaName: 'test',
+    });
+
+    expect(result).toEqual({ key: 'value' });
+  });
+
+  it('extracts only first balanced JSON object, not greedy match', async () => {
+    const provider = createAnthropicTextProvider('test-key', 'claude-sonnet-4-20250514');
+    mockCreate.mockResolvedValueOnce({
+      content: [
+        {
+          type: 'text',
+          text: 'Result: {"first": true} and also {"second": true}',
+        },
+      ],
+    });
+
+    const result = await provider.generateStructuredOutput<{ first: boolean }>({
+      systemPrompt: 'system',
+      userPrompt: 'user',
+      schemaName: 'test',
+    });
+
+    expect(result).toEqual({ first: true });
+  });
+
+  it('throws KtaviError with cause when JSON is malformed', async () => {
+    const provider = createAnthropicTextProvider('test-key', 'claude-sonnet-4-20250514');
+    mockCreate.mockResolvedValueOnce({
+      content: [{ type: 'text', text: '{invalid json}' }],
+    });
+
+    await expect(
+      provider.generateStructuredOutput({
+        systemPrompt: 'system',
+        userPrompt: 'user',
+        schemaName: 'test',
+      }),
+    ).rejects.toThrow('malformed JSON');
+  });
 });

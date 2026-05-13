@@ -25,6 +25,7 @@ import {
   createTextAIProvider,
   createImageProvider,
   getApiKeyForProvider,
+  getApiKeyEnvName,
 } from '../../../src/cli/shared/providers.js';
 import { createCloudinaryStorageProvider } from '../../../src/providers/storage/cloudinaryStorageProvider.js';
 import { createLocalStorageProvider } from '../../../src/providers/storage/localStorageProvider.js';
@@ -128,6 +129,16 @@ describe('createStorageProvider', () => {
       apiSecret: '',
       folder: 'covers',
     });
+  });
+});
+
+describe('getApiKeyEnvName', () => {
+  it('returns OPENAI_API_KEY for openai', () => {
+    expect(getApiKeyEnvName('openai')).toBe('OPENAI_API_KEY');
+  });
+
+  it('returns ANTHROPIC_API_KEY for anthropic', () => {
+    expect(getApiKeyEnvName('anthropic')).toBe('ANTHROPIC_API_KEY');
   });
 });
 

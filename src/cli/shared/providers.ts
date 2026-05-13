@@ -16,6 +16,10 @@ const API_KEY_ENV: Record<AIProvider, string> = {
   anthropic: 'ANTHROPIC_API_KEY',
 };
 
+export function getApiKeyEnvName(provider: AIProvider): string {
+  return API_KEY_ENV[provider];
+}
+
 export function getApiKeyForProvider(
   provider: AIProvider,
   env: NodeJS.ProcessEnv,

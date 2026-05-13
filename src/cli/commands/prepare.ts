@@ -49,9 +49,16 @@ export function registerPrepareCommand(program: Command) {
           ) as StorageTarget;
           const storageProvider = createStorageProvider(storageTarget, config, process.env);
 
-          const imageProvider = opts.generateCover
-            ? createImageProvider(config, process.env)
-            : undefined;
+          let imageProvider;
+          if (opts.generateCover) {
+            imageProvider = createImageProvider(config, process.env);
+            if (!imageProvider) {
+              logger.error(
+                'OPENAI_API_KEY is required for image generation. Add it to your .env file.',
+              );
+              process.exit(1);
+            }
+          }
 
           const result = await prepareDraftWorkflow(file, {
             mode: (opts.mode as WritingMode) ?? config.writing.defaultMode,
