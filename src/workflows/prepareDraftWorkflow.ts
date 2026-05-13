@@ -39,6 +39,7 @@ export type PrepareDraftOptions = {
   size: ImageSize;
   style?: string;
   coverField: CoverFieldName;
+  preserveFrontmatterOrder?: boolean;
   aiProvider?: TextAIProvider;
   imageProvider?: ImageGenerationProvider;
   storageProvider?: AssetStorageProvider;
@@ -89,6 +90,7 @@ export async function prepareDraftWorkflow(
         draft,
         updates: { [options.coverField]: coverUrl },
         apply: options.apply,
+        preserveFrontmatterOrder: options.preserveFrontmatterOrder,
       });
     }
   }

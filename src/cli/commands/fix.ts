@@ -54,6 +54,7 @@ export function registerFixCommand(program: Command) {
               draft,
               updates,
               apply: opts.apply ?? false,
+              preserveFrontmatterOrder: config.markdown.preserveFrontmatterOrder,
             });
           }
 

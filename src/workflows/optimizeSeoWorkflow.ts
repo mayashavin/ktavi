@@ -11,7 +11,7 @@ export type OptimizeSeoResult = {
 
 export async function optimizeSeoWorkflow(
   filePath: string,
-  options: { apply?: boolean; aiProvider?: TextAIProvider },
+  options: { apply?: boolean; aiProvider?: TextAIProvider; preserveFrontmatterOrder?: boolean },
 ): Promise<OptimizeSeoResult> {
   const draft = await parseMarkdownTool({ filePath });
   const { suggestions } = await reviewSeoTool({ draft }, options.aiProvider);
@@ -29,7 +29,12 @@ export async function optimizeSeoWorkflow(
     }
 
     if (Object.keys(updates).length > 0) {
-      patch = await updateFrontmatterTool({ draft, updates, apply: true });
+      patch = await updateFrontmatterTool({
+        draft,
+        updates,
+        apply: true,
+        preserveFrontmatterOrder: options.preserveFrontmatterOrder,
+      });
     }
   }
 

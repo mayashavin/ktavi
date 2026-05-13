@@ -7,8 +7,9 @@ export async function updateFrontmatterTool(input: {
   draft: BlogDraft;
   updates: Record<string, unknown>;
   apply: boolean;
+  preserveFrontmatterOrder?: boolean;
 }): Promise<DraftPatch> {
-  const { draft, updates, apply } = input;
+  const { draft, updates, apply, preserveFrontmatterOrder = true } = input;
 
   const updatedFrontmatter = { ...draft.frontmatter };
   const changes: DraftChange[] = [];
@@ -27,7 +28,10 @@ export async function updateFrontmatterTool(input: {
     }
   }
 
-  const updatedContent = stringifyFrontmatter(updatedFrontmatter, draft.markdownBody);
+  const updatedContent = stringifyFrontmatter(updatedFrontmatter, draft.markdownBody, {
+    preserveFrontmatterOrder,
+    originalRawContent: draft.rawContent,
+  });
   const { diff } = generateDiffTool({
     original: draft.rawContent,
     updated: updatedContent,

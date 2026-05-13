@@ -26,6 +26,7 @@ export function registerSeoCommand(program: Command) {
           const result = await optimizeSeoWorkflow(file, {
             apply: opts.apply,
             aiProvider,
+            preserveFrontmatterOrder: config.markdown.preserveFrontmatterOrder,
           });
 
           if (opts.json) {
