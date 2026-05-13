@@ -146,6 +146,26 @@ describe('createAnthropicTextProvider', () => {
     expect(result).toEqual({ data: 'value' });
   });
 
+  it('handles braces inside JSON string values correctly', async () => {
+    const provider = createAnthropicTextProvider('test-key', 'claude-sonnet-4-20250514');
+    mockCreate.mockResolvedValueOnce({
+      content: [
+        {
+          type: 'text',
+          text: 'Result: {"text": "use {braces} and \\"quotes\\"", "valid": true}',
+        },
+      ],
+    });
+
+    const result = await provider.generateStructuredOutput<{ text: string; valid: boolean }>({
+      systemPrompt: 'system',
+      userPrompt: 'user',
+      schemaName: 'test',
+    });
+
+    expect(result).toEqual({ text: 'use {braces} and "quotes"', valid: true });
+  });
+
   it('throws KtaviError when no parseable JSON object exists', async () => {
     const provider = createAnthropicTextProvider('test-key', 'claude-sonnet-4-20250514');
     mockCreate.mockResolvedValueOnce({

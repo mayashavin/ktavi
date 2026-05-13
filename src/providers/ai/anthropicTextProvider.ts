@@ -9,9 +9,25 @@ function extractJsonObject(text: string): string | null {
     if (start === -1) return null;
 
     let depth = 0;
+    let inString = false;
+    let escape = false;
     for (let i = start; i < text.length; i++) {
-      if (text[i] === '{') depth++;
-      else if (text[i] === '}') depth--;
+      const ch = text[i];
+      if (escape) {
+        escape = false;
+        continue;
+      }
+      if (ch === '\\' && inString) {
+        escape = true;
+        continue;
+      }
+      if (ch === '"') {
+        inString = !inString;
+        continue;
+      }
+      if (inString) continue;
+      if (ch === '{') depth++;
+      else if (ch === '}') depth--;
       if (depth === 0) {
         const candidate = text.slice(start, i + 1);
         try {
@@ -32,7 +48,7 @@ function extractJsonObject(text: string): string | null {
 export function createAnthropicTextProvider(apiKey: string, model: string): TextAIProvider {
   if (!apiKey) {
     throw new KtaviError(
-      'API key is not set. Please set KTAVI_TEXT_API_KEY in your .env file.',
+      'API key is not set. Please set KTAVI_TEXT_API_KEY (or ANTHROPIC_API_KEY) in your .env file.',
       'AI_PROVIDER_ERROR',
     );
   }

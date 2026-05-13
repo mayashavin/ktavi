@@ -20,7 +20,7 @@ export function registerReviewCommand(program: Command) {
         const aiProvider = createTextAIProvider(config, process.env);
         if (!aiProvider) {
           logger.error(
-            'KTAVI_TEXT_API_KEY is required for writing review. Add it to your .env file.',
+            `KTAVI_TEXT_API_KEY (or ${config.ai.provider === 'anthropic' ? 'ANTHROPIC_API_KEY' : 'OPENAI_API_KEY'}) is required for writing review. Add it to your .env file.`,
           );
           process.exit(1);
         }

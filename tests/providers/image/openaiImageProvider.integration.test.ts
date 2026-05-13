@@ -8,7 +8,7 @@ const apiKey = process.env.OPENAI_API_KEY ?? '';
 describe('openaiImageProvider', () => {
   it('throws KtaviError when API key is empty', () => {
     expect(() => createOpenAIImageProvider('')).toThrow(KtaviError);
-    expect(() => createOpenAIImageProvider('')).toThrow('OPENAI_API_KEY is not set');
+    expect(() => createOpenAIImageProvider('')).toThrow('KTAVI_IMAGE_API_KEY');
 
     try {
       createOpenAIImageProvider('');

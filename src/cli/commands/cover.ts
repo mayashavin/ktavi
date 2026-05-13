@@ -44,7 +44,7 @@ export function registerCoverCommand(program: Command) {
           const aiProvider = createTextAIProvider(config, process.env);
           if (!aiProvider) {
             logger.error(
-              'KTAVI_TEXT_API_KEY is required for cover generation. Add it to your .env file.',
+              `KTAVI_TEXT_API_KEY (or ${config.ai.provider === 'anthropic' ? 'ANTHROPIC_API_KEY' : 'OPENAI_API_KEY'}) is required for cover generation. Add it to your .env file.`,
             );
             process.exit(1);
           }
@@ -59,7 +59,7 @@ export function registerCoverCommand(program: Command) {
             imageProvider = createImageProvider(config, process.env);
             if (!imageProvider) {
               logger.error(
-                'KTAVI_IMAGE_API_KEY is required for image generation. Add it to your .env file.',
+                'KTAVI_IMAGE_API_KEY (or OPENAI_API_KEY) is required for image generation. Add it to your .env file.',
               );
               process.exit(1);
             }

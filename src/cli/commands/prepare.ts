@@ -54,7 +54,7 @@ export function registerPrepareCommand(program: Command) {
             imageProvider = createImageProvider(config, process.env);
             if (!imageProvider) {
               logger.error(
-                'KTAVI_IMAGE_API_KEY is required for image generation. Add it to your .env file.',
+                'KTAVI_IMAGE_API_KEY (or OPENAI_API_KEY) is required for image generation. Add it to your .env file.',
               );
               process.exit(1);
             }
