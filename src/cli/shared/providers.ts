@@ -16,15 +16,24 @@ const FALLBACK_TEXT_KEY: Record<AIProvider, string> = {
   anthropic: 'ANTHROPIC_API_KEY',
 };
 
+function firstNonEmptyEnvValue(
+  ...values: Array<string | undefined>
+): string | undefined {
+  return values.find((value) => value !== undefined && value !== '');
+}
+
 export function resolveTextApiKey(
   provider: AIProvider,
   env: NodeJS.ProcessEnv,
 ): string | undefined {
-  return env.KTAVI_TEXT_API_KEY ?? env[FALLBACK_TEXT_KEY[provider]];
+  return firstNonEmptyEnvValue(
+    env.KTAVI_TEXT_API_KEY,
+    env[FALLBACK_TEXT_KEY[provider]],
+  );
 }
 
 export function resolveImageApiKey(env: NodeJS.ProcessEnv): string | undefined {
-  return env.KTAVI_IMAGE_API_KEY ?? env.OPENAI_API_KEY;
+  return firstNonEmptyEnvValue(env.KTAVI_IMAGE_API_KEY, env.OPENAI_API_KEY);
 }
 
 export function createTextAIProvider(

@@ -54,15 +54,14 @@ export function registerCoverCommand(program: Command) {
             config.storage.provider) as StorageTarget;
           const storageProvider = createStorageProvider(storageTarget, config, process.env);
 
-          let imageProvider;
-          if (opts.generate) {
-            imageProvider = createImageProvider(config, process.env);
-            if (!imageProvider) {
-              logger.error(
-                'KTAVI_IMAGE_API_KEY (or OPENAI_API_KEY) is required for image generation. Add it to your .env file.',
-              );
-              process.exit(1);
-            }
+          const imageProvider = opts.generate
+            ? createImageProvider(config, process.env)
+            : undefined;
+          if (opts.generate && !imageProvider) {
+            logger.error(
+              'KTAVI_IMAGE_API_KEY (or OPENAI_API_KEY) is required for image generation. Add it to your .env file.',
+            );
+            process.exit(1);
           }
 
           const result = await generateAndAttachCoverWorkflow(file, {
