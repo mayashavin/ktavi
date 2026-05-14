@@ -197,9 +197,7 @@ function printNextSteps(filePath: string, config: Partial<KtaviConfig>): void {
   const steps: string[] = [];
   const fallbackKey = config.ai?.provider === 'anthropic' ? 'ANTHROPIC_API_KEY' : 'OPENAI_API_KEY';
   steps.push(`Set KTAVI_TEXT_API_KEY in your .env (or ${fallbackKey})`);
-  if (config.ai?.imageModel) {
-    steps.push('Set KTAVI_IMAGE_API_KEY (or OPENAI_API_KEY) for cover image generation');
-  }
+  steps.push('Set KTAVI_IMAGE_API_KEY (or OPENAI_API_KEY) for cover image generation');
   if (config.storage?.provider === 'cloudinary') {
     steps.push('Set CLOUDINARY_CLOUD_NAME, CLOUDINARY_API_KEY, and CLOUDINARY_API_SECRET in .env');
   }
