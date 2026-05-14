@@ -1,13 +1,66 @@
 import { createCloudinaryStorageProvider } from '../../providers/storage/cloudinaryStorageProvider.js';
 import { createLocalStorageProvider } from '../../providers/storage/localStorageProvider.js';
-import type { AssetStorageProvider } from '../../core/providers.js';
+import { createOpenAITextProvider } from '../../providers/ai/openaiTextProvider.js';
+import { createOpenAIImageProvider } from '../../providers/image/openaiImageProvider.js';
+import { createAnthropicTextProvider } from '../../providers/ai/anthropicTextProvider.js';
+import type {
+  AssetStorageProvider,
+  ImageGenerationProvider,
+  TextAIProvider,
+} from '../../core/providers.js';
 import type { KtaviConfig } from '../../core/config.js';
-import type { StorageTarget } from '../../core/types.js';
+import type { AIProvider, StorageTarget } from '../../core/types.js';
 
-/**
- * Factory function that resolves the correct storage provider based on the
- * given target, config, and environment variables.
- */
+const FALLBACK_TEXT_KEY: Record<AIProvider, string> = {
+  openai: 'OPENAI_API_KEY',
+  anthropic: 'ANTHROPIC_API_KEY',
+};
+
+function firstNonEmptyEnvValue(
+  ...values: Array<string | undefined>
+): string | undefined {
+  return values.find((value) => value !== undefined && value !== '');
+}
+
+export function resolveTextApiKey(
+  provider: AIProvider,
+  env: NodeJS.ProcessEnv,
+): string | undefined {
+  return firstNonEmptyEnvValue(
+    env.KTAVI_TEXT_API_KEY,
+    env[FALLBACK_TEXT_KEY[provider]],
+  );
+}
+
+export function resolveImageApiKey(env: NodeJS.ProcessEnv): string | undefined {
+  return firstNonEmptyEnvValue(env.KTAVI_IMAGE_API_KEY, env.OPENAI_API_KEY);
+}
+
+export function createTextAIProvider(
+  config: KtaviConfig,
+  env: NodeJS.ProcessEnv,
+): TextAIProvider | undefined {
+  const apiKey = resolveTextApiKey(config.ai.provider, env);
+  if (!apiKey) return undefined;
+
+  switch (config.ai.provider) {
+    case 'anthropic':
+      return createAnthropicTextProvider(apiKey, config.ai.textModel);
+    case 'openai':
+    default:
+      return createOpenAITextProvider(apiKey, config.ai.textModel);
+  }
+}
+
+export function createImageProvider(
+  config: KtaviConfig,
+  env: NodeJS.ProcessEnv,
+): ImageGenerationProvider | undefined {
+  const apiKey = resolveImageApiKey(env);
+  if (!apiKey) return undefined;
+  return createOpenAIImageProvider(apiKey, config.ai.imageModel);
+}
+
 export function createStorageProvider(
   target: StorageTarget,
   config: KtaviConfig,

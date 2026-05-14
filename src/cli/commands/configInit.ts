@@ -6,6 +6,7 @@ import {
   loadSingleConfigFile,
 } from '../../core/config.js';
 import type { KtaviConfig } from '../../core/config.js';
+import { DEFAULT_TEXT_MODEL } from '../../core/config.js';
 import { logger } from '../../core/logger.js';
 import { fileExists } from '../../utils/fileSystem.js';
 import { writeFile } from '../../utils/fileSystem.js';
@@ -55,13 +56,16 @@ async function promptForConfig(
 ): Promise<Partial<KtaviConfig>> {
   const provider = await select({
     message: 'AI provider',
-    choices: [{ value: 'openai' as const, name: 'OpenAI' }],
+    choices: [
+      { value: 'openai' as const, name: 'OpenAI' },
+      { value: 'anthropic' as const, name: 'Anthropic (Claude)' },
+    ],
     default: getDefault(existing, 'ai.provider', SCHEMA_DEFAULTS.ai.provider),
   });
 
   const textModel = await input({
     message: 'Text model',
-    default: getDefault(existing, 'ai.textModel', SCHEMA_DEFAULTS.ai.textModel),
+    default: getDefault(existing, 'ai.textModel', DEFAULT_TEXT_MODEL[provider]),
   });
 
   const imageModel = await input({
@@ -191,10 +195,9 @@ function printNextSteps(filePath: string, config: Partial<KtaviConfig>): void {
   logger.heading('Next steps');
 
   const steps: string[] = [];
-  const provider = config.ai?.provider ?? SCHEMA_DEFAULTS.ai.provider;
-  if (provider === 'openai') {
-    steps.push('Set OPENAI_API_KEY in your .env');
-  }
+  const fallbackKey = config.ai?.provider === 'anthropic' ? 'ANTHROPIC_API_KEY' : 'OPENAI_API_KEY';
+  steps.push(`Set KTAVI_TEXT_API_KEY in your .env (or ${fallbackKey})`);
+  steps.push('Set KTAVI_IMAGE_API_KEY (or OPENAI_API_KEY) for cover image generation');
   if (config.storage?.provider === 'cloudinary') {
     steps.push('Set CLOUDINARY_CLOUD_NAME, CLOUDINARY_API_KEY, and CLOUDINARY_API_SECRET in .env');
   }

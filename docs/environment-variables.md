@@ -2,11 +2,25 @@
 
 Ktavi reads environment variables from a `.env` file in your project root (loaded via `dotenv`).
 
-## Required
+## AI keys
 
-| Variable         | Description    | Required for                                                                                                      |
-| ---------------- | -------------- | ----------------------------------------------------------------------------------------------------------------- |
-| `OPENAI_API_KEY` | OpenAI API key | `review`, `cover` (always required). `analyze`, `seo`, `fix`, `prepare` (optional -- enables AI-powered features) |
+| Variable              | Description                                             |
+| --------------------- | ------------------------------------------------------- |
+| `KTAVI_TEXT_API_KEY`  | API key for text generation (review, SEO, cover prompt) |
+| `KTAVI_IMAGE_API_KEY` | API key for image generation (cover images)             |
+
+Set the key that matches your configured provider. For example, if `ai.provider` is `anthropic`, set `KTAVI_TEXT_API_KEY` to your Anthropic key. If you also use cover image generation (OpenAI), set `KTAVI_IMAGE_API_KEY` to your OpenAI key.
+
+### Fallback keys
+
+If the Ktavi-specific variables are not set, provider-specific keys are used as fallbacks:
+
+| Ktavi variable        | Fallback                                                         |
+| --------------------- | ---------------------------------------------------------------- |
+| `KTAVI_TEXT_API_KEY`  | `OPENAI_API_KEY` or `ANTHROPIC_API_KEY` (based on `ai.provider`) |
+| `KTAVI_IMAGE_API_KEY` | `OPENAI_API_KEY`                                                 |
+
+This means existing setups with `OPENAI_API_KEY` continue to work without changes.
 
 ## Cloudinary (optional)
 
@@ -29,7 +43,8 @@ cp .env.example .env
 `.env.example` contents:
 
 ```
-OPENAI_API_KEY=
+KTAVI_TEXT_API_KEY=
+KTAVI_IMAGE_API_KEY=
 CLOUDINARY_CLOUD_NAME=
 CLOUDINARY_API_KEY=
 CLOUDINARY_API_SECRET=
@@ -37,7 +52,7 @@ CLOUDINARY_API_SECRET=
 
 ## Commands and their AI requirements
 
-| Command   | Without `OPENAI_API_KEY`    | With `OPENAI_API_KEY`                                        |
+| Command   | Without AI key              | With AI key                                                  |
 | --------- | --------------------------- | ------------------------------------------------------------ |
 | `analyze` | Metadata and structure only | Adds content summary                                         |
 | `seo`     | Deterministic checks only   | Adds AI-powered suggestions                                  |

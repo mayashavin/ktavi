@@ -4,7 +4,7 @@ import { KtaviError } from '../../core/errors.js';
 export function createOpenAITextProvider(apiKey: string, model: string): TextAIProvider {
   if (!apiKey) {
     throw new KtaviError(
-      'OPENAI_API_KEY is not set. Please add it to your .env file.',
+      'API key is not set. Please set KTAVI_TEXT_API_KEY (or OPENAI_API_KEY) in your .env file.',
       'AI_PROVIDER_ERROR',
     );
   }

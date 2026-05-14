@@ -2,8 +2,8 @@ import { Command } from 'commander';
 import { reviewDraftWorkflow } from '../../workflows/reviewDraftWorkflow.js';
 import { logger } from '../../core/logger.js';
 import { KtaviError, friendlyErrorMessage } from '../../core/errors.js';
-import { createOpenAITextProvider } from '../../providers/ai/openaiTextProvider.js';
 import { loadConfig } from '../../core/config.js';
+import { createTextAIProvider } from '../shared/providers.js';
 import { renderInlineSuggestion } from '../../utils/diffRenderer.js';
 import type { WritingMode } from '../../core/types.js';
 
@@ -17,13 +17,13 @@ export function registerReviewCommand(program: Command) {
     .action(async (file: string, opts: { mode: string; json?: boolean }) => {
       try {
         const config = await loadConfig();
-        const apiKey = process.env.OPENAI_API_KEY;
-        if (!apiKey) {
-          logger.error('OPENAI_API_KEY is required for writing review. Add it to your .env file.');
+        const aiProvider = createTextAIProvider(config, process.env);
+        if (!aiProvider) {
+          logger.error(
+            `KTAVI_TEXT_API_KEY (or ${config.ai.provider === 'anthropic' ? 'ANTHROPIC_API_KEY' : 'OPENAI_API_KEY'}) is required for writing review. Add it to your .env file.`,
+          );
           process.exit(1);
         }
-
-        const aiProvider = createOpenAITextProvider(apiKey, config.ai.textModel);
         const mode = (opts.mode as WritingMode) ?? config.writing.defaultMode;
         const result = await reviewDraftWorkflow(file, mode, aiProvider);
 

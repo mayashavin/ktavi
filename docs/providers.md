@@ -2,36 +2,56 @@
 
 Ktavi uses a provider abstraction for AI text generation, image generation, and asset storage. This guide covers how to set up each provider.
 
-## OpenAI (text and image)
+## AI providers
 
-OpenAI is currently the only supported AI provider for both text and image generation.
-
-### Setup
-
-1. Get an API key from [platform.openai.com](https://platform.openai.com)
-2. Add it to your `.env` file:
-
-```
-OPENAI_API_KEY=sk-...
-```
-
-### Models
-
-Configure which models to use in your `ktavi.config.ts`:
+Ktavi supports multiple AI providers for text generation. Set the provider in your `ktavi.config.ts`:
 
 ```typescript
 export default {
   ai: {
-    provider: 'openai',
-    textModel: 'gpt-4o', // Used for review, SEO, summary, cover prompt
-    imageModel: 'gpt-image-2', // Used for cover image generation
+    provider: 'openai', // or 'anthropic'
+    textModel: 'gpt-4o',
   },
 };
 ```
 
 **Text model** is used by: `analyze` (summary), `seo` (AI suggestions), `review`, `fix` (AI suggestions), `cover` (prompt generation), and `prepare`.
 
-**Image model** is used by: `cover --generate` and `prepare --generate-cover`.
+**Image model** is used by: `cover --generate` and `prepare --generate-cover`. Image generation currently uses OpenAI regardless of the text provider setting.
+
+Set your API keys in `.env`:
+
+```
+KTAVI_TEXT_API_KEY=sk-...        # for text generation (review, SEO, cover prompt)
+KTAVI_IMAGE_API_KEY=sk-...      # for image generation (cover --generate)
+```
+
+Provider-specific keys (`OPENAI_API_KEY`, `ANTHROPIC_API_KEY`) are also supported as fallbacks. `KTAVI_IMAGE_API_KEY` falls back to `OPENAI_API_KEY`.
+
+### OpenAI
+
+```typescript
+export default {
+  ai: {
+    provider: 'openai',
+    textModel: 'gpt-4o',
+    imageModel: 'gpt-image-2',
+  },
+};
+```
+
+### Anthropic (Claude)
+
+```typescript
+export default {
+  ai: {
+    provider: 'anthropic',
+    textModel: 'claude-sonnet-4-20250514',
+  },
+};
+```
+
+Note: Anthropic does not offer image generation, so cover image generation requires `KTAVI_IMAGE_API_KEY` set to an OpenAI key.
 
 ### Supported image sizes
 

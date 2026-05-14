@@ -2,8 +2,8 @@ import { Command } from 'commander';
 import { optimizeSeoWorkflow } from '../../workflows/optimizeSeoWorkflow.js';
 import { logger } from '../../core/logger.js';
 import { KtaviError, friendlyErrorMessage } from '../../core/errors.js';
-import { createOpenAITextProvider } from '../../providers/ai/openaiTextProvider.js';
 import { loadConfig } from '../../core/config.js';
+import { createTextAIProvider } from '../shared/providers.js';
 import { renderFrontmatterDiff } from '../../utils/diffRenderer.js';
 
 export function registerSeoCommand(program: Command) {
@@ -18,10 +18,7 @@ export function registerSeoCommand(program: Command) {
       async (file: string, opts: { json?: boolean; apply?: boolean; sideBySide?: boolean }) => {
         try {
           const config = await loadConfig();
-          const apiKey = process.env.OPENAI_API_KEY;
-          const aiProvider = apiKey
-            ? createOpenAITextProvider(apiKey, config.ai.textModel)
-            : undefined;
+          const aiProvider = createTextAIProvider(config, process.env);
 
           const result = await optimizeSeoWorkflow(file, {
             apply: opts.apply,

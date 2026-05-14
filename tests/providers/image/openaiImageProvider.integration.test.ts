@@ -3,12 +3,28 @@ import { createOpenAIImageProvider } from '../../../src/providers/image/openaiIm
 import { KtaviError } from '../../../src/core/errors.js';
 
 const RUN_INTEGRATION = process.env.RUN_OPENAI_IMAGE_INTEGRATION_TESTS === 'true';
-const apiKey = process.env.OPENAI_API_KEY ?? '';
+
+function resolveApiKey(): string {
+  const candidates = [
+    process.env.KTAVI_IMAGE_API_KEY,
+    process.env.OPENAI_API_KEY,
+  ];
+
+  for (const candidate of candidates) {
+    if (candidate && candidate.trim() !== '') {
+      return candidate;
+    }
+  }
+
+  return '';
+}
+
+const apiKey = resolveApiKey();
 
 describe('openaiImageProvider', () => {
   it('throws KtaviError when API key is empty', () => {
     expect(() => createOpenAIImageProvider('')).toThrow(KtaviError);
-    expect(() => createOpenAIImageProvider('')).toThrow('OPENAI_API_KEY is not set');
+    expect(() => createOpenAIImageProvider('')).toThrow('KTAVI_IMAGE_API_KEY');
 
     try {
       createOpenAIImageProvider('');
