@@ -19,13 +19,14 @@ export default {
 
 **Image model** is used by: `cover --generate` and `prepare --generate-cover`. Image generation currently uses OpenAI regardless of the text provider setting.
 
-Set your API key in `.env`:
+Set your API keys in `.env`:
 
 ```
-KTAVI_TEXT_API_KEY=sk-...
+KTAVI_TEXT_API_KEY=sk-...        # for text generation (review, SEO, cover prompt)
+KTAVI_IMAGE_API_KEY=sk-...      # for image generation (cover --generate)
 ```
 
-Provider-specific keys (`OPENAI_API_KEY`, `ANTHROPIC_API_KEY`) are also supported as fallbacks.
+Provider-specific keys (`OPENAI_API_KEY`, `ANTHROPIC_API_KEY`) are also supported as fallbacks. `KTAVI_IMAGE_API_KEY` falls back to `OPENAI_API_KEY`.
 
 ### OpenAI
 

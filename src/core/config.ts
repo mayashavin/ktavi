@@ -4,6 +4,11 @@ import { createJiti } from 'jiti';
 import { z } from 'zod';
 import type { AIProvider, CoverFieldName, ImageSize, StorageTarget, WritingMode } from './types.js';
 
+export const DEFAULT_TEXT_MODEL: Record<AIProvider, string> = {
+  openai: 'gpt-4o',
+  anthropic: 'claude-sonnet-4-20250514',
+};
+
 export type KtaviConfig = {
   ai: {
     provider: AIProvider;
@@ -145,6 +150,9 @@ function deepMerge(base: KtaviConfig, override: Partial<KtaviConfig>): KtaviConf
 
   if (override.ai) {
     result.ai = { ...result.ai, ...override.ai };
+    if (override.ai.provider && !override.ai.textModel) {
+      result.ai.textModel = DEFAULT_TEXT_MODEL[result.ai.provider];
+    }
   }
   if (override.markdown) {
     result.markdown = { ...result.markdown, ...override.markdown };

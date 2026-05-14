@@ -89,6 +89,14 @@ describe('loadConfig', () => {
     expect(config.writing.defaultMode).toBe('light');
   });
 
+  it('defaults textModel to Claude model when provider is anthropic', async () => {
+    const { loadConfig, DEFAULT_TEXT_MODEL } = await import('../../src/core/config.js');
+    const fixturePath = path.resolve('tests/fixtures/test-config-anthropic.ts');
+    const config = await loadConfig(fixturePath, NONEXISTENT_PATH);
+    expect(config.ai.provider).toBe('anthropic');
+    expect(config.ai.textModel).toBe(DEFAULT_TEXT_MODEL.anthropic);
+  });
+
   it('deep-merges storage.local without touching cloudinary', async () => {
     const { loadConfig } = await import('../../src/core/config.js');
     const fixturePath = path.resolve('tests/fixtures/test-config-local-storage.ts');
